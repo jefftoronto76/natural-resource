@@ -26,7 +26,7 @@ export function Problem() {
           <em style={{ fontStyle: 'italic' }}>what they look like.</em>
         </h2>
         <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'var(--color-text-muted)', fontWeight: 400 }}>
-          Pipeline issues are usually people issues. Growth ceilings are usually judgment issues. Bad projects are usually clarity issues. I help you find the real problem — and build the capability to solve it.
+          Pipeline problems are usually people problems. Growth ceilings are usually judgment problems. Stalled progress is usually a clarity problem. I help you find the real problem and build the capability to solve it.
         </p>
       </div>
     </section>
