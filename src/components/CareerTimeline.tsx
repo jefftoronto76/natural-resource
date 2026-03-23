@@ -86,7 +86,7 @@ export function CareerTimeline() {
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-muted)')}
         >
           <span style={{
-            display: 'inline-block', width: '18px', height: '18px',
+            width: '18px', height: '18px',
             border: '1px solid rgba(26,25,23,0.2)', borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'transform 0.3s ease',

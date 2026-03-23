@@ -21,7 +21,7 @@ const SERVICES = [
 export function Work() {
   return (
     <CardRow
-      id="work"
+      
       label="Two Levers"
       headline="One operator. <em style='font-style:italic'>Two ways in.</em>"
       subheadline="Both lanes start with the same session. Tap a card to see the full picture."
