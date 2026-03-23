@@ -51,11 +51,14 @@ export function WhyMe() {
                 fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
                 color: 'var(--color-text-primary)', marginBottom: '28px',
               }}>
-                Built in the<br /><em style={{ fontStyle: 'italic' }}>hard rooms.</em>
+                Best Practices + Your Context = <em style={{ fontStyle: 'italic' }}>Better Growth</em>
               </h2>
-              <p style={bodyStyle}>My operating approach was shaped inside Constellation Software — where growth is earned through discipline, not narrative. Over 13 years at Trapeze Group, I scaled personal quota from $350K to $25M.</p>
-              <p style={bodyStyle}>Since then: Head of Revenue at Keyhole (acquired by Muck Rack), GM at Meal Garden where a product-led motion drove ninefold ARR growth. And a Graduate Certificate in Executive Coaching from Royal Roads University.</p>
-              <p style={{ ...bodyStyle, marginBottom: 0 }}>Today I work with founders, operators, and revenue leaders — coaching the people and scoping the problems that need both.</p>
+              <p style={bodyStyle}>I lead with questions vs. a scripted playbook.</p>
+              <p style={bodyStyle}>I'm well-versed in the best practices and popular frameworks, but I've found they're only as good as the context in which they're applied.</p>
+              <p style={bodyStyle}>I'm a player-coach. Comfortable in the boardroom and on the conference floor.</p>
+              <p style={bodyStyle}>My career spans more than 20 years, and I've built range by taking on roles outside my comfort zone and learning new skills and approaches to succeed.</p>
+              <p style={bodyStyle}>I'm a strong partner to leaders because I understand your world and speak your language, and I'm a great resource for up-and-comers, because I'm built to help others succeed.</p>
+              <p style={{ ...bodyStyle, marginBottom: 0 }}>I deliver results with people, not through them, and believe in learning as a competitive advantage.</p>
 
               <div style={quoteStyle}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
