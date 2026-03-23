@@ -1,4 +1,5 @@
 import { useReveal } from '@/hooks/useReveal'
+import { CareerTimeline } from './CareerTimeline'
 
 const STATS = [
   { value: '27', label: 'Years operating' },
@@ -95,6 +96,7 @@ export function WhyMe() {
           }
         }
       `}</style>
+      <CareerTimeline />
     </>
   )
 }
