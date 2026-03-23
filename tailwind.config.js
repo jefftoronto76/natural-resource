@@ -1,0 +1,18 @@
+export default {
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        bg: 'var(--color-bg)',
+        surface: 'var(--color-surface)',
+        accent: 'var(--color-accent)',
+      },
+      fontFamily: {
+        display: 'var(--font-display)',
+        body: 'var(--font-body)',
+        mono: 'var(--font-mono)',
+      },
+    },
+  },
+  plugins: [],
+}
