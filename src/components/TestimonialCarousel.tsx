@@ -79,8 +79,7 @@ export function TestimonialCarousel() {
               style={{
                 height: '32px',
                 width: 'auto',
-                objectFit: 'contain',
-                filter: 'grayscale(100%) opacity(0.7)'
+                objectFit: 'contain'
               }}
             />
           </div>
