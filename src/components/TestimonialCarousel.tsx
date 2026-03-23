@@ -46,8 +46,8 @@ export function TestimonialCarousel() {
         background: 'var(--color-bg)',
         border: '1px solid rgba(26,25,23,0.12)',
         borderRadius: '16px',
-        padding: 'clamp(32px, 4vw, 48px)',
-        minHeight: '320px',
+        padding: 'clamp(40px, 5vw, 60px)',
+        minHeight: '400px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -57,31 +57,31 @@ export function TestimonialCarousel() {
         <div>
           <p style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(18px, 2vw, 24px)',
+            fontSize: 'clamp(22px, 2.5vw, 30px)',
             fontStyle: 'italic',
             fontWeight: 400,
             lineHeight: 1.6,
             color: 'var(--color-text-primary)',
-            marginBottom: '24px'
+            marginBottom: '30px'
           }}>
             "{TESTIMONIALS[activeIndex].quote}"
           </p>
           <div style={{
             borderTop: '1px solid rgba(26,25,23,0.08)',
-            paddingTop: '20px'
+            paddingTop: '25px'
           }}>
             <p style={{
               fontFamily: 'var(--font-sans)',
-              fontSize: '14px',
+              fontSize: '17px',
               fontWeight: 600,
               color: 'var(--color-text-primary)',
-              marginBottom: '4px'
+              marginBottom: '6px'
             }}>
               {TESTIMONIALS[activeIndex].author}
             </p>
             <p style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
+              fontSize: '13px',
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
               color: 'var(--color-text-dim)'
@@ -96,8 +96,8 @@ export function TestimonialCarousel() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '16px',
-        marginTop: '24px'
+        gap: '20px',
+        marginTop: '30px'
       }}>
         <button
           onClick={handlePrev}
@@ -105,8 +105,8 @@ export function TestimonialCarousel() {
             background: 'transparent',
             border: '1px solid rgba(26,25,23,0.12)',
             borderRadius: '50%',
-            width: '40px',
-            height: '40px',
+            width: '50px',
+            height: '50px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -124,19 +124,19 @@ export function TestimonialCarousel() {
           }}
           aria-label="Previous testimonial"
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 4L6 10L12 16" />
           </svg>
         </button>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '10px' }}>
           {TESTIMONIALS.map((_, index) => (
             <button
               key={index}
               onClick={() => setActiveIndex(index)}
               style={{
-                width: '8px',
-                height: '8px',
+                width: '10px',
+                height: '10px',
                 borderRadius: '50%',
                 border: 'none',
                 background: index === activeIndex ? 'var(--color-accent)' : 'rgba(26,25,23,0.2)',
@@ -155,8 +155,8 @@ export function TestimonialCarousel() {
             background: 'transparent',
             border: '1px solid rgba(26,25,23,0.12)',
             borderRadius: '50%',
-            width: '40px',
-            height: '40px',
+            width: '50px',
+            height: '50px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -174,7 +174,7 @@ export function TestimonialCarousel() {
           }}
           aria-label="Next testimonial"
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M8 4L14 10L8 16" />
           </svg>
         </button>
