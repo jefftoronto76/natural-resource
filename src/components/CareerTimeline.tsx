@@ -94,7 +94,14 @@ export function CareerTimeline() {
             fontSize: '14px', lineHeight: 1, color: 'var(--color-accent)',
             flexShrink: 0,
           } as React.CSSProperties}>+</span>
-          {open ? 'Close' : <><span className="highlight-marker">Career</span> highlights</>}
+          {open ? 'Close' : <>Career <span style={{
+            position: 'relative',
+            display: 'inline-block',
+            padding: '0 4px',
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cpath d='M2,14 C20,8 80,6 98,12 C99,16 95,20 80,21 C50,23 15,22 2,18 Z' fill='%232d6a4f' fill-opacity='0.2'/%3E%3C/svg%3E\")",
+            backgroundSize: '100% 100%',
+            backgroundRepeat: 'no-repeat',
+          }}>Highlights</span></>}
         </button>
       </div>
 
