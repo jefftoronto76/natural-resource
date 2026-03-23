@@ -13,9 +13,9 @@ export function Hero() {
             letterSpacing: '0.22em', textTransform: 'uppercase',
             color: 'var(--color-text-dim)', marginBottom: '40px',
           }}>Performance-Driven, <span style={{
-            background: 'rgba(45, 106, 79, 0.15)',
-            padding: '2px 6px',
-            borderRadius: '2px',
+            background: 'linear-gradient(104deg, rgba(255, 210, 0, 0) 0.9%, rgba(255, 210, 0, 1.25) 2.4%, rgba(255, 210, 0, 0.5) 5.8%, rgba(255, 210, 0, 0.1) 93%, rgba(255, 210, 0, 0.7) 96%, rgba(255, 210, 0, 0) 98%), linear-gradient(183deg, rgba(255, 210, 0, 0) 0%, rgba(255, 210, 0, 0.3) 7.9%, rgba(255, 210, 0, 0) 15%)',
+            padding: '0.1em 4px',
+            borderRadius: '4px',
           }}>Heart-Led</span></p>
 
           <h1 style={{
