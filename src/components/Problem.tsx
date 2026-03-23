@@ -14,7 +14,7 @@ export function Problem() {
           color: 'var(--color-text-dim)', marginBottom: '40px',
           display: 'flex', alignItems: 'center', gap: '16px',
         }}>
-          The Work
+          The <span className="highlight-marker">Work</span>
           <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', maxWidth: '120px', display: 'block' }} />
         </p>
         <h2 style={{

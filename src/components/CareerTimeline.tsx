@@ -94,7 +94,7 @@ export function CareerTimeline() {
             fontSize: '14px', lineHeight: 1, color: 'var(--color-accent)',
             flexShrink: 0,
           } as React.CSSProperties}>+</span>
-          {open ? 'Close' : 'Career highlights'}
+          {open ? 'Close' : <><span className="highlight-marker">Career</span> highlights</>}
         </button>
       </div>
 

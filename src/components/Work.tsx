@@ -23,7 +23,7 @@ export function Work() {
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div ref={ref} className="reveal" style={{ marginBottom: '48px' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-text-dim)', marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-              Two Levers
+              Two <span className="highlight-marker">Levers</span>
               <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', maxWidth: '120px', display: 'block' }} />
             </p>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 4vw, 52px)', fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em', color: 'var(--color-text-primary)' }}>

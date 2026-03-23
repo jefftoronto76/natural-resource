@@ -33,7 +33,7 @@ export function WhyMe() {
       <section id="about" style={{ padding: sectionPad, borderBottom: '1px solid rgba(26,25,23,0.08)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <p style={labelStyle}>
-            Why Me
+            Why <span className="highlight-marker">Me</span>
             <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', maxWidth: '120px', display: 'block' }} />
           </p>
 

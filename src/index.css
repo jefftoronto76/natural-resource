@@ -48,3 +48,9 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--color-bg); }
 ::-webkit-scrollbar-thumb { background: rgba(26,25,23,0.15); border-radius: 2px; }
+
+.highlight-marker {
+  background: #E8E1CF;
+  padding: 2px 8px;
+  display: inline-block;
+}

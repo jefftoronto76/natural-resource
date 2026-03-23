@@ -12,7 +12,7 @@ export function Hero() {
             fontFamily: 'var(--font-mono)', fontSize: '11px',
             letterSpacing: '0.22em', textTransform: 'uppercase',
             color: 'var(--color-text-dim)', marginBottom: '40px',
-          }}>Performance-Driven, Heart-Led</p>
+          }}>Performance-Driven, <span className="highlight-marker">Heart-Led</span></p>
 
           <h1 style={{
             fontFamily: 'var(--font-display)',
