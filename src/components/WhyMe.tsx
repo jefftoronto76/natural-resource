@@ -2,6 +2,13 @@ import { useReveal } from '@/hooks/useReveal'
 import { CareerTimeline } from './CareerTimeline'
 import { TestimonialCarousel } from './TestimonialCarousel'
 
+const STATS = [
+  { value: '27', label: 'Years operating' },
+  { value: '$25M', label: 'Personal quota scaled' },
+  { value: '9×', label: 'ARR growth, Meal Garden' },
+  { value: 'ICF', label: 'Coaching methodology' },
+]
+
 export function WhyMe() {
   const ref = useReveal()
   const carouselRef = useReveal()
@@ -16,6 +23,10 @@ export function WhyMe() {
   const bodyStyle: React.CSSProperties = {
     fontSize: 'clamp(16px, 1.8vw, 17px)', lineHeight: 1.8,
     color: 'var(--color-text-muted)', fontWeight: 400, marginBottom: '20px',
+  }
+  const quoteStyle: React.CSSProperties = {
+    borderLeft: '2px solid var(--color-accent)',
+    paddingLeft: '24px', marginTop: '32px',
   }
 
   return (
@@ -47,6 +58,23 @@ export function WhyMe() {
               <p style={bodyStyle}>I'm a player-coach. As comfortable in the boardroom as I am on discovery calls.</p>
               <p style={bodyStyle}>My career spans more than 20 years, and I've built range by taking on roles outside my comfort zone and learning new skills and approaches to succeed.</p>
               <p style={{ ...bodyStyle, marginBottom: 0 }}>I deliver results with people, not through them, and believe in learning as a competitive advantage.</p>
+
+              <div style={quoteStyle}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
+                  "I took that advice and went out guns blazing — #1 on my team and #2 in Canada."
+                </p>
+                <cite style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', fontStyle: 'normal' }}>
+                  — Chris Chun, Intuit
+                </cite>
+              </div>
+              <div style={{ ...quoteStyle, marginTop: '24px' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
+                  "A very capable leader, an advocate for the customer base, and a true partner as we re-built our sales organization."
+                </p>
+                <cite style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', fontStyle: 'normal' }}>
+                  — Jim Schnepp, VP Sales, Trapeze Group
+                </cite>
+              </div>
             </div>
 
             <div ref={carouselRef} className="reveal">
