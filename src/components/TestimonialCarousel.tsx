@@ -1,31 +1,41 @@
 import { useState } from 'react'
 
-interface Testimonial {
-  quote: string
-  author: string
-  role: string
+interface StatsCard {
+  logo: string
+  headline: string
+  metric: string
+  market: string
+  story: string
 }
 
-const TESTIMONIALS: Testimonial[] = [
+const STATS_CARDS: StatsCard[] = [
   {
-    quote: "I took that advice and went out guns blazing — #1 on my team and #2 in Canada.",
-    author: "Chris Chun",
-    role: "Intuit"
+    logo: "/logos/Trapeze.svg",
+    headline: "MARKET DOMINANCE",
+    metric: "$350K → $25M",
+    market: "Mission Critical, Integrated Technology, B2G",
+    story: "13 successful years building commercial systems in the Constellation Software ecosystem"
   },
   {
-    quote: "A very capable leader, an advocate for the customer base, and a true partner as we re-built our sales organization.",
-    author: "Jim Schnepp",
-    role: "VP Sales, Trapeze Group"
+    logo: "/logos/Infor.svg",
+    headline: "ENTERPRISE BREAKTHROUGH",
+    metric: "$1.7M ARR",
+    market: "Tier 1 Enterprise, B2B",
+    story: "Closed the largest HCM CloudSuite deal in Canadian history in 2018"
   },
   {
-    quote: "Jeff brings a unique combination of strategic thinking and tactical execution that drives real results.",
-    author: "Sarah Mitchell",
-    role: "Director of Sales Operations"
+    logo: "/logos/keyhole.svg",
+    headline: "REVENUE MODEL TRANSFORMATION",
+    metric: "3× Average Deal Size",
+    market: "B2B Social Analytics",
+    story: "Rebuilt the GTM motion, tripling deal size and unlocking enterprise revenue"
   },
   {
-    quote: "His coaching approach helped me unlock my potential and exceed my targets consistently.",
-    author: "Marcus Thompson",
-    role: "Enterprise Account Executive"
+    logo: "/logos/mealgarden.svg",
+    headline: "PLG SCALE & GROWTH",
+    metric: "9× ARR",
+    market: "PLG, SMB, B2B2C",
+    story: "Took a stalled product to ninefold ARR growth before a clean exit"
   }
 ]
 
@@ -33,12 +43,14 @@ export function TestimonialCarousel() {
   const [activeIndex, setActiveIndex] = useState(0)
 
   const handlePrev = () => {
-    setActiveIndex((prev) => (prev === 0 ? TESTIMONIALS.length - 1 : prev - 1))
+    setActiveIndex((prev) => (prev === 0 ? STATS_CARDS.length - 1 : prev - 1))
   }
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev === TESTIMONIALS.length - 1 ? 0 : prev + 1))
+    setActiveIndex((prev) => (prev === STATS_CARDS.length - 1 ? 0 : prev + 1))
   }
+
+  const currentCard = STATS_CARDS[activeIndex]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
@@ -55,38 +67,72 @@ export function TestimonialCarousel() {
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
       }}>
         <div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            marginBottom: '32px'
+          }}>
+            <img
+              src={currentCard.logo}
+              alt="Company logo"
+              style={{
+                height: '32px',
+                width: 'auto',
+                objectFit: 'contain',
+                filter: 'grayscale(100%) opacity(0.7)'
+              }}
+            />
+          </div>
+
+          <p style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '11px',
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: 'var(--color-text-dim)',
+            marginBottom: '16px',
+            fontWeight: 600
+          }}>
+            {currentCard.headline}
+          </p>
+
           <p style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(22px, 2.5vw, 30px)',
-            fontStyle: 'italic',
+            fontSize: 'clamp(32px, 4vw, 48px)',
             fontWeight: 400,
-            lineHeight: 1.6,
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
             color: 'var(--color-text-primary)',
-            marginBottom: '30px'
+            marginBottom: '20px'
           }}>
-            "{TESTIMONIALS[activeIndex].quote}"
+            {currentCard.metric}
           </p>
+
+          <p style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: '14px',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--color-accent)',
+            marginBottom: '24px',
+            fontWeight: 600
+          }}>
+            {currentCard.market}
+          </p>
+
           <div style={{
             borderTop: '1px solid rgba(26,25,23,0.08)',
-            paddingTop: '25px'
+            paddingTop: '24px'
           }}>
             <p style={{
               fontFamily: 'var(--font-sans)',
-              fontSize: '17px',
-              fontWeight: 600,
-              color: 'var(--color-text-primary)',
-              marginBottom: '6px'
+              fontSize: '15px',
+              lineHeight: 1.7,
+              color: 'var(--color-text-muted)',
+              fontWeight: 400
             }}>
-              {TESTIMONIALS[activeIndex].author}
-            </p>
-            <p style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '13px',
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'var(--color-text-dim)'
-            }}>
-              {TESTIMONIALS[activeIndex].role}
+              {currentCard.story}
             </p>
           </div>
         </div>
@@ -122,7 +168,7 @@ export function TestimonialCarousel() {
             e.currentTarget.style.background = 'transparent'
             e.currentTarget.style.borderColor = 'rgba(26,25,23,0.12)'
           }}
-          aria-label="Previous testimonial"
+          aria-label="Previous card"
         >
           <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 4L6 10L12 16" />
@@ -130,7 +176,7 @@ export function TestimonialCarousel() {
         </button>
 
         <div style={{ display: 'flex', gap: '10px' }}>
-          {TESTIMONIALS.map((_, index) => (
+          {STATS_CARDS.map((_, index) => (
             <button
               key={index}
               onClick={() => setActiveIndex(index)}
@@ -144,7 +190,7 @@ export function TestimonialCarousel() {
                 transition: 'all 0.2s ease',
                 padding: 0
               }}
-              aria-label={`Go to testimonial ${index + 1}`}
+              aria-label={`Go to card ${index + 1}`}
             />
           ))}
         </div>
@@ -172,7 +218,7 @@ export function TestimonialCarousel() {
             e.currentTarget.style.background = 'transparent'
             e.currentTarget.style.borderColor = 'rgba(26,25,23,0.12)'
           }}
-          aria-label="Next testimonial"
+          aria-label="Next card"
         >
           <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M8 4L14 10L8 16" />
