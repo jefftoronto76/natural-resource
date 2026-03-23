@@ -13,9 +13,12 @@ export function Hero() {
             letterSpacing: '0.22em', textTransform: 'uppercase',
             color: 'var(--color-text-dim)', marginBottom: '40px',
           }}>Performance-Driven, <span style={{
-            background: 'linear-gradient(104deg, rgba(255, 210, 0, 0) 0.9%, rgba(255, 210, 0, 1.25) 2.4%, rgba(255, 210, 0, 0.5) 5.8%, rgba(255, 210, 0, 0.1) 93%, rgba(255, 210, 0, 0.7) 96%, rgba(255, 210, 0, 0) 98%), linear-gradient(183deg, rgba(255, 210, 0, 0) 0%, rgba(255, 210, 0, 0.3) 7.9%, rgba(255, 210, 0, 0) 15%)',
-            padding: '0.1em 4px',
-            borderRadius: '4px',
+            position: 'relative',
+            display: 'inline-block',
+            padding: '0 4px',
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cpath d='M2,14 C20,8 80,6 98,12 C99,16 95,20 80,21 C50,23 15,22 2,18 Z' fill='%232d6a4f' fill-opacity='0.2'/%3E%3C/svg%3E\")",
+            backgroundSize: '100% 100%',
+            backgroundRepeat: 'no-repeat',
           }}>Heart-Led</span></p>
 
           <h1 style={{
