@@ -52,18 +52,11 @@ export function Session() {
           const applyWidgetStyles = () => {
             const calendlyWidget = calendarContainerRef.current?.querySelector('.calendly-inline-widget') as HTMLElement
             if (calendlyWidget) {
-              calendlyWidget.style.setProperty('width', '100%', 'important')
-              calendlyWidget.style.setProperty('height', '700px', 'important')
-              calendlyWidget.style.setProperty('min-width', '0', 'important')
-              calendlyWidget.style.setProperty('max-width', '100%', 'important')
-              calendlyWidget.style.setProperty('overflow', 'hidden', 'important')
+              calendlyWidget.setAttribute('style', 'min-width:320px;height:700px;')
 
               const iframe = calendlyWidget.querySelector('iframe') as HTMLIFrameElement
               if (iframe) {
-                iframe.style.setProperty('width', '100%', 'important')
                 iframe.style.setProperty('height', '700px', 'important')
-                iframe.style.setProperty('min-width', '0', 'important')
-                iframe.style.setProperty('max-width', '100%', 'important')
               }
             }
           }

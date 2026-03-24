@@ -64,9 +64,5 @@ body {
 }
 
 .calendly-inline-widget iframe {
-  width: 100% !important;
-  max-width: 100% !important;
   height: 700px !important;
-  min-width: 0 !important;
-  border: none !important;
 }
