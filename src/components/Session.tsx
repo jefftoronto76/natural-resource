@@ -49,12 +49,31 @@ export function Session() {
             parentElement: calendarContainerRef.current
           })
 
-          const calendlyWidget = calendarContainerRef.current.querySelector('.calendly-inline-widget') as HTMLElement
-          if (calendlyWidget) {
-            calendlyWidget.style.width = '100%'
-            calendlyWidget.style.height = '700px'
-            calendlyWidget.style.minWidth = '320px'
+          const applyWidgetStyles = () => {
+            const calendlyWidget = calendarContainerRef.current?.querySelector('.calendly-inline-widget') as HTMLElement
+            if (calendlyWidget) {
+              calendlyWidget.style.setProperty('width', '100%', 'important')
+              calendlyWidget.style.setProperty('height', '700px', 'important')
+              calendlyWidget.style.setProperty('min-width', '320px', 'important')
+              calendlyWidget.style.setProperty('max-width', '100%', 'important')
+            }
           }
+
+          setTimeout(applyWidgetStyles, 100)
+          setTimeout(applyWidgetStyles, 500)
+          setTimeout(applyWidgetStyles, 1000)
+
+          const observer = new MutationObserver(applyWidgetStyles)
+          if (calendarContainerRef.current) {
+            observer.observe(calendarContainerRef.current, {
+              childList: true,
+              subtree: true,
+              attributes: true,
+              attributeFilter: ['style']
+            })
+          }
+
+          return () => observer.disconnect()
         }
       }, 100)
 
@@ -161,6 +180,7 @@ export function Session() {
             style={{
               width: '100%',
               minHeight: '700px',
+              maxWidth: '100%',
               overflow: 'hidden',
               background: '#f9f8f5'
             }}
