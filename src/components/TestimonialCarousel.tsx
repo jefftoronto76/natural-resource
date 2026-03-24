@@ -2,7 +2,6 @@ import { useState } from 'react'
 
 interface StatsCard {
   logo: string
-  logoHeight: string
   headline: string
   metric: string
   tagline: string
@@ -13,7 +12,6 @@ interface StatsCard {
 const STATS_CARDS: StatsCard[] = [
   {
     logo: "/logos/Trapeze.svg",
-    logoHeight: "28px",
     headline: "MARKET DOMINANCE",
     metric: "$350K → $25M",
     tagline: "Mission-critical B2G enterprise infrastructure",
@@ -26,7 +24,6 @@ const STATS_CARDS: StatsCard[] = [
   },
   {
     logo: "/logos/Infor.svg",
-    logoHeight: "24px",
     headline: "ENTERPRISE BREAKTHROUGH",
     metric: "$1.7M",
     tagline: "Tier-1 enterprise HCM SaaS",
@@ -38,7 +35,6 @@ const STATS_CARDS: StatsCard[] = [
   },
   {
     logo: "/logos/keyhole.svg",
-    logoHeight: "36px",
     headline: "REVENUE MODEL TRANSFORMATION",
     metric: "3× Deal Size",
     tagline: "B2B social analytics SaaS",
@@ -50,7 +46,6 @@ const STATS_CARDS: StatsCard[] = [
   },
   {
     logo: "/logos/mealgarden.svg",
-    logoHeight: "40px",
     headline: "PLG SCALE & GROWTH",
     metric: "9× ARR Growth",
     tagline: "B2B2C marketplace",
@@ -112,8 +107,9 @@ export function TestimonialCarousel() {
               src={currentCard.logo}
               alt="Company logo"
               style={{
-                height: currentCard.logoHeight,
+                height: '40px',
                 width: 'auto',
+                maxWidth: '160px',
                 objectFit: 'contain'
               }}
             />
