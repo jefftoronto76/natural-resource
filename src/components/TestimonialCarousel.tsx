@@ -26,7 +26,7 @@ const STATS_CARDS: StatsCard[] = [
   {
     logo: "/logos/keyhole.svg",
     headline: "REVENUE MODEL TRANSFORMATION",
-    metric: "3× Average Deal Size",
+    metric: "3× Deal Size",
     market: "B2B Social Analytics",
     story: "Rebuilt the GTM motion, tripling deal size and unlocking enterprise revenue"
   },
