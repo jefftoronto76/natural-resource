@@ -54,8 +54,17 @@ export function Session() {
             if (calendlyWidget) {
               calendlyWidget.style.setProperty('width', '100%', 'important')
               calendlyWidget.style.setProperty('height', '700px', 'important')
-              calendlyWidget.style.setProperty('min-width', '320px', 'important')
+              calendlyWidget.style.setProperty('min-width', '0', 'important')
               calendlyWidget.style.setProperty('max-width', '100%', 'important')
+              calendlyWidget.style.setProperty('overflow', 'hidden', 'important')
+
+              const iframe = calendlyWidget.querySelector('iframe') as HTMLIFrameElement
+              if (iframe) {
+                iframe.style.setProperty('width', '100%', 'important')
+                iframe.style.setProperty('height', '700px', 'important')
+                iframe.style.setProperty('min-width', '0', 'important')
+                iframe.style.setProperty('max-width', '100%', 'important')
+              }
             }
           }
 
@@ -82,8 +91,8 @@ export function Session() {
   }, [activeCalendar])
 
   return (
-    <section id="session" style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)', borderBottom: '1px solid rgba(26,25,23,0.08)' }}>
-      <div ref={ref} className="reveal" style={{ maxWidth: '900px', margin: '0 auto' }}>
+    <section id="session" style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)', borderBottom: '1px solid rgba(26,25,23,0.08)', overflow: 'hidden' }}>
+      <div ref={ref} className="reveal" style={{ maxWidth: '900px', margin: '0 auto', width: '100%', overflow: 'hidden' }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-text-dim)', marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           How to <span style={{
             position: 'relative',
@@ -172,7 +181,9 @@ export function Session() {
           position: 'relative',
           marginBottom: '24px',
           borderRadius: '8px',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          maxWidth: '100%',
+          width: '100%'
         }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f' }} />
           <div

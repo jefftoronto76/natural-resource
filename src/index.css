@@ -55,10 +55,18 @@ body {
   display: inline-block;
 }
 
-.calendly-inline-widget,
+.calendly-inline-widget {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 700px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
 .calendly-inline-widget iframe {
   width: 100% !important;
   max-width: 100% !important;
   height: 700px !important;
-  min-width: 320px !important;
+  min-width: 0 !important;
+  border: none !important;
 }
