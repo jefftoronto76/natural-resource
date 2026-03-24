@@ -1,25 +1,11 @@
 import { useReveal } from '@/hooks/useReveal'
-import { useState, useEffect, useRef } from 'react'
-
-declare global {
-  interface Window {
-    Calendly?: {
-      initInlineWidget: (options: {
-        url: string
-        parentElement: HTMLElement
-        prefill?: Record<string, unknown>
-        utm?: Record<string, unknown>
-      }) => void
-    }
-  }
-}
+import { useState, useEffect } from 'react'
 
 type CalendarType = 'working-session' | 'discovery-call'
 
 export function Session() {
   const ref = useReveal()
   const [activeCalendar, setActiveCalendar] = useState<CalendarType>('working-session')
-  const calendarContainerRef = useRef<HTMLDivElement>(null)
 
   const calendlyUrls = {
     'working-session': 'https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f',
@@ -27,61 +13,14 @@ export function Session() {
   }
 
   useEffect(() => {
-    const script = document.createElement('script')
-    script.src = 'https://assets.calendly.com/assets/external/widget.js'
-    script.async = true
-    document.body.appendChild(script)
-
-    return () => {
-      document.body.removeChild(script)
+    const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]')
+    if (!existingScript) {
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      script.async = true
+      document.body.appendChild(script)
     }
   }, [])
-
-  useEffect(() => {
-    if (calendarContainerRef.current) {
-      calendarContainerRef.current.innerHTML = ''
-
-      const checkCalendly = setInterval(() => {
-        if (window.Calendly && calendarContainerRef.current) {
-          clearInterval(checkCalendly)
-          window.Calendly.initInlineWidget({
-            url: calendlyUrls[activeCalendar],
-            parentElement: calendarContainerRef.current
-          })
-
-          const applyWidgetStyles = () => {
-            const calendlyWidget = calendarContainerRef.current?.querySelector('.calendly-inline-widget') as HTMLElement
-            if (calendlyWidget) {
-              calendlyWidget.setAttribute('style', 'min-width:320px;height:700px;')
-
-              const iframe = calendlyWidget.querySelector('iframe') as HTMLIFrameElement
-              if (iframe) {
-                iframe.style.setProperty('height', '700px', 'important')
-              }
-            }
-          }
-
-          setTimeout(applyWidgetStyles, 100)
-          setTimeout(applyWidgetStyles, 500)
-          setTimeout(applyWidgetStyles, 1000)
-
-          const observer = new MutationObserver(applyWidgetStyles)
-          if (calendarContainerRef.current) {
-            observer.observe(calendarContainerRef.current, {
-              childList: true,
-              subtree: true,
-              attributes: true,
-              attributeFilter: ['style']
-            })
-          }
-
-          return () => observer.disconnect()
-        }
-      }, 100)
-
-      return () => clearInterval(checkCalendly)
-    }
-  }, [activeCalendar])
 
   return (
     <section id="session" style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)', borderBottom: '1px solid rgba(26,25,23,0.08)', overflow: 'hidden' }}>
@@ -180,14 +119,9 @@ export function Session() {
         }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f' }} />
           <div
-            ref={calendarContainerRef}
-            style={{
-              width: '100%',
-              minHeight: '700px',
-              maxWidth: '100%',
-              overflow: 'hidden',
-              background: '#f9f8f5'
-            }}
+            className="calendly-inline-widget"
+            data-url={calendlyUrls[activeCalendar]}
+            style={{ minWidth: '320px', height: '700px' }}
           />
         </div>
 
