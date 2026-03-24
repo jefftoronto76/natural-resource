@@ -48,6 +48,13 @@ export function Session() {
             url: calendlyUrls[activeCalendar],
             parentElement: calendarContainerRef.current
           })
+
+          const calendlyWidget = calendarContainerRef.current.querySelector('.calendly-inline-widget') as HTMLElement
+          if (calendlyWidget) {
+            calendlyWidget.style.width = '100%'
+            calendlyWidget.style.height = '700px'
+            calendlyWidget.style.minWidth = '320px'
+          }
         }
       }, 100)
 
@@ -141,7 +148,7 @@ export function Session() {
         </div>
 
         <div style={{
-          border: '1px solid rgba(26,25,23,0.1)',
+          border: '1px solid rgba(26,25,23,0.08)',
           padding: 0,
           position: 'relative',
           marginBottom: '24px',
@@ -152,7 +159,9 @@ export function Session() {
           <div
             ref={calendarContainerRef}
             style={{
+              width: '100%',
               minHeight: '700px',
+              overflow: 'hidden',
               background: '#f9f8f5'
             }}
           />
