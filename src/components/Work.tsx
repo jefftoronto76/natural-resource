@@ -1,78 +1,132 @@
-import { useReveal } from '@/hooks/useReveal'
-
-const LANES = [
-  {
-    number: '01', title: '1-on-1 Coaching',
-    audience: 'For ambitious professionals',
-    body: 'For ambitious professionals who need help. I help you identify the root cause and build a practical plan to address it.',
-    items: ['Pipeline management', 'Account strategy', 'Team dynamics', 'Leadership challenges', 'A bad project', "A promotion you're working toward", "Figuring out what's next"],
-  },
-  {
-    number: '02', title: 'Embedded Execution',
-    audience: 'For founders, CEOs, and PE leaders',
-    body: "For organizations that need to move faster without breaking what they're building.",
-    items: ["Systems that aren't scaling", "A pipeline that isn't converting", 'An AI strategy that needs to get real', "A project that's gone sideways", 'A leadership gap creating drag'],
-  },
-]
-
 export function Work() {
-  const ref = useReveal()
   return (
-    <>
-      <section id="work" style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)', borderBottom: '1px solid rgba(26,25,23,0.08)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div ref={ref} className="reveal" style={{ marginBottom: '48px' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-text-dim)', marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span style={{
-                position: 'relative',
-                display: 'inline-block',
-                padding: '0 4px',
-                backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cpath d='M2,14 C20,8 80,6 98,12 C99,16 95,20 80,21 C50,23 15,22 2,18 Z' fill='%232d6a4f' fill-opacity='0.2'/%3E%3C/svg%3E\")",
-                backgroundSize: '100% 100%',
-                backgroundRepeat: 'no-repeat',
-              }}>Two Levers</span>
-              <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', maxWidth: '120px', display: 'block' }} />
-            </p>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 4vw, 52px)', fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em', color: 'var(--color-text-primary)' }}>
-              One operator.<br /><em style={{ fontStyle: 'italic' }}>Two ways in.</em>
-            </h2>
+    <section id="work" className="w-full px-8 py-32 max-w-7xl mx-auto">
+      {/* Headline */}
+      <div className="mb-24">
+        <h2
+          className="text-6xl leading-tight max-w-2xl"
+          style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400 }}
+        >
+          One operator.
+          <br />
+          <span className="italic">Two ways in.</span>
+        </h2>
+      </div>
+
+      {/* Two Columns */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+        {/* Column 1 - 1-on-1 Coaching */}
+        <div className="space-y-8 border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)' }}>
+          {/* Number */}
+          <div
+            className="text-xs tracking-widest text-gray-300"
+            style={{ fontFamily: 'DM Mono, monospace' }}
+          >
+            01
           </div>
 
-          <div className="nr-lanes">
-            {LANES.map(({ number, title, audience, body, items }) => {
-              const laneRef = useReveal()
-              return (
-                <div key={number} ref={laneRef} className="reveal" style={{ background: 'var(--color-bg)', padding: 'clamp(32px, 4vw, 48px) clamp(24px, 3.5vw, 40px)', border: '1px solid rgba(26,25,23,0.12)' }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.2em', color: 'rgba(26,25,23,0.2)', marginBottom: '24px' }}>{number}</p>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-accent)', marginBottom: '12px' }}>{audience}</p>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(24px, 3vw, 32px)', fontWeight: 400, color: 'var(--color-text-primary)', marginBottom: '16px', lineHeight: 1.2 }}>{title}</h3>
-                  <p style={{ fontSize: 'clamp(16px, 1.6vw, 17px)', lineHeight: 1.75, color: 'var(--color-text-muted)', fontWeight: 400, marginBottom: '28px' }}>{body}</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {items.map(item => (
-                      <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '16px', height: '1px', background: 'var(--color-accent)', opacity: 0.5, flexShrink: 0 }} />
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '18px', letterSpacing: '0.06em', color: 'var(--color-text-muted)', lineHeight: 1.8 }}>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
+          {/* Category */}
+          <div
+            className="text-xs tracking-widest text-gray-400 uppercase"
+            style={{ fontFamily: 'DM Mono, monospace' }}
+          >
+            FOR AMBITIOUS PROFESSIONALS
           </div>
+
+          {/* Service Title */}
+          <h3
+            className="text-4xl"
+            style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400 }}
+          >
+            1-on-1 Coaching
+          </h3>
+
+          {/* Description */}
+          <p
+            className="text-base leading-relaxed text-gray-600 max-w-md"
+            style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+          >
+            For ambitious professionals who need help, I help you identify the root cause and build a practical plan to address it.
+          </p>
+
+          {/* List */}
+          <ul className="space-y-4 pt-4">
+            {[
+              'Pipeline management',
+              'Account strategy',
+              'Team dynamics',
+              'Leadership challenges',
+              'A bad project',
+              'A promotion you\'re working toward',
+              'Figuring out what\'s next',
+            ].map((item, index) => (
+              <li
+                key={index}
+                className="flex items-start gap-3 text-lg text-gray-500"
+                style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+              >
+                <span className="text-gray-300 mt-1">—</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </section>
 
-      <style>{`
-        .nr-lanes {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1px;
-          background: rgba(26,25,23,0.08);
-        }
-        @media (max-width: 768px) {
-          .nr-lanes { grid-template-columns: 1fr; }
-        }
-      `}</style>
-    </>
-  )
+        {/* Column 2 - Embedded Execution */}
+        <div className="space-y-8 border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)' }}>
+          {/* Number */}
+          <div
+            className="text-xs tracking-widest text-gray-300"
+            style={{ fontFamily: 'DM Mono, monospace' }}
+          >
+            02
+          </div>
+
+          {/* Category */}
+          <div
+            className="text-xs tracking-widest text-gray-400 uppercase"
+            style={{ fontFamily: 'DM Mono, monospace' }}
+          >
+            FOR FOUNDERS, CEOS, AND PE LEADERS
+          </div>
+
+          {/* Service Title */}
+          <h3
+            className="text-4xl"
+            style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400 }}
+          >
+            Embedded Execution
+          </h3>
+
+          {/* Description */}
+          <p
+            className="text-base leading-relaxed text-gray-600 max-w-md"
+            style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+          >
+            For organizations that need to move faster without breaking what they're building.
+          </p>
+
+          {/* List */}
+          <ul className="space-y-4 pt-4">
+            {[
+              'Systems that aren\'t scaling',
+              'A pipeline that isn\'t converting',
+              'An AI strategy that needs to get real',
+              'A project that\'s gone sideways',
+              'A leadership gap creating drag',
+            ].map((item, index) => (
+              <li
+                key={index}
+                className="flex items-start gap-3 text-lg text-gray-500"
+                style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+              >
+                <span className="text-gray-300 mt-1">—</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
 }
