@@ -19,7 +19,7 @@ const STATS_CARDS: StatsCard[] = [
   {
     logo: "/logos/Infor.svg",
     headline: "ENTERPRISE BREAKTHROUGH",
-    metric: "$1.7M ARR",
+    metric: "$1.7M",
     market: "Tier 1 Enterprise, B2B",
     story: "Closed the largest HCM CloudSuite deal in Canadian history in 2018"
   },
@@ -33,7 +33,7 @@ const STATS_CARDS: StatsCard[] = [
   {
     logo: "/logos/mealgarden.svg",
     headline: "PLG SCALE & GROWTH",
-    metric: "9× ARR",
+    metric: "9× ARR Growth",
     market: "PLG, SMB, B2B2C",
     story: "Took a stalled product to ninefold ARR growth before a clean exit"
   }
