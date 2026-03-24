@@ -42,7 +42,7 @@ export function Work() {
             {LANES.map(({ number, title, audience, body, items }) => {
               const laneRef = useReveal()
               return (
-                <div key={number} ref={laneRef} className="reveal" style={{ background: 'var(--color-bg)', padding: 'clamp(32px, 4vw, 48px) clamp(24px, 3.5vw, 40px)' }}>
+                <div key={number} ref={laneRef} className="reveal" style={{ background: 'var(--color-bg)', padding: 'clamp(32px, 4vw, 48px) clamp(24px, 3.5vw, 40px)', border: '1px solid rgba(26,25,23,0.12)' }}>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.2em', color: 'rgba(26,25,23,0.2)', marginBottom: '24px' }}>{number}</p>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-accent)', marginBottom: '12px' }}>{audience}</p>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(24px, 3vw, 32px)', fontWeight: 400, color: 'var(--color-text-primary)', marginBottom: '16px', lineHeight: 1.2 }}>{title}</h3>
@@ -51,7 +51,7 @@ export function Work() {
                     {items.map(item => (
                       <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{ width: '16px', height: '1px', background: 'var(--color-accent)', opacity: 0.5, flexShrink: 0 }} />
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.06em', color: 'var(--color-text-muted)' }}>{item}</span>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '18px', letterSpacing: '0.06em', color: 'var(--color-text-muted)', lineHeight: 1.8 }}>{item}</span>
                       </div>
                     ))}
                   </div>
