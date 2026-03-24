@@ -7,3 +7,9 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+interface Window {
+  Calendly?: {
+    initPopupWidget: (options: { url: string }) => void
+  }
+}

@@ -1,16 +1,8 @@
 import { useReveal } from '@/hooks/useReveal'
-import { useState, useEffect } from 'react'
-
-type CalendarType = 'working-session' | 'discovery-call'
+import { useEffect } from 'react'
 
 export function Session() {
   const ref = useReveal()
-  const [activeCalendar, setActiveCalendar] = useState<CalendarType>('working-session')
-
-  const calendlyUrls = {
-    'working-session': 'https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f',
-    'discovery-call': 'https://calendly.com/naturalresource/discovery-call?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f'
-  }
 
   useEffect(() => {
     const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]')
@@ -21,6 +13,15 @@ export function Session() {
       document.body.appendChild(script)
     }
   }, [])
+
+  const handleDiscoveryClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    if (window.Calendly) {
+      window.Calendly.initPopupWidget({
+        url: 'https://calendly.com/naturalresource/discovery-call?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f'
+      })
+    }
+  }
 
   return (
     <section id="session" style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)', borderBottom: '1px solid rgba(26,25,23,0.08)', overflow: 'hidden' }}>
@@ -41,77 +42,10 @@ export function Session() {
         </h2>
 
         <div style={{
-          display: 'flex',
-          gap: '16px',
-          marginBottom: '32px',
-          flexWrap: 'wrap'
-        }}>
-          <button
-            onClick={() => setActiveCalendar('working-session')}
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: '16px',
-              fontWeight: 600,
-              color: activeCalendar === 'working-session' ? 'var(--color-text-primary)' : 'var(--color-text-dim)',
-              background: 'transparent',
-              border: 'none',
-              borderBottom: activeCalendar === 'working-session' ? '3px solid #2d6a4f' : '3px solid transparent',
-              padding: '12px 16px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (activeCalendar !== 'working-session') {
-                e.currentTarget.style.color = 'var(--color-text-primary)'
-                e.currentTarget.style.borderBottom = '3px solid rgba(45, 106, 79, 0.3)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeCalendar !== 'working-session') {
-                e.currentTarget.style.color = 'var(--color-text-dim)'
-                e.currentTarget.style.borderBottom = '3px solid transparent'
-              }
-            }}
-          >
-            Book a Working Session — $250
-          </button>
-
-          <button
-            onClick={() => setActiveCalendar('discovery-call')}
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: '16px',
-              fontWeight: 600,
-              color: activeCalendar === 'discovery-call' ? 'var(--color-text-primary)' : 'var(--color-text-dim)',
-              background: 'transparent',
-              border: 'none',
-              borderBottom: activeCalendar === 'discovery-call' ? '3px solid #2d6a4f' : '3px solid transparent',
-              padding: '12px 16px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (activeCalendar !== 'discovery-call') {
-                e.currentTarget.style.color = 'var(--color-text-primary)'
-                e.currentTarget.style.borderBottom = '3px solid rgba(45, 106, 79, 0.3)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeCalendar !== 'discovery-call') {
-                e.currentTarget.style.color = 'var(--color-text-dim)'
-                e.currentTarget.style.borderBottom = '3px solid transparent'
-              }
-            }}
-          >
-            Start with a free call
-          </button>
-        </div>
-
-        <div style={{
           border: '1px solid rgba(26,25,23,0.08)',
           padding: 0,
           position: 'relative',
-          marginBottom: '24px',
+          marginBottom: '32px',
           borderRadius: '8px',
           overflow: 'hidden',
           maxWidth: '100%',
@@ -120,10 +54,28 @@ export function Session() {
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f' }} />
           <div
             className="calendly-inline-widget"
-            data-url={calendlyUrls[activeCalendar]}
+            data-url="https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f"
             style={{ minWidth: '320px', height: '700px' }}
           />
         </div>
+
+        <p style={{ fontSize: '16px', color: 'var(--color-text-muted)', lineHeight: 1.7, textAlign: 'center', marginBottom: '24px' }}>
+          Not ready to commit?{' '}
+          <a
+            href="#"
+            onClick={handleDiscoveryClick}
+            style={{
+              color: '#2d6a4f',
+              textDecoration: 'none',
+              borderBottom: '1px solid #2d6a4f',
+              transition: 'opacity 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            Start with a free 15-minute call →
+          </a>
+        </p>
 
         <p style={{ fontSize: '16px', color: 'var(--color-text-dim)', lineHeight: 1.7, textAlign: 'center' }}>
           ICF-aligned. Root-cause focused. Designed to help you find the right path forward. Not every engagement is a fit — if it isn't, you'll know by the end of the session.
