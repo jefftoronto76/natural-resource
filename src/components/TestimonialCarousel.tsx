@@ -132,7 +132,8 @@ export function TestimonialCarousel() {
           {/* Tagline with arrow */}
           <p style={{
             fontFamily: 'DM Mono, monospace',
-            fontSize: '18px',
+            fontSize: '16px',
+            fontWeight: 'bold',
             color: '#2d6a4f',
             marginBottom: '24px',
             letterSpacing: '0.02em',
