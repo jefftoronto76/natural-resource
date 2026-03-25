@@ -41,49 +41,65 @@ export function Session() {
           Whichever lane fits,<br /><em style={{ fontStyle: 'italic' }}>both start here.</em>
         </h2>
 
-        <p style={{ fontSize: '18px', color: 'rgba(26,25,23,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 400, lineHeight: 1.7, marginBottom: '32px' }}>
-          Coaching or special projects. C$250, paid upfront. Real outcomes.<br /><strong style={{ fontWeight: 600 }}>Book below.</strong>
-        </p>
-
         <div style={{
-          border: '1px solid rgba(26,25,23,0.08)',
-          padding: 0,
-          position: 'relative',
-          marginBottom: '32px',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          maxWidth: '100%',
-          width: '100%'
-        }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f' }} />
-          <div
-            className="calendly-inline-widget"
-            data-url="https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f"
-            style={{ minWidth: '320px', height: '700px' }}
-          />
+          display: 'grid',
+          gridTemplateColumns: '55% 45%',
+          gap: '48px',
+          alignItems: 'start',
+          marginBottom: '32px'
+        }}
+        className="session-grid">
+          <div style={{
+            border: '1px solid rgba(26,25,23,0.08)',
+            padding: 0,
+            position: 'relative',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            maxWidth: '100%',
+            width: '100%'
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f' }} />
+            <div
+              className="calendly-inline-widget"
+              data-url="https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f"
+              style={{ minWidth: '320px', height: '600px' }}
+            />
+          </div>
+
+          <div style={{ paddingTop: '8px' }}>
+            <p style={{ fontSize: '18px', color: 'rgba(26,25,23,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 400, lineHeight: 1.7, marginBottom: '24px' }}>
+              Coaching or special projects. C$250, paid upfront. Real outcomes.
+            </p>
+
+            <div style={{ fontSize: 'clamp(48px, 6vw, 64px)', fontFamily: 'var(--font-display)', color: '#2d6a4f', fontWeight: 400, letterSpacing: '-0.02em', marginBottom: '24px' }}>
+              C$250
+            </div>
+
+            <p style={{ fontSize: '16px', color: 'rgba(26,25,23,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 400, lineHeight: 1.7, marginBottom: '32px' }}>
+              60 minutes. ICF-aligned. Root-cause focused.
+            </p>
+
+            <div style={{ height: '1px', background: 'rgba(26,25,23,0.1)', marginBottom: '32px' }} />
+
+            <p style={{ fontSize: '16px', color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
+              Not ready to commit?{' '}
+              <a
+                href="#"
+                onClick={handleDiscoveryClick}
+                style={{
+                  color: '#2d6a4f',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid #2d6a4f',
+                  transition: 'opacity 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+              >
+                Start with a free 15-minute call →
+              </a>
+            </p>
+          </div>
         </div>
-
-        <p style={{ fontSize: '16px', color: 'var(--color-text-muted)', lineHeight: 1.7, textAlign: 'center', marginBottom: '24px' }}>
-          Not ready to commit?{' '}
-          <a
-            href="#"
-            onClick={handleDiscoveryClick}
-            style={{
-              color: '#2d6a4f',
-              textDecoration: 'none',
-              borderBottom: '1px solid #2d6a4f',
-              transition: 'opacity 0.2s ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-          >
-            Start with a free 15-minute call →
-          </a>
-        </p>
-
-        <p style={{ fontSize: '16px', color: 'var(--color-text-dim)', lineHeight: 1.7, textAlign: 'center' }}>
-          ICF-aligned. Root-cause focused. Designed to help you find the right path forward. Not every engagement is a fit — if it isn't, you'll know by the end of the session.
-        </p>
       </div>
     </section>
   )

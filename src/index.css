@@ -58,11 +58,18 @@ body {
 .calendly-inline-widget {
   width: 100% !important;
   max-width: 100% !important;
-  height: 700px !important;
+  height: 600px !important;
   min-width: 0 !important;
   overflow: hidden !important;
 }
 
 .calendly-inline-widget iframe {
-  height: 700px !important;
+  height: 600px !important;
+}
+
+@media (max-width: 768px) {
+  .session-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
 }
