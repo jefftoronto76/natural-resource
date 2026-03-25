@@ -41,6 +41,10 @@ export function Session() {
           Whichever lane fits,<br /><em style={{ fontStyle: 'italic' }}>both start here.</em>
         </h2>
 
+        <p style={{ fontSize: '18px', color: 'rgba(26,25,23,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 400, lineHeight: 1.7, marginBottom: '32px' }}>
+          Coaching or special projects. C$250, paid upfront. Real outcomes. Book below.
+        </p>
+
         <div style={{
           border: '1px solid rgba(26,25,23,0.08)',
           padding: 0,
