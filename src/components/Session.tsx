@@ -42,7 +42,7 @@ export function Session() {
         </h2>
 
         <p style={{ fontSize: '18px', color: 'rgba(26,25,23,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 400, lineHeight: 1.7, marginBottom: '32px' }}>
-          Coaching or special projects. C$250, paid upfront. Real outcomes. Book below.
+          Coaching or special projects. C$250, paid upfront. Real outcomes.<br /><strong style={{ fontWeight: 600 }}>Book below.</strong>
         </p>
 
         <div style={{
