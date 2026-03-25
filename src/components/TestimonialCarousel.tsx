@@ -155,7 +155,9 @@ export function TestimonialCarousel() {
           <div style={{ marginBottom: '20px' }}>
             <div style={{
               fontFamily: 'Playfair Display, serif',
-              fontSize: 'clamp(32px, 4vw, 48px)',
+              fontSize: (currentCard.logo === "/logos/Keyhole.svg" || currentCard.logo === "/logos/MealGarden.svg")
+                ? 'clamp(40px, 5vw, 64px)'
+                : 'clamp(32px, 4vw, 48px)',
               fontWeight: 400,
               color: 'rgba(26,25,23,0.9)',
               lineHeight: 1.2,
