@@ -54,15 +54,15 @@ export function WhyMe() {
               }}>
                 I lead with <em style={{ fontStyle: 'italic' }}>questions.</em>
               </h2>
-              <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I lead with questions.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>We'll pressure-test your instincts to find the right move.</p>
+              <div style={{ marginBottom: '12px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>We'll start with questions.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>This will pressure-test your instincts to confirm the right move.</p>
               </div>
-              <div style={{ marginBottom: '24px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I'm a player-coach.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>I operate at the decision level and get on the field when execution is the lever.</p>
               </div>
-              <div style={{ marginBottom: '24px' }}>
+              <div style={{ marginBottom: '12px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Most of my career, I've worked directly with founders and GMs.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>I understand how to prioritize, think, and execute — not just advise.</p>
               </div>
