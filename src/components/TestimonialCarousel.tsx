@@ -5,6 +5,7 @@ interface StatsCard {
   year: string
   tagline: string
   metric: string
+  metricLabel?: string
   outcome: string
   story: string
   details: string[]
@@ -40,7 +41,8 @@ const STATS_CARDS: StatsCard[] = [
     logo: "/logos/Keyhole.svg",
     year: "2017",
     tagline: "Self Service → PLG, Inbound & Enterprise",
-    metric: "3× Deal Size",
+    metric: "3×",
+    metricLabel: "Deal Size",
     outcome: "Rebuilt the revenue team around deal qualification, annual contracts and demand gen.",
     story: "Rebuilt the GTM motion, tripling deal size and unlocking enterprise revenue",
     details: [
@@ -52,7 +54,8 @@ const STATS_CARDS: StatsCard[] = [
     logo: "/logos/MealGarden.svg",
     year: "2019",
     tagline: "Stalled Product → Stable Business",
-    metric: "9× ARR",
+    metric: "9×",
+    metricLabel: "ARR Growth",
     outcome: "GM-level ownership across P&L, product, sales, and demand generation.",
     story: "Took a stalled product to ninefold ARR growth before a clean exit",
     details: [
@@ -149,15 +152,26 @@ export function TestimonialCarousel() {
           </p>
 
           {/* Metric - large hero number */}
-          <div style={{
-            fontFamily: 'Playfair Display, serif',
-            fontSize: 'clamp(32px, 4vw, 48px)',
-            fontWeight: 400,
-            color: 'rgba(26,25,23,0.9)',
-            marginBottom: '20px',
-            lineHeight: 1.2,
-          }}>
-            {currentCard.metric}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{
+              fontFamily: 'Playfair Display, serif',
+              fontSize: 'clamp(32px, 4vw, 48px)',
+              fontWeight: 400,
+              color: 'rgba(26,25,23,0.9)',
+              lineHeight: 1.2,
+            }}>
+              {currentCard.metric}
+            </div>
+            {currentCard.metricLabel && (
+              <div style={{
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '14px',
+                color: 'rgba(26,25,23,0.5)',
+                marginTop: '4px',
+              }}>
+                {currentCard.metricLabel}
+              </div>
+            )}
           </div>
 
           {/* Outcome sentence */}
