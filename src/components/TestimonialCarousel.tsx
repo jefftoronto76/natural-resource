@@ -2,9 +2,10 @@ import { useState } from 'react'
 
 interface StatsCard {
   logo: string
-  headline: string
-  metric: string
+  year: string
   tagline: string
+  metric: string
+  outcome: string
   story: string
   details: string[]
 }
@@ -12,9 +13,10 @@ interface StatsCard {
 const STATS_CARDS: StatsCard[] = [
   {
     logo: "/logos/Trapeze.svg",
-    headline: "MARKET DOMINANCE",
+    year: "2000",
+    tagline: "Struggling Provider → Trusted Partner",
     metric: "$350K → $25M",
-    tagline: "Mission-critical B2G enterprise infrastructure",
+    outcome: "Led the sales transformation that helped establish Trapeze as industry leader.",
     story: "13 successful years building commercial systems in the Constellation Software ecosystem",
     details: [
       "Full-cycle enterprise selling",
@@ -24,9 +26,10 @@ const STATS_CARDS: StatsCard[] = [
   },
   {
     logo: "/logos/Infor.svg",
-    headline: "ENTERPRISE BREAKTHROUGH",
+    year: "2015",
+    tagline: "Legacy Vendor → Viable Cloud Partner",
     metric: "$1.7M",
-    tagline: "Tier-1 enterprise HCM SaaS",
+    outcome: "Closed the largest HCM CloudSuite deal in Company history.",
     story: "Closed the largest HCM CloudSuite deal in Canadian history in 2018",
     details: [
       "Largest CloudSuite HCM deal in Canada (2018)",
@@ -34,10 +37,11 @@ const STATS_CARDS: StatsCard[] = [
     ]
   },
   {
-    logo: "/logos/keyhole.svg",
-    headline: "REVENUE MODEL TRANSFORMATION",
+    logo: "/logos/Keyhole.svg",
+    year: "2017",
+    tagline: "Self Service → PLG, Inbound & Enterprise",
     metric: "3× Deal Size",
-    tagline: "B2B social analytics SaaS",
+    outcome: "Rebuilt the revenue team around deal qualification, annual contracts and demand gen.",
     story: "Rebuilt the GTM motion, tripling deal size and unlocking enterprise revenue",
     details: [
       "Inbound growth motion",
@@ -45,10 +49,11 @@ const STATS_CARDS: StatsCard[] = [
     ]
   },
   {
-    logo: "/logos/mealgarden.svg",
-    headline: "PLG SCALE & GROWTH",
-    metric: "9× ARR Growth",
-    tagline: "B2B2C marketplace",
+    logo: "/logos/MealGarden.svg",
+    year: "2019",
+    tagline: "Stalled Product → Stable Business",
+    metric: "9× ARR",
+    outcome: "GM-level ownership across P&L, product, sales, and demand generation.",
     story: "Took a stalled product to ninefold ARR growth before a clean exit",
     details: [
       "Led Revenue, Product, and Operations",
@@ -95,62 +100,77 @@ export function TestimonialCarousel() {
         flexDirection: 'column',
         boxShadow: '0 4px 24px rgba(0,0,0,0.04)',
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        position: 'relative',
       }}>
+        {/* Year stamp - absolute top right */}
+        <div style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          fontFamily: 'DM Mono, monospace',
+          fontSize: '11px',
+          color: 'rgba(26,25,23,0.25)',
+          letterSpacing: '0.15em',
+        }}>
+          {currentCard.year}
+        </div>
+
         <div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            marginBottom: '32px'
-          }}>
+          {/* Logo - left aligned */}
+          <div style={{ marginBottom: '20px' }}>
             <img
               src={currentCard.logo}
               alt="Company logo"
               style={{
                 height: '40px',
                 width: 'auto',
-                maxWidth: '160px',
-                objectFit: 'contain'
+                display: 'block',
               }}
             />
           </div>
 
+          {/* Tagline with arrow */}
           <p style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '11px',
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            color: 'var(--color-text-dim)',
-            marginBottom: '16px',
-            fontWeight: 600
+            fontFamily: 'DM Mono, monospace',
+            fontSize: '12px',
+            color: 'rgba(26,25,23,0.5)',
+            marginBottom: '24px',
+            letterSpacing: '0.02em',
           }}>
-            {currentCard.headline}
+            {currentCard.tagline.split('→').map((part, i, arr) => (
+              <span key={i}>
+                {part.trim()}
+                {i < arr.length - 1 && (
+                  <span style={{ color: '#2d6a4f', margin: '0 6px' }}>→</span>
+                )}
+              </span>
+            ))}
           </p>
 
-          <p style={{
-            fontFamily: 'var(--font-display)',
+          {/* Metric - large hero number */}
+          <div style={{
+            fontFamily: 'Playfair Display, serif',
             fontSize: 'clamp(32px, 4vw, 48px)',
             fontWeight: 400,
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em',
-            color: 'var(--color-text-primary)',
-            marginBottom: '20px'
+            color: 'rgba(26,25,23,0.9)',
+            marginBottom: '20px',
+            lineHeight: 1.2,
           }}>
             {currentCard.metric}
-          </p>
+          </div>
 
+          {/* Outcome sentence */}
           <p style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: '14px',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: 'var(--color-accent)',
+            fontSize: '16px',
+            color: 'rgba(26,25,23,0.6)',
+            lineHeight: 1.7,
+            fontFamily: 'DM Sans, sans-serif',
             marginBottom: '24px',
-            fontWeight: 600
           }}>
-            {currentCard.tagline}
+            {currentCard.outcome}
           </p>
 
+          {/* Expandable section */}
           <div style={{
             maxHeight: isExpanded ? '500px' : '0',
             opacity: isExpanded ? 1 : 0,
@@ -204,10 +224,11 @@ export function TestimonialCarousel() {
           </div>
         </div>
 
+        {/* See More toggle */}
         <button
           onClick={() => toggleExpanded(activeIndex)}
           style={{
-            marginTop: isExpanded ? '16px' : '24px',
+            marginTop: isExpanded ? '16px' : '0',
             background: 'transparent',
             border: 'none',
             color: 'var(--color-accent)',
