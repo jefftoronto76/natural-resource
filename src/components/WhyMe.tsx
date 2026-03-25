@@ -54,10 +54,22 @@ export function WhyMe() {
               }}>
                 I lead with <em style={{ fontStyle: 'italic' }}>questions.</em>
               </h2>
-              <p style={bodyStyle}>Your answers provide the context that we'll build our plans around.</p>
-              <p style={bodyStyle}>I'm a player-coach. As comfortable in the boardroom as I am on discovery calls.</p>
-              <p style={bodyStyle}>My career spans more than 20 years, and I've built range by taking on roles outside my comfort zone and learning new skills and approaches to succeed.</p>
-              <p style={{ ...bodyStyle, marginBottom: 0 }}>I deliver results with people, not through them, and believe in learning as a competitive advantage.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I lead with questions.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>We'll pressure-test your instincts to find the right move.</p>
+              </div>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I'm a player-coach.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>I operate at the decision level and get on the field when execution is the lever.</p>
+              </div>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Most of my career, I've worked directly with founders and GMs.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>I understand how to prioritize, think, and execute — not just advise.</p>
+              </div>
+              <div>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I deliver results with people, not through them.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Because growth only sticks when your team knows how to carry it forward.</p>
+              </div>
 
               <div style={quoteStyle}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
