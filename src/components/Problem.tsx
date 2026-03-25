@@ -18,7 +18,7 @@ export function Problem() {
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'rgba(0,0,0,0.45)',
+        background: 'rgba(0,0,0,0.1)',
         zIndex: 1,
       }} />
       <div ref={ref} className="reveal" style={{ maxWidth: '700px', position: 'relative', zIndex: 2 }}>
@@ -27,6 +27,7 @@ export function Problem() {
           letterSpacing: '0.22em', textTransform: 'uppercase',
           color: 'rgba(255,255,255,0.6)', marginBottom: '40px',
           display: 'flex', alignItems: 'center', gap: '16px',
+          fontWeight: 600,
         }}>
           The <span style={{
             position: 'relative',
