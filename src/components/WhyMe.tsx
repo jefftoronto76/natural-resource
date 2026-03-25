@@ -52,10 +52,9 @@ export function WhyMe() {
                 fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
                 color: 'var(--color-text-primary)', marginBottom: '28px',
               }}>
-                I lead with <em style={{ fontStyle: 'italic' }}>questions.</em>
+                We'll start with <em style={{ fontStyle: 'italic' }}>questions.</em>
               </h2>
               <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>We'll start with questions.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>This will pressure-test your instincts to confirm the right move.</p>
               </div>
               <div style={{ marginBottom: '12px' }}>
