@@ -52,7 +52,7 @@ export function Work() {
             className="text-base leading-relaxed text-gray-600 max-w-md"
             style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
           >
-            For ambitious professionals who need help, I help you identify the root cause and build a practical plan to address it.
+            Structured thinking work, not just conversations. A clear process to get you unstuck and moving forward.
           </p>
 
           {/* List */}
