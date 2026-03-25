@@ -66,7 +66,7 @@ const STATS_CARDS: StatsCard[] = [
 ]
 
 export function TestimonialCarousel() {
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [activeIndex, setActiveIndex] = useState(3)
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
 
   const handlePrev = () => {
