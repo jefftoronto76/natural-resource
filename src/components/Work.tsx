@@ -4,13 +4,19 @@ export function Work() {
       {/* Headline */}
       <div className="mb-24">
         <h2
-          className="text-6xl leading-tight max-w-2xl"
+          className="text-6xl leading-tight max-w-2xl mb-6"
           style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400 }}
         >
           One operator.
           <br />
           <span className="italic">Two ways in.</span>
         </h2>
+        <p
+          className="text-lg leading-relaxed"
+          style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400, color: 'rgba(26,25,23,0.6)' }}
+        >
+          I studied coaching at the graduate level, and it's embedded in how I approach growth and leadership.
+        </p>
       </div>
 
       {/* Two Columns */}

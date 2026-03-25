@@ -37,13 +37,9 @@ export function Session() {
           }}>Start</span>
           <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', maxWidth: '120px', display: 'block' }} />
         </p>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 4vw, 52px)', fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em', color: 'var(--color-text-primary)', marginBottom: '24px' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 4vw, 52px)', fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em', color: 'var(--color-text-primary)', marginBottom: '48px' }}>
           Whichever lane fits,<br /><em style={{ fontStyle: 'italic' }}>both start here.</em>
         </h2>
-
-        <p style={{ fontSize: '18px', color: 'rgba(26,25,23,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 400, lineHeight: 1.7, marginBottom: '48px' }}>
-          I studied coaching at the graduate level, and it's embedded in how I approach growth and leadership.
-        </p>
 
         <div style={{
           display: 'grid',
