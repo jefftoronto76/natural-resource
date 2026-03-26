@@ -18,11 +18,16 @@ const STATS_CARDS: StatsCard[] = [
     tagline: "Struggling Provider → Trusted Partner",
     metric: "$350K → $25M",
     outcome: "Led the sales transformation that helped establish Trapeze as industry leader.",
-    story: "13 successful years building commercial systems in the Constellation Software ecosystem",
+    story: "WHAT GOT ME THERE: Promoted through the Constellation Software environment to build teams, strengthen execution, and grow revenue in a disciplined enterprise sales model.",
     details: [
-      "Full-cycle enterprise selling",
-      "Multi-stakeholder procurement",
-      "13 years in the Constellation Software ecosystem"
+      "BUSINESS CONTEXT: Mission-critical vertical software business serving public transportation agencies across North America, with long sales cycles and complex stakeholder environments.",
+      "IMPACT:",
+      "Grew from an individual contributor to a sales leader over more than a decade",
+      "Built and coached high-performing enterprise sales teams across North America",
+      "Introduced sales systems, playbooks, onboarding, and win/loss processes",
+      "Consistently achieved top performer or top performing team in terms of quota and forecast accuracy",
+      "Built trusted advisor relationships with major enterprise customers and helped establish Trapeze as the market leader",
+      "QUOTE: \"He has proven repeatedly that he can perform in the most trying situations.\" — Rick Bacchus, President, Trapeze Group North America"
     ]
   },
   {
