@@ -105,12 +105,20 @@ export function Work() {
           </h3>
 
           {/* Description */}
-          <p
-            className="text-base leading-relaxed text-gray-600 max-w-md"
-            style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
-          >
-            For organizations that need to move faster without breaking what they're building.
-          </p>
+          <div className="max-w-md space-y-2">
+            <p
+              className="text-base leading-relaxed text-gray-600"
+              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+            >
+              For organizations that want to grow without the drama.
+            </p>
+            <p
+              className="text-base leading-relaxed text-gray-600"
+              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+            >
+              I build systems that stop problems from happening.
+            </p>
+          </div>
 
           {/* List */}
           <ul className="space-y-4 pt-4">
