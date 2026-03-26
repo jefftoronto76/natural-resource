@@ -66,18 +66,18 @@ const QUOTES: Quote[] = [
 ]
 
 export function QuoteCarouselSection() {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(1)
   const ref = useReveal()
 
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? 0 : prev - 1))
+    setCurrentIndex((prev) => (prev === 1 ? 1 : prev - 1))
   }
 
   const handleNext = () => {
     setCurrentIndex((prev) => Math.min(QUOTES.length - 2, prev + 1))
   }
 
-  const canGoUp = currentIndex > 0
+  const canGoUp = currentIndex > 1
   const canGoDown = currentIndex < QUOTES.length - 2
 
   const quoteStyle: React.CSSProperties = {
@@ -179,9 +179,42 @@ export function QuoteCarouselSection() {
             overflow: 'hidden',
             minHeight: '450px',
           }}>
-            {/* First visible quote */}
+            {/* Previous quote (above, faded) */}
+            {currentIndex - 1 >= 0 && (
+              <div style={{
+                ...quoteStyle,
+                opacity: 0.4,
+                transform: 'translateY(0)',
+                pointerEvents: 'none',
+              }}>
+                <p style={{
+                  fontFamily: 'Playfair Display, serif',
+                  fontSize: 'clamp(18px, 2vw, 22px)',
+                  fontStyle: 'italic',
+                  fontWeight: 400,
+                  lineHeight: 1.6,
+                  color: 'var(--color-text-primary)',
+                  marginBottom: '16px'
+                }}>
+                  "{QUOTES[currentIndex - 1].text}"
+                </p>
+                <cite style={{
+                  fontFamily: 'DM Mono, monospace',
+                  fontSize: '11px',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'var(--color-text-dim)',
+                  fontStyle: 'normal'
+                }}>
+                  — {QUOTES[currentIndex - 1].author}, {QUOTES[currentIndex - 1].company} ({QUOTES[currentIndex - 1].year})
+                </cite>
+              </div>
+            )}
+
+            {/* Current quote (center, full opacity) */}
             <div style={{
               ...quoteStyle,
+              marginTop: currentIndex - 1 >= 0 ? '56px' : '0',
               opacity: 1,
               transform: 'translateY(0)',
             }}>
@@ -208,13 +241,14 @@ export function QuoteCarouselSection() {
               </cite>
             </div>
 
-            {/* Second visible quote */}
+            {/* Next quote (below, faded) */}
             {currentIndex + 1 < QUOTES.length && (
               <div style={{
                 ...quoteStyle,
                 marginTop: '56px',
-                opacity: 1,
+                opacity: 0.4,
                 transform: 'translateY(0)',
+                pointerEvents: 'none',
               }}>
                 <p style={{
                   fontFamily: 'Playfair Display, serif',
@@ -236,39 +270,6 @@ export function QuoteCarouselSection() {
                   fontStyle: 'normal'
                 }}>
                   — {QUOTES[currentIndex + 1].author}, {QUOTES[currentIndex + 1].company} ({QUOTES[currentIndex + 1].year})
-                </cite>
-              </div>
-            )}
-
-            {/* Peek of next quote (partially visible, muted) */}
-            {currentIndex + 2 < QUOTES.length && (
-              <div style={{
-                ...quoteStyle,
-                marginTop: '56px',
-                opacity: 0.25,
-                transform: 'translateY(0)',
-                pointerEvents: 'none',
-              }}>
-                <p style={{
-                  fontFamily: 'Playfair Display, serif',
-                  fontSize: 'clamp(18px, 2vw, 22px)',
-                  fontStyle: 'italic',
-                  fontWeight: 400,
-                  lineHeight: 1.6,
-                  color: 'var(--color-text-primary)',
-                  marginBottom: '16px'
-                }}>
-                  "{QUOTES[currentIndex + 2].text}"
-                </p>
-                <cite style={{
-                  fontFamily: 'DM Mono, monospace',
-                  fontSize: '11px',
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: 'var(--color-text-dim)',
-                  fontStyle: 'normal'
-                }}>
-                  — {QUOTES[currentIndex + 2].author}, {QUOTES[currentIndex + 2].company} ({QUOTES[currentIndex + 2].year})
                 </cite>
               </div>
             )}
