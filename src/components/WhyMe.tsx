@@ -99,7 +99,7 @@ export function WhyMe() {
         }
       `}</style>
       <QuoteCarouselSection />
-      <CareerTimeline />
+      {/* <CareerTimeline /> */}
     </>
   )
 }
