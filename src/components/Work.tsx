@@ -49,6 +49,29 @@ export function Work() {
 
   return (
     <section id="work" className="w-full px-8 py-32 max-w-7xl mx-auto">
+      {/* Section Label */}
+      <p style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: '11px',
+        letterSpacing: '0.22em',
+        textTransform: 'uppercase',
+        color: 'var(--color-text-dim)',
+        marginBottom: '40px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+      }}>
+        How to <span style={{
+          position: 'relative',
+          display: 'inline-block',
+          padding: '0 4px',
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cpath d='M2,14 C20,8 80,6 98,12 C99,16 95,20 80,21 C50,23 15,22 2,18 Z' fill='%232d6a4f' fill-opacity='0.2'/%3E%3C/svg%3E\")",
+          backgroundSize: '100% 100%',
+          backgroundRepeat: 'no-repeat',
+        }}>Start</span>
+        <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', maxWidth: '120px', display: 'block' }} />
+      </p>
+
       {/* Headline */}
       <div className="mb-24">
         <h2
