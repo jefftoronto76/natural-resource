@@ -1,6 +1,7 @@
 import { useReveal } from '@/hooks/useReveal'
 import { CareerTimeline } from './CareerTimeline'
 import { TestimonialCarousel } from './TestimonialCarousel'
+import { QuotesCarousel } from './QuotesCarousel'
 
 const STATS = [
   { value: '27', label: 'Years operating' },
@@ -12,8 +13,9 @@ const STATS = [
 export function WhyMe() {
   const ref = useReveal()
   const carouselRef = useReveal()
+  const quotesRef = useReveal()
 
-  const sectionPad = 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)'
+  const sectionPad = 'clamp(80px, 10vw, 120px) clamp(24px, 5vw, 48px)'
   const labelStyle: React.CSSProperties = {
     fontFamily: 'var(--font-mono)', fontSize: '11px',
     letterSpacing: '0.22em', textTransform: 'uppercase',
@@ -69,46 +71,18 @@ export function WhyMe() {
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I deliver results with people, not through them.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Because growth only sticks when your team knows how to carry it forward.</p>
               </div>
-
-              <div style={quoteStyle} className="nr-quotes-desktop">
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
-                  "I took that advice and went out guns blazing — #1 on my team and #2 in Canada."
-                </p>
-                <cite style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', fontStyle: 'normal' }}>
-                  — Chris Chun, Intuit
-                </cite>
-              </div>
-              <div style={{ ...quoteStyle, marginTop: '24px' }} className="nr-quotes-desktop">
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
-                  "A very capable leader, an advocate for the customer base, and a true partner as we re-built our sales organization."
-                </p>
-                <cite style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', fontStyle: 'normal' }}>
-                  — Jim Schnepp, VP Sales, Trapeze Group
-                </cite>
-              </div>
             </div>
 
             <div ref={carouselRef} className="reveal">
               <TestimonialCarousel />
             </div>
 
+            <div ref={quotesRef} className="reveal nr-quotes-desktop">
+              <QuotesCarousel />
+            </div>
+
             <div className="nr-quotes-mobile">
-              <div style={quoteStyle}>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
-                  "I took that advice and went out guns blazing — #1 on my team and #2 in Canada."
-                </p>
-                <cite style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', fontStyle: 'normal' }}>
-                  — Chris Chun, Intuit
-                </cite>
-              </div>
-              <div style={{ ...quoteStyle, marginTop: '24px' }}>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
-                  "A very capable leader, an advocate for the customer base, and a true partner as we re-built our sales organization."
-                </p>
-                <cite style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', fontStyle: 'normal' }}>
-                  — Jim Schnepp, VP Sales, Trapeze Group
-                </cite>
-              </div>
+              <QuotesCarousel />
             </div>
           </div>
         </div>
@@ -117,18 +91,26 @@ export function WhyMe() {
       <style>{`
         .nr-split {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 1fr 1fr 1fr;
           gap: 64px;
-          align-items: center;
+          align-items: start;
         }
         .nr-quotes-mobile {
           display: none;
+        }
+        @media (max-width: 1200px) {
+          .nr-split {
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+          }
+          .nr-quotes-desktop {
+            grid-column: 1 / -1;
+          }
         }
         @media (max-width: 768px) {
           .nr-split {
             grid-template-columns: 1fr;
             gap: 48px;
-            align-items: start;
           }
           .nr-quotes-desktop {
             display: none;
