@@ -1,19 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function Work() {
   const [expandedCard1, setExpandedCard1] = useState(false);
   const [expandedCard2, setExpandedCard2] = useState(false);
   const [openCalendar, setOpenCalendar] = useState<'card1' | 'card2' | null>(null);
+  const calendly1Ref = useRef<HTMLDivElement>(null);
+  const calendly2Ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]')
-    if (!existingScript) {
-      const script = document.createElement('script')
-      script.src = 'https://assets.calendly.com/assets/external/widget.js'
-      script.async = true
-      document.body.appendChild(script)
+    const loadCalendly = () => {
+      const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]')
+      if (!existingScript) {
+        const script = document.createElement('script')
+        script.src = 'https://assets.calendly.com/assets/external/widget.js'
+        script.async = true
+        document.body.appendChild(script)
+      }
     }
+    loadCalendly()
   }, [])
+
+  useEffect(() => {
+    if (openCalendar === 'card1' && calendly1Ref.current && window.Calendly) {
+      window.Calendly.initInlineWidget({
+        url: 'https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f',
+        parentElement: calendly1Ref.current,
+      })
+    }
+  }, [openCalendar])
+
+  useEffect(() => {
+    if (openCalendar === 'card2' && calendly2Ref.current && window.Calendly) {
+      window.Calendly.initInlineWidget({
+        url: 'https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f',
+        parentElement: calendly2Ref.current,
+      })
+    }
+  }, [openCalendar])
 
   const handleDiscoveryClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
@@ -212,11 +235,10 @@ export function Work() {
             overflow: 'hidden',
             position: 'relative'
           }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f', zIndex: 1 }} />
             <div
-              className="calendly-inline-widget"
-              data-url="https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f"
-              style={{ minWidth: '320px', height: '600px' }}
+              ref={calendly1Ref}
+              style={{ minWidth: '320px', height: '700px' }}
             />
           </div>
         )}
@@ -374,11 +396,10 @@ export function Work() {
             overflow: 'hidden',
             position: 'relative'
           }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f', zIndex: 1 }} />
             <div
-              className="calendly-inline-widget"
-              data-url="https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f"
-              style={{ minWidth: '320px', height: '600px' }}
+              ref={calendly2Ref}
+              style={{ minWidth: '320px', height: '700px' }}
             />
           </div>
         )}
