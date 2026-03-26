@@ -47,14 +47,6 @@ export function Work() {
     }
   }
 
-  const toggleCalendar = (card: 'card1' | 'card2') => {
-    if (openCalendar === card) {
-      setOpenCalendar(null)
-    } else {
-      setOpenCalendar(card)
-    }
-  }
-
   return (
     <section id="work" className="w-full px-8 py-32 max-w-7xl mx-auto">
       {/* Headline */}
@@ -214,9 +206,9 @@ export function Work() {
           )}
 
           {/* Book Button */}
-          {!openCalendar && (
+          {openCalendar !== 'card1' && (
             <button
-              onClick={() => toggleCalendar('card1')}
+              onClick={() => setOpenCalendar('card1')}
               style={{
                 marginTop: '24px',
                 width: '100%',
@@ -244,7 +236,7 @@ export function Work() {
 
           {openCalendar === 'card1' && (
             <button
-              onClick={() => toggleCalendar('card1')}
+              onClick={() => setOpenCalendar(null)}
               style={{
                 marginTop: '16px',
                 width: '100%',
@@ -403,9 +395,9 @@ export function Work() {
           )}
 
           {/* Book Button */}
-          {!openCalendar && (
+          {openCalendar !== 'card2' && (
             <button
-              onClick={() => toggleCalendar('card2')}
+              onClick={() => setOpenCalendar('card2')}
               style={{
                 marginTop: '24px',
                 width: '100%',
@@ -433,7 +425,7 @@ export function Work() {
 
           {openCalendar === 'card2' && (
             <button
-              onClick={() => toggleCalendar('card2')}
+              onClick={() => setOpenCalendar(null)}
               style={{
                 marginTop: '16px',
                 width: '100%',
