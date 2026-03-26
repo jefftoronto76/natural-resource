@@ -59,12 +59,12 @@ export function Work() {
           <ul className="space-y-4 pt-4">
             {[
               'A deal you can\'t afford to lose',
-              'A conversation you don\'t know how to have',
-              'A team that isn\'t working together',
-              'A decision with no clear answer',
-              'A project that went sideways',
-              'A pipeline that doesn\'t convert',
-              'Customers you\'re losing and don\'t know why',
+              'Conversations you don\'t know how to have',
+              'Teams that aren\'t working together',
+              'Decisions with no clear answer',
+              'A project that\'s going sideways',
+              'Pipeline that doesn\'t convert',
+              'Customers quietly churning',
             ].map((item, index) => (
               <li
                 key={index}
