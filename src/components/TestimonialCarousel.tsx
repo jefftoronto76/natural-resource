@@ -9,6 +9,8 @@ interface StatsCard {
   outcome: string
   story: string
   details: string[]
+  quote?: string
+  quoteAuthor?: string
 }
 
 const STATS_CARDS: StatsCard[] = [
@@ -18,17 +20,17 @@ const STATS_CARDS: StatsCard[] = [
     tagline: "Struggling Provider → Trusted Partner",
     metric: "$350K → $25M",
     outcome: "Led the sales transformation that helped establish Trapeze as industry leader.",
-    story: "WHAT GOT ME THERE: Promoted through the Constellation Software environment to build teams, strengthen execution, and grow revenue in a disciplined enterprise sales model.",
+    story: "Promoted through the Constellation Software environment to build teams, strengthen execution, and grow revenue in a disciplined enterprise sales model.",
     details: [
-      "BUSINESS CONTEXT: Mission-critical vertical software business serving public transportation agencies across North America, with long sales cycles and complex stakeholder environments.",
-      "IMPACT:",
+      "Mission-critical vertical software business serving public transportation agencies across North America, with long sales cycles and complex stakeholder environments.",
       "Grew from an individual contributor to a sales leader over more than a decade",
       "Built and coached high-performing enterprise sales teams across North America",
       "Introduced sales systems, playbooks, onboarding, and win/loss processes",
       "Consistently achieved top performer or top performing team in terms of quota and forecast accuracy",
-      "Built trusted advisor relationships with major enterprise customers and helped establish Trapeze as the market leader",
-      "QUOTE: \"He has proven repeatedly that he can perform in the most trying situations.\" — Rick Bacchus, President, Trapeze Group North America"
-    ]
+      "Built trusted advisor relationships with major enterprise customers and helped establish Trapeze as the market leader"
+    ],
+    quote: "He has proven repeatedly that he can perform in the most trying situations.",
+    quoteAuthor: "Rick Bacchus, President, Trapeze Group North America"
   },
   {
     logo: "/logos/Infor.svg",
@@ -194,7 +196,7 @@ export function TestimonialCarousel() {
 
           {/* Expandable section */}
           <div style={{
-            maxHeight: isExpanded ? '500px' : '0',
+            maxHeight: isExpanded ? '800px' : '0',
             opacity: isExpanded ? 1 : 0,
             overflow: 'hidden',
             transition: 'max-height 0.3s ease, opacity 0.3s ease',
@@ -204,44 +206,183 @@ export function TestimonialCarousel() {
               paddingTop: '24px',
               paddingBottom: '24px'
             }}>
-              <p style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: '15px',
-                lineHeight: 1.7,
-                color: 'var(--color-text-muted)',
-                fontWeight: 400,
-                marginBottom: '20px'
-              }}>
-                {currentCard.story}
-              </p>
+              {currentCard.quote ? (
+                <>
+                  {/* WHAT GOT ME THERE section */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{
+                      fontFamily: 'DM Mono, monospace',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: 'rgba(26,25,23,0.5)',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      marginBottom: '8px'
+                    }}>
+                      WHAT GOT ME THERE
+                    </div>
+                    <p style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '15px',
+                      lineHeight: 1.7,
+                      color: 'var(--color-text-muted)',
+                      fontWeight: 400,
+                      margin: 0
+                    }}>
+                      {currentCard.story}
+                    </p>
+                  </div>
 
-              <ul style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
-              }}>
-                {currentCard.details.map((detail, idx) => (
-                  <li key={idx} style={{
+                  {/* BUSINESS CONTEXT section */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{
+                      fontFamily: 'DM Mono, monospace',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: 'rgba(26,25,23,0.5)',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      marginBottom: '8px'
+                    }}>
+                      BUSINESS CONTEXT
+                    </div>
+                    <p style={{
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '15px',
+                      lineHeight: 1.7,
+                      color: 'var(--color-text-muted)',
+                      fontWeight: 400,
+                      margin: 0
+                    }}>
+                      {currentCard.details[0]}
+                    </p>
+                  </div>
+
+                  {/* IMPACT section */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{
+                      fontFamily: 'DM Mono, monospace',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: 'rgba(26,25,23,0.5)',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      marginBottom: '8px'
+                    }}>
+                      IMPACT
+                    </div>
+                    <ul style={{
+                      listStyle: 'none',
+                      padding: 0,
+                      margin: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}>
+                      {currentCard.details.slice(1).map((detail, idx) => (
+                        <li key={idx} style={{
+                          fontFamily: 'var(--font-sans)',
+                          fontSize: '14px',
+                          lineHeight: 1.6,
+                          color: 'var(--color-text-muted)',
+                          paddingLeft: '20px',
+                          position: 'relative'
+                        }}>
+                          <span style={{
+                            position: 'absolute',
+                            left: 0,
+                            color: 'var(--color-accent)',
+                            fontWeight: 600
+                          }}>·</span>
+                          {detail}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* QUOTE section */}
+                  <div>
+                    <div style={{
+                      fontFamily: 'DM Mono, monospace',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: 'rgba(26,25,23,0.5)',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      marginBottom: '8px'
+                    }}>
+                      QUOTE
+                    </div>
+                    <div style={{
+                      borderLeft: '3px solid #2d6a4f',
+                      paddingLeft: '16px',
+                      marginBottom: '8px'
+                    }}>
+                      <p style={{
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: '15px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-muted)',
+                        fontStyle: 'italic',
+                        margin: 0
+                      }}>
+                        {currentCard.quote}
+                      </p>
+                    </div>
+                    <div style={{
+                      fontFamily: 'DM Mono, monospace',
+                      fontSize: '11px',
+                      color: 'rgba(26,25,23,0.5)',
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      paddingLeft: '16px'
+                    }}>
+                      {currentCard.quoteAuthor}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p style={{
                     fontFamily: 'var(--font-sans)',
-                    fontSize: '14px',
-                    lineHeight: 1.6,
+                    fontSize: '15px',
+                    lineHeight: 1.7,
                     color: 'var(--color-text-muted)',
-                    paddingLeft: '20px',
-                    position: 'relative'
+                    fontWeight: 400,
+                    marginBottom: '20px'
                   }}>
-                    <span style={{
-                      position: 'absolute',
-                      left: 0,
-                      color: 'var(--color-accent)',
-                      fontWeight: 600
-                    }}>·</span>
-                    {detail}
-                  </li>
-                ))}
-              </ul>
+                    {currentCard.story}
+                  </p>
+
+                  <ul style={{
+                    listStyle: 'none',
+                    padding: 0,
+                    margin: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}>
+                    {currentCard.details.map((detail, idx) => (
+                      <li key={idx} style={{
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: '14px',
+                        lineHeight: 1.6,
+                        color: 'var(--color-text-muted)',
+                        paddingLeft: '20px',
+                        position: 'relative'
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          left: 0,
+                          color: 'var(--color-accent)',
+                          fontWeight: 600
+                        }}>·</span>
+                        {detail}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
           </div>
         </div>
