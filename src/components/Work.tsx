@@ -1,8 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function Work() {
   const [expandedCard1, setExpandedCard1] = useState(false);
   const [expandedCard2, setExpandedCard2] = useState(false);
+  const [openCalendar, setOpenCalendar] = useState<'card1' | 'card2' | null>(null);
+
+  useEffect(() => {
+    const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]')
+    if (!existingScript) {
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      script.async = true
+      document.body.appendChild(script)
+    }
+  }, [])
+
+  const handleDiscoveryClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    if (window.Calendly) {
+      window.Calendly.initPopupWidget({
+        url: 'https://calendly.com/naturalresource/discovery-call?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f'
+      })
+    }
+  }
+
+  const toggleCalendar = (card: 'card1' | 'card2') => {
+    if (openCalendar === card) {
+      setOpenCalendar(null)
+    } else {
+      setOpenCalendar(card)
+    }
+  }
 
   return (
     <section id="work" className="w-full px-8 py-32 max-w-7xl mx-auto">
@@ -27,7 +55,9 @@ export function Work() {
       {/* Two Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
         {/* Column 1 - 1-on-1 Coaching */}
-        <div className="space-y-8 border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)' }}>
+        <div>
+        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+          <div className="space-y-8">
           {/* Number */}
           <div
             className="text-xs tracking-widest text-gray-300"
@@ -65,6 +95,18 @@ export function Work() {
               style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
             >
               A clear process to get you unstuck and moving forward.
+            </p>
+            <p
+              className="text-lg"
+              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, color: '#2d6a4f', marginTop: '16px' }}
+            >
+              $250 per session
+            </p>
+            <p
+              className="text-base"
+              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400, color: '#2d6a4f' }}
+            >
+              No commitment required.
             </p>
           </div>
 
@@ -131,10 +173,59 @@ export function Work() {
               </svg>
             </button>
           </div>
+          </div>
+
+          {/* Book Button */}
+          <button
+            onClick={() => toggleCalendar('card1')}
+            style={{
+              marginTop: '24px',
+              width: '100%',
+              padding: '16px 32px',
+              background: 'rgba(26,25,23,0.9)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontFamily: 'DM Sans, sans-serif',
+              fontSize: '16px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(26,25,23,1)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(26,25,23,0.9)'
+            }}
+          >
+            {openCalendar === 'card1' ? 'Hide Calendar' : 'Book a Session — C$250'}
+          </button>
+        </div>
+
+        {/* Calendly Embed Card 1 */}
+        {openCalendar === 'card1' && (
+          <div style={{
+            marginTop: '16px',
+            border: '1px solid rgba(26,25,23,0.08)',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f' }} />
+            <div
+              className="calendly-inline-widget"
+              data-url="https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f"
+              style={{ minWidth: '320px', height: '600px' }}
+            />
+          </div>
+        )}
         </div>
 
         {/* Column 2 - Embedded Execution */}
-        <div className="space-y-8 border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)' }}>
+        <div>
+        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+          <div className="space-y-8">
           {/* Number */}
           <div
             className="text-xs tracking-widest text-gray-300"
@@ -172,6 +263,12 @@ export function Work() {
               style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
             >
               I build systems that stop problems from happening.
+            </p>
+            <p
+              className="text-lg"
+              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, color: '#2d6a4f', marginTop: '16px' }}
+            >
+              $250 to start the conversation.
             </p>
           </div>
 
@@ -238,7 +335,80 @@ export function Work() {
               </svg>
             </button>
           </div>
+          </div>
+
+          {/* Book Button */}
+          <button
+            onClick={() => toggleCalendar('card2')}
+            style={{
+              marginTop: '24px',
+              width: '100%',
+              padding: '16px 32px',
+              background: 'rgba(26,25,23,0.9)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontFamily: 'DM Sans, sans-serif',
+              fontSize: '16px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(26,25,23,1)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(26,25,23,0.9)'
+            }}
+          >
+            {openCalendar === 'card2' ? 'Hide Calendar' : 'Book a Session — C$250'}
+          </button>
         </div>
+
+        {/* Calendly Embed Card 2 */}
+        {openCalendar === 'card2' && (
+          <div style={{
+            marginTop: '16px',
+            border: '1px solid rgba(26,25,23,0.08)',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f' }} />
+            <div
+              className="calendly-inline-widget"
+              data-url="https://calendly.com/naturalresource/working-session?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f"
+              style={{ minWidth: '320px', height: '600px' }}
+            />
+          </div>
+        )}
+        </div>
+      </div>
+
+      {/* Discovery Call Link */}
+      <div style={{
+        textAlign: 'center',
+        marginTop: '48px',
+        fontSize: '16px',
+        color: 'rgba(26,25,23,0.6)',
+        fontFamily: 'DM Sans, sans-serif'
+      }}>
+        Not sure where to start?{' '}
+        <a
+          href="#"
+          onClick={handleDiscoveryClick}
+          style={{
+            color: '#2d6a4f',
+            textDecoration: 'none',
+            borderBottom: '1px solid #2d6a4f',
+            transition: 'opacity 0.2s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+        >
+          Book a free 15-minute call
+        </a>
+        .
       </div>
 
       <style>{`
