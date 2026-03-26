@@ -20,7 +20,7 @@ const STATS_CARDS: StatsCard[] = [
     tagline: "Struggling Provider → Trusted Partner",
     metric: "$350K → $25M",
     outcome: "Led the sales transformation that helped establish Trapeze as industry leader.",
-    story: "Promoted through the Constellation Software environment to build teams, strengthen execution, and grow revenue in a disciplined enterprise sales model.",
+    story: "Started part-time as a data analyst working with the executive team, including Constellation Software CEO Mark Leonard, to help build an early CRM and reporting foundation.",
     details: [
       "Mission-critical vertical software business serving public transportation agencies across North America, with long sales cycles and complex stakeholder environments.",
       "Grew from an individual contributor to a sales leader over more than a decade",
