@@ -66,7 +66,7 @@ const STATS_CARDS: StatsCard[] = [
       "Worked closely with CEO to build product-led feedback loops amongst the teams"
     ],
     quote: "Your question-based coaching had a huge impact on helping me think more creatively in the face of problems that seem unapproachable.",
-    quoteAuthor: "Iara, Keyhole"
+    quoteAuthor: "Iara Rios, Keyhole"
   },
   {
     logo: "/logos/MealGarden.svg",
