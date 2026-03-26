@@ -38,11 +38,16 @@ const STATS_CARDS: StatsCard[] = [
     tagline: "Legacy Vendor → Viable Cloud Partner",
     metric: "$1.7M",
     outcome: "Closed the largest HCM CloudSuite deal in Company history.",
-    story: "Closed the largest HCM CloudSuite deal in Canadian history in 2018",
+    story: "Joined during Infor's push to expand cloud adoption and modernize its legacy ERP customer base.",
     details: [
-      "Largest CloudSuite HCM deal in Canada (2018)",
-      "Built $5M enterprise pipeline in 18 months"
-    ]
+      "Tier-1 enterprise software environment selling complex HCM transformation deals with long sales cycles, formal procurement, and executive stakeholders.",
+      "Closed the largest CloudSuite HCM deal of all time (2018)",
+      "Built $2M enterprise pipeline in 18 months",
+      "Established credibility in a highly competitive Tier-1 environment",
+      "Navigated complex enterprise buying committees and procurement processes"
+    ],
+    quote: "Dog with a bone. Awesome.",
+    quoteAuthor: "John Parsons, Infor — on closing the largest CloudSuite HCM deal in company history"
   },
   {
     logo: "/logos/Keyhole.svg",
@@ -51,11 +56,17 @@ const STATS_CARDS: StatsCard[] = [
     metric: "3×",
     metricLabel: "Deal Size",
     outcome: "Rebuilt the revenue team around deal qualification, annual contracts and demand gen.",
-    story: "Rebuilt the GTM motion, tripling deal size and unlocking enterprise revenue",
+    story: "Recruited by the CEO to rebuild revenue, grow deal size, and expand growth channels; owned hiring and growth spend.",
     details: [
-      "Inbound growth motion",
-      "Demand generation team build"
-    ]
+      "Product-led SaaS company with strong self-serve adoption but limited enterprise motion and no structured demand generation.",
+      "Introduced inbound and enterprise revenue channels",
+      "Added demand generation and customer success capability",
+      "Consistently delivered +/- 10% of team sales quota",
+      "Expanded scope from sales leadership into full revenue ownership",
+      "Worked closely with CEO to build product-led feedback loops amongst the teams"
+    ],
+    quote: "Your question-based coaching had a huge impact on helping me think more creatively in the face of problems that seem unapproachable.",
+    quoteAuthor: "Iara, Keyhole"
   },
   {
     logo: "/logos/MealGarden.svg",
@@ -64,11 +75,17 @@ const STATS_CARDS: StatsCard[] = [
     metric: "9×",
     metricLabel: "ARR Growth",
     outcome: "GM-level ownership across P&L, product, sales, and demand generation.",
-    story: "Took a stalled product to ninefold ARR growth before a clean exit",
+    story: "Recruited by the Founder to operationalize the business, establish P&L discipline, and build the leadership and commercial foundation for scale.",
     details: [
-      "Led Revenue, Product, and Operations",
-      "Turned stalled product into growth engine"
-    ]
+      "High-potential product with strong market fit but limited commercial structure and no integrated product-to-revenue operating model.",
+      "Built and led Revenue, Product, and Operations",
+      "Established P&L ownership and operating cadence",
+      "Maintained >18% trial-to-conversion ratio over 5 years",
+      "Built demand generation, onboarding, and customer success functions",
+      "Rebuilt approach to product development, layering in structured feedback and a design resource"
+    ],
+    quote: "Jeff has been instrumental in moving Meal Garden forward.",
+    quoteAuthor: "Vlad Chernenko, Founder, Meal Garden"
   }
 ]
 
