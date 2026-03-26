@@ -78,8 +78,7 @@ export function Work() {
       {/* Two Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
         {/* Column 1 - 1-on-1 Coaching */}
-        <div>
-        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)' }}>
           <div className="space-y-8">
           {/* Number */}
           <div
@@ -196,57 +195,85 @@ export function Work() {
               </svg>
             </button>
           </div>
-          </div>
+
+          {/* Calendly Embed Card 1 */}
+          {openCalendar === 'card1' && (
+            <div style={{
+              marginTop: '32px',
+              marginLeft: '-32px',
+              marginRight: '-32px',
+              marginBottom: '-32px',
+              borderTop: '1px solid rgba(26,25,23,0.08)',
+              overflow: 'hidden',
+            }}>
+              <div
+                ref={calendly1Ref}
+                style={{ minWidth: '320px', height: '700px' }}
+              />
+            </div>
+          )}
 
           {/* Book Button */}
-          <button
-            onClick={() => toggleCalendar('card1')}
-            style={{
-              marginTop: '24px',
-              width: '100%',
-              padding: '16px 32px',
-              background: 'rgba(26,25,23,0.9)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontFamily: 'DM Sans, sans-serif',
-              fontSize: '16px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'background 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(26,25,23,1)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(26,25,23,0.9)'
-            }}
-          >
-            {openCalendar === 'card1' ? 'Hide Calendar' : 'Book a Session — C$250'}
-          </button>
-        </div>
+          {!openCalendar && (
+            <button
+              onClick={() => toggleCalendar('card1')}
+              style={{
+                marginTop: '24px',
+                width: '100%',
+                padding: '16px 32px',
+                background: 'rgba(26,25,23,0.9)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(26,25,23,1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(26,25,23,0.9)'
+              }}
+            >
+              Book a Session — C$250
+            </button>
+          )}
 
-        {/* Calendly Embed Card 1 */}
-        {openCalendar === 'card1' && (
-          <div style={{
-            marginTop: '16px',
-            border: '1px solid rgba(26,25,23,0.08)',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            position: 'relative'
-          }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f', zIndex: 1 }} />
-            <div
-              ref={calendly1Ref}
-              style={{ minWidth: '320px', height: '700px' }}
-            />
+          {openCalendar === 'card1' && (
+            <button
+              onClick={() => toggleCalendar('card1')}
+              style={{
+                marginTop: '16px',
+                width: '100%',
+                padding: '16px 32px',
+                background: 'rgba(26,25,23,0.9)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(26,25,23,1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(26,25,23,0.9)'
+              }}
+            >
+              Hide Calendar
+            </button>
+          )}
           </div>
-        )}
         </div>
 
         {/* Column 2 - Embedded Execution */}
-        <div>
-        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)' }}>
           <div className="space-y-8">
           {/* Number */}
           <div
@@ -357,52 +384,81 @@ export function Work() {
               </svg>
             </button>
           </div>
-          </div>
+
+          {/* Calendly Embed Card 2 */}
+          {openCalendar === 'card2' && (
+            <div style={{
+              marginTop: '32px',
+              marginLeft: '-32px',
+              marginRight: '-32px',
+              marginBottom: '-32px',
+              borderTop: '1px solid rgba(26,25,23,0.08)',
+              overflow: 'hidden',
+            }}>
+              <div
+                ref={calendly2Ref}
+                style={{ minWidth: '320px', height: '700px' }}
+              />
+            </div>
+          )}
 
           {/* Book Button */}
-          <button
-            onClick={() => toggleCalendar('card2')}
-            style={{
-              marginTop: '24px',
-              width: '100%',
-              padding: '16px 32px',
-              background: 'rgba(26,25,23,0.9)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontFamily: 'DM Sans, sans-serif',
-              fontSize: '16px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'background 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(26,25,23,1)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(26,25,23,0.9)'
-            }}
-          >
-            {openCalendar === 'card2' ? 'Hide Calendar' : 'Book a Session — C$250'}
-          </button>
-        </div>
+          {!openCalendar && (
+            <button
+              onClick={() => toggleCalendar('card2')}
+              style={{
+                marginTop: '24px',
+                width: '100%',
+                padding: '16px 32px',
+                background: 'rgba(26,25,23,0.9)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(26,25,23,1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(26,25,23,0.9)'
+              }}
+            >
+              Book a Session — C$250
+            </button>
+          )}
 
-        {/* Calendly Embed Card 2 */}
-        {openCalendar === 'card2' && (
-          <div style={{
-            marginTop: '16px',
-            border: '1px solid rgba(26,25,23,0.08)',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            position: 'relative'
-          }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#2d6a4f', zIndex: 1 }} />
-            <div
-              ref={calendly2Ref}
-              style={{ minWidth: '320px', height: '700px' }}
-            />
+          {openCalendar === 'card2' && (
+            <button
+              onClick={() => toggleCalendar('card2')}
+              style={{
+                marginTop: '16px',
+                width: '100%',
+                padding: '16px 32px',
+                background: 'rgba(26,25,23,0.9)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(26,25,23,1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(26,25,23,0.9)'
+              }}
+            >
+              Hide Calendar
+            </button>
+          )}
           </div>
-        )}
         </div>
       </div>
 
