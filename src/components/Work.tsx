@@ -48,12 +48,20 @@ export function Work() {
           </h3>
 
           {/* Description */}
-          <p
-            className="text-base leading-relaxed text-gray-600 max-w-md"
-            style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
-          >
-            Structured thinking work, not just conversations. A clear process to get you unstuck and moving forward.
-          </p>
+          <div className="max-w-md space-y-2">
+            <p
+              className="text-base leading-relaxed text-gray-600"
+              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+            >
+              Structured thinking work, not just conversations.
+            </p>
+            <p
+              className="text-base leading-relaxed text-gray-600"
+              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+            >
+              A clear process to get you unstuck and moving forward.
+            </p>
+          </div>
 
           {/* List */}
           <ul className="space-y-4 pt-4">
