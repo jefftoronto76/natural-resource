@@ -121,7 +121,7 @@ export function Work() {
               'A critical project off track',
               'A leadership gap slowing execution',
               'Conversion drops nobody can explain',
-              'Product, sales, and customer friction',
+              'Friction between product, sales, and customers',
             ].map((item, index) => (
               <li
                 key={index}
