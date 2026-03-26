@@ -1,7 +1,7 @@
 import { useReveal } from '@/hooks/useReveal'
 import { CareerTimeline } from './CareerTimeline'
 import { TestimonialCarousel } from './TestimonialCarousel'
-import { QuotesCarousel } from './QuotesCarousel'
+import { QuoteCarouselSection } from './QuoteCarouselSection'
 
 const STATS = [
   { value: '27', label: 'Years operating' },
@@ -13,9 +13,8 @@ const STATS = [
 export function WhyMe() {
   const ref = useReveal()
   const carouselRef = useReveal()
-  const quotesRef = useReveal()
 
-  const sectionPad = 'clamp(80px, 10vw, 120px) clamp(24px, 5vw, 48px)'
+  const sectionPad = 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)'
   const labelStyle: React.CSSProperties = {
     fontFamily: 'var(--font-mono)', fontSize: '11px',
     letterSpacing: '0.22em', textTransform: 'uppercase',
@@ -76,14 +75,6 @@ export function WhyMe() {
             <div ref={carouselRef} className="reveal">
               <TestimonialCarousel />
             </div>
-
-            <div ref={quotesRef} className="reveal nr-quotes-desktop">
-              <QuotesCarousel />
-            </div>
-
-            <div className="nr-quotes-mobile">
-              <QuotesCarousel />
-            </div>
           </div>
         </div>
       </section>
@@ -91,37 +82,19 @@ export function WhyMe() {
       <style>{`
         .nr-split {
           display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
+          grid-template-columns: 1fr 1fr;
           gap: 64px;
-          align-items: start;
-        }
-        .nr-quotes-mobile {
-          display: none;
-        }
-        @media (max-width: 1200px) {
-          .nr-split {
-            grid-template-columns: 1fr 1fr;
-            gap: 48px;
-          }
-          .nr-quotes-desktop {
-            grid-column: 1 / -1;
-          }
+          align-items: center;
         }
         @media (max-width: 768px) {
           .nr-split {
             grid-template-columns: 1fr;
             gap: 48px;
-          }
-          .nr-quotes-desktop {
-            display: none;
-          }
-          .nr-quotes-mobile {
-            display: block;
-            grid-column: 1;
-            margin-top: 32px;
+            align-items: start;
           }
         }
       `}</style>
+      <QuoteCarouselSection />
       <CareerTimeline />
     </>
   )
