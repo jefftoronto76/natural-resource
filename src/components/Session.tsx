@@ -41,6 +41,10 @@ export function Session() {
           Whichever lane fits,<br /><em style={{ fontStyle: 'italic' }}>both start here.</em>
         </h2>
 
+        <p className="session-subhead-mobile" style={{ fontSize: '18px', color: 'rgba(26,25,23,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 400, lineHeight: 1.7, marginBottom: '24px', display: 'none' }}>
+          Coaching or special projects. C$250, paid upfront. Real outcomes. Book below.
+        </p>
+
         <div style={{
           display: 'grid',
           gridTemplateColumns: '55% 45%',
@@ -67,7 +71,7 @@ export function Session() {
           </div>
 
           <div style={{ paddingTop: '8px' }}>
-            <p style={{ fontSize: '18px', color: 'rgba(26,25,23,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 400, lineHeight: 1.7, marginBottom: '24px' }}>
+            <p className="session-subhead-desktop" style={{ fontSize: '18px', color: 'rgba(26,25,23,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 400, lineHeight: 1.7, marginBottom: '24px' }}>
               Coaching or special projects. C$250, paid upfront. Real outcomes.
             </p>
 
@@ -101,6 +105,17 @@ export function Session() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .session-subhead-desktop {
+            display: none !important;
+          }
+          .session-subhead-mobile {
+            display: block !important;
+          }
+        }
+      `}</style>
     </section>
   )
 }

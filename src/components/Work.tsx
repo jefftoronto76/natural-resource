@@ -1,4 +1,9 @@
+import { useState } from 'react';
+
 export function Work() {
+  const [expandedCard1, setExpandedCard1] = useState(false);
+  const [expandedCard2, setExpandedCard2] = useState(false);
+
   return (
     <section id="work" className="w-full px-8 py-32 max-w-7xl mx-auto">
       {/* Headline */}
@@ -64,26 +69,68 @@ export function Work() {
           </div>
 
           {/* List */}
-          <ul className="space-y-4 pt-4">
-            {[
-              'A deal you can\'t afford to lose',
-              'Conversations you don\'t know how to have',
-              'Teams that aren\'t working together',
-              'Decisions with no clear answer',
-              'A project that\'s going sideways',
-              'Pipeline that doesn\'t convert',
-              'Customers quietly churning',
-            ].map((item, index) => (
-              <li
-                key={index}
-                className="flex items-start gap-3 text-lg text-gray-500"
-                style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+          <div className="work-card-list-wrapper">
+            <ul className="space-y-4 pt-4 work-card-list" style={{
+              maxHeight: expandedCard1 ? '1000px' : '0',
+              overflow: 'hidden',
+              transition: 'max-height 0.3s ease'
+            }}>
+              {[
+                'A deal you can\'t afford to lose',
+                'Conversations you don\'t know how to have',
+                'Teams that aren\'t working together',
+                'Decisions with no clear answer',
+                'A project that\'s going sideways',
+                'Pipeline that doesn\'t convert',
+                'Customers quietly churning',
+              ].map((item, index) => (
+                <li
+                  key={index}
+                  className="flex items-start gap-3 text-lg text-gray-500"
+                  style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+                >
+                  <span className="text-gray-300 mt-1">—</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => setExpandedCard1(!expandedCard1)}
+              className="work-card-toggle"
+              style={{
+                marginTop: '16px',
+                background: 'transparent',
+                border: 'none',
+                color: '#2d6a4f',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'none',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 0',
+              }}
+            >
+              {expandedCard1 ? 'See less' : 'See more'}
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  transform: expandedCard1 ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.3s ease'
+                }}
               >
-                <span className="text-gray-300 mt-1">—</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+                <path d="M4 6L8 10L12 6" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Column 2 - Embedded Execution */}
@@ -129,28 +176,83 @@ export function Work() {
           </div>
 
           {/* List */}
-          <ul className="space-y-4 pt-4">
-            {[
-              'Forecasts you don\'t trust',
-              'Conversion drops nobody can explain',
-              'Systems breaking under growth',
-              'A critical project off track',
-              'A leadership gap slowing execution',
-              'Friction between product, sales, and customers',
-              'AI plans that aren\'t operational',
-            ].map((item, index) => (
-              <li
-                key={index}
-                className="flex items-start gap-3 text-lg text-gray-500"
-                style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+          <div className="work-card-list-wrapper">
+            <ul className="space-y-4 pt-4 work-card-list" style={{
+              maxHeight: expandedCard2 ? '1000px' : '0',
+              overflow: 'hidden',
+              transition: 'max-height 0.3s ease'
+            }}>
+              {[
+                'Forecasts you don\'t trust',
+                'Conversion drops nobody can explain',
+                'Systems breaking under growth',
+                'A critical project off track',
+                'A leadership gap slowing execution',
+                'Friction between product, sales, and customers',
+                'AI plans that aren\'t operational',
+              ].map((item, index) => (
+                <li
+                  key={index}
+                  className="flex items-start gap-3 text-lg text-gray-500"
+                  style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
+                >
+                  <span className="text-gray-300 mt-1">—</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => setExpandedCard2(!expandedCard2)}
+              className="work-card-toggle"
+              style={{
+                marginTop: '16px',
+                background: 'transparent',
+                border: 'none',
+                color: '#2d6a4f',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'none',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 0',
+              }}
+            >
+              {expandedCard2 ? 'See less' : 'See more'}
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  transform: expandedCard2 ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.3s ease'
+                }}
               >
-                <span className="text-gray-300 mt-1">—</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+                <path d="M4 6L8 10L12 6" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
+
+      <style>{`
+        @media (min-width: 769px) {
+          .work-card-list {
+            max-height: none !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .work-card-toggle {
+            display: flex !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

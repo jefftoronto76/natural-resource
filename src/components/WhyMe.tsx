@@ -46,7 +46,7 @@ export function WhyMe() {
           </p>
 
           <div className="nr-split">
-            <div ref={ref} className="reveal">
+            <div ref={ref} className="reveal nr-content-block">
               <h2 style={{
                 fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 4vw, 52px)',
                 fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
@@ -70,6 +70,29 @@ export function WhyMe() {
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Because growth only sticks when your team knows how to carry it forward.</p>
               </div>
 
+              <div style={quoteStyle} className="nr-quotes-desktop">
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
+                  "I took that advice and went out guns blazing — #1 on my team and #2 in Canada."
+                </p>
+                <cite style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', fontStyle: 'normal' }}>
+                  — Chris Chun, Intuit
+                </cite>
+              </div>
+              <div style={{ ...quoteStyle, marginTop: '24px' }} className="nr-quotes-desktop">
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
+                  "A very capable leader, an advocate for the customer base, and a true partner as we re-built our sales organization."
+                </p>
+                <cite style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', fontStyle: 'normal' }}>
+                  — Jim Schnepp, VP Sales, Trapeze Group
+                </cite>
+              </div>
+            </div>
+
+            <div ref={carouselRef} className="reveal">
+              <TestimonialCarousel />
+            </div>
+
+            <div className="nr-quotes-mobile">
               <div style={quoteStyle}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 1.8vw, 20px)', fontStyle: 'italic', fontWeight: 400, lineHeight: 1.6, color: 'var(--color-text-primary)', marginBottom: '10px' }}>
                   "I took that advice and went out guns blazing — #1 on my team and #2 in Canada."
@@ -87,10 +110,6 @@ export function WhyMe() {
                 </cite>
               </div>
             </div>
-
-            <div ref={carouselRef} className="reveal">
-              <TestimonialCarousel />
-            </div>
           </div>
         </div>
       </section>
@@ -102,11 +121,22 @@ export function WhyMe() {
           gap: 64px;
           align-items: center;
         }
+        .nr-quotes-mobile {
+          display: none;
+        }
         @media (max-width: 768px) {
           .nr-split {
             grid-template-columns: 1fr;
             gap: 48px;
             align-items: start;
+          }
+          .nr-quotes-desktop {
+            display: none;
+          }
+          .nr-quotes-mobile {
+            display: block;
+            grid-column: 1;
+            margin-top: 32px;
           }
         }
       `}</style>
