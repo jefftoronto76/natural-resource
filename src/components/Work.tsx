@@ -58,13 +58,13 @@ export function Work() {
           {/* List */}
           <ul className="space-y-4 pt-4">
             {[
-              'Pipeline management',
-              'Account strategy',
-              'Team dynamics',
-              'Leadership challenges',
-              'A bad project',
-              'A promotion you\'re working toward',
-              'Figuring out what\'s next',
+              'A deal you can\'t afford to lose',
+              'A conversation you don\'t know how to have',
+              'A team that isn\'t working together',
+              'A decision where you can\'t see the full picture',
+              'A project that went sideways',
+              'A pipeline that doesn\'t convert',
+              'Customers you\'re losing and don\'t know why',
             ].map((item, index) => (
               <li
                 key={index}
