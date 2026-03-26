@@ -113,11 +113,48 @@ export function QuoteCarouselSection() {
           margin: '0 auto',
           position: 'relative',
         }}>
+          {/* Up Arrow - Above first quote */}
+          <button
+            onClick={handlePrev}
+            disabled={!canGoUp}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: '0',
+              marginBottom: '24px',
+              marginLeft: '24px',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: canGoUp ? 'pointer' : 'not-allowed',
+              transition: 'all 0.2s ease',
+              color: canGoUp ? 'var(--color-text-primary)' : 'rgba(26,25,23,0.2)',
+              opacity: canGoUp ? 1 : 0.3,
+              outline: 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (canGoUp) {
+                e.currentTarget.style.opacity = '0.6'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (canGoUp) {
+                e.currentTarget.style.opacity = '1'
+              }
+            }}
+            aria-label="Previous quotes"
+          >
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12L10 6L16 12" />
+            </svg>
+          </button>
+
           <div style={{
             position: 'relative',
             overflow: 'hidden',
             minHeight: '450px',
-            marginBottom: '40px'
           }}>
             {/* First visible quote */}
             <div style={{
@@ -214,85 +251,43 @@ export function QuoteCarouselSection() {
             )}
           </div>
 
-          {/* Navigation Controls */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '16px'
-          }}>
-            <button
-              onClick={handlePrev}
-              disabled={!canGoUp}
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(26,25,23,0.12)',
-                borderRadius: '50%',
-                width: '50px',
-                height: '50px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: canGoUp ? 'pointer' : 'not-allowed',
-                transition: 'all 0.2s ease',
-                color: canGoUp ? 'var(--color-text-primary)' : 'rgba(26,25,23,0.2)',
-                opacity: canGoUp ? 1 : 0.4
-              }}
-              onMouseEnter={(e) => {
-                if (canGoUp) {
-                  e.currentTarget.style.background = 'rgba(26,25,23,0.04)'
-                  e.currentTarget.style.borderColor = 'rgba(26,25,23,0.2)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (canGoUp) {
-                  e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.borderColor = 'rgba(26,25,23,0.12)'
-                }
-              }}
-              aria-label="Previous quotes"
-            >
-              <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12L10 6L16 12" />
-              </svg>
-            </button>
-
-            <button
-              onClick={handleNext}
-              disabled={!canGoDown}
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(26,25,23,0.12)',
-                borderRadius: '50%',
-                width: '50px',
-                height: '50px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: canGoDown ? 'pointer' : 'not-allowed',
-                transition: 'all 0.2s ease',
-                color: canGoDown ? 'var(--color-text-primary)' : 'rgba(26,25,23,0.2)',
-                opacity: canGoDown ? 1 : 0.4
-              }}
-              onMouseEnter={(e) => {
-                if (canGoDown) {
-                  e.currentTarget.style.background = 'rgba(26,25,23,0.04)'
-                  e.currentTarget.style.borderColor = 'rgba(26,25,23,0.2)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (canGoDown) {
-                  e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.borderColor = 'rgba(26,25,23,0.12)'
-                }
-              }}
-              aria-label="Next quotes"
-            >
-              <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 8L10 14L16 8" />
-              </svg>
-            </button>
-          </div>
+          {/* Down Arrow - Below last quote */}
+          <button
+            onClick={handleNext}
+            disabled={!canGoDown}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: '0',
+              marginTop: '24px',
+              marginLeft: '24px',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: canGoDown ? 'pointer' : 'not-allowed',
+              transition: 'all 0.2s ease',
+              color: canGoDown ? 'var(--color-text-primary)' : 'rgba(26,25,23,0.2)',
+              opacity: canGoDown ? 1 : 0.3,
+              outline: 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (canGoDown) {
+                e.currentTarget.style.opacity = '0.6'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (canGoDown) {
+                e.currentTarget.style.opacity = '1'
+              }
+            }}
+            aria-label="Next quotes"
+          >
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 8L10 14L16 8" />
+            </svg>
+          </button>
         </div>
       </div>
     </section>
