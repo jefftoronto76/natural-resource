@@ -66,9 +66,13 @@ export function WhyMe() {
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Most of my career, I've worked directly with founders and GMs.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>I understand how to prioritize, think, and execute — not just advise.</p>
               </div>
-              <div>
+              <div style={{ marginBottom: '12px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I deliver results with people, not through them.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Because growth only sticks when your team knows how to carry it forward.</p>
+              </div>
+              <div>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Continuous learner. Active feedback seeker.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>I stay sharp by constantly refining how I think and execute.</p>
               </div>
             </div>
 
