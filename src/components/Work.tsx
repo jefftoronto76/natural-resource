@@ -131,13 +131,13 @@ export function Work() {
           {/* List */}
           <ul className="space-y-4 pt-4">
             {[
+              'Forecasts you don\'t trust',
               'Friction between product, sales, and customers',
               'A leadership gap slowing execution',
               'A critical project off track',
               'AI plans that aren\'t operational',
               'Systems breaking under growth',
               'Conversion drops nobody can explain',
-              'Forecasts you don\'t trust',
             ].map((item, index) => (
               <li
                 key={index}
