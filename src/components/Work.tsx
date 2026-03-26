@@ -66,13 +66,13 @@ export function Work() {
           {/* List */}
           <ul className="space-y-4 pt-4">
             {[
+              'A deal you can\'t afford to lose',
               'Conversations you don\'t know how to have',
               'Teams that aren\'t working together',
               'Decisions with no clear answer',
               'A project that\'s going sideways',
               'Pipeline that doesn\'t convert',
               'Customers quietly churning',
-              'A deal you can\'t afford to lose',
             ].map((item, index) => (
               <li
                 key={index}
