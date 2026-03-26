@@ -61,7 +61,7 @@ export function Work() {
               'A deal you can\'t afford to lose',
               'A conversation you don\'t know how to have',
               'A team that isn\'t working together',
-              'A decision where you can\'t see the full picture',
+              'A decision with no clear answer',
               'A project that went sideways',
               'A pipeline that doesn\'t convert',
               'Customers you\'re losing and don\'t know why',
@@ -115,11 +115,13 @@ export function Work() {
           {/* List */}
           <ul className="space-y-4 pt-4">
             {[
-              'Systems that aren\'t scaling',
-              'A pipeline that isn\'t converting',
-              'An AI strategy that needs to get real',
-              'A project that\'s gone sideways',
-              'A leadership gap creating drag',
+              'Systems breaking under growth',
+              'Forecasts you don\'t trust',
+              'AI plans that aren\'t operational',
+              'A critical project off track',
+              'A leadership gap slowing execution',
+              'Conversion drops nobody can explain',
+              'Product, sales, and customer friction',
             ].map((item, index) => (
               <li
                 key={index}
