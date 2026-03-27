@@ -7,7 +7,6 @@ export const metadata: Metadata = {
   description:
     'Performance-driven, heart-led coaching and embedded execution support. Better close rates, deeper relationships, revenue growth made easier.',
   metadataBase: new URL('https://jefflougheed.ca'),
-  icons: { icon: '/favicon.png' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
