@@ -37,11 +37,14 @@ interface SageStore {
   visitorName: string | null
   hasGreeted: boolean
   isStreaming: boolean
+  isExpanded: boolean
   addMessage: (msg: Omit<SageMessage, 'id' | 'timestamp'>) => void
   updateLastMessage: (content: string) => void
   setVisitorName: (name: string) => void
   setGreeted: (greeted: boolean) => void
   setStreaming: (streaming: boolean) => void
+  expand: () => void
+  collapse: () => void
   reset: () => void
 }
 
@@ -50,6 +53,7 @@ export const useSageStore = create<SageStore>((set) => ({
   visitorName: null,
   hasGreeted: false,
   isStreaming: false,
+  isExpanded: false,
   addMessage: (msg) => set((state) => ({
     messages: [...state.messages, {
       ...msg,
@@ -67,5 +71,7 @@ export const useSageStore = create<SageStore>((set) => ({
   setVisitorName: (name) => set({ visitorName: name }),
   setGreeted: (greeted) => set({ hasGreeted: greeted }),
   setStreaming: (streaming) => set({ isStreaming: streaming }),
-  reset: () => set({ messages: [], visitorName: null, hasGreeted: false, isStreaming: false }),
+  expand: () => set({ isExpanded: true }),
+  collapse: () => set({ isExpanded: false }),
+  reset: () => set({ messages: [], visitorName: null, hasGreeted: false, isStreaming: false, isExpanded: false }),
 }))

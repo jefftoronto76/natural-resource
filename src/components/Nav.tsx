@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSageStore } from '../lib/store'
 
 const LINKS = [
   { label: 'About', href: '#about' },
@@ -10,12 +11,27 @@ const LINKS = [
 export function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const expandChat = useSageStore((state) => state.expand)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href === '#chat') {
+      e.preventDefault()
+      setOpen(false)
+      const chatSection = document.getElementById('chat')
+      if (chatSection) {
+        chatSection.scrollIntoView({ behavior: 'smooth' })
+        setTimeout(() => expandChat(), 600)
+      }
+    } else {
+      setOpen(false)
+    }
+  }
 
   return (
     <>
@@ -38,10 +54,11 @@ export function Nav() {
         {/* Desktop links */}
         <div style={{ display: 'flex', gap: '32px' }} className="nr-desktop-links">
           {LINKS.map(({ label, href }) => (
-            <a key={label} href={href} style={{
+            <a key={label} href={href} onClick={(e) => handleLinkClick(e, href)} style={{
               fontFamily: 'var(--font-mono)', fontSize: '11px',
               letterSpacing: '0.18em', textTransform: 'uppercase',
               color: 'var(--color-text-muted)', textDecoration: 'none',
+              cursor: 'pointer',
             }}>
               {label}
             </a>
@@ -70,12 +87,13 @@ export function Nav() {
           gap: '0',
         }}>
           {LINKS.map(({ label, href }) => (
-            <a key={label} href={href} onClick={() => setOpen(false)} style={{
+            <a key={label} href={href} onClick={(e) => handleLinkClick(e, href)} style={{
               fontFamily: 'var(--font-mono)', fontSize: '12px',
               letterSpacing: '0.18em', textTransform: 'uppercase',
               color: 'var(--color-text-primary)', textDecoration: 'none',
               padding: '16px 0',
               borderBottom: '1px solid rgba(26,25,23,0.06)',
+              cursor: 'pointer',
             }}>
               {label}
             </a>

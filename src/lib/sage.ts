@@ -67,6 +67,18 @@ function shouldStop(message: string): boolean {
   return stopSignals.some(signal => message.toLowerCase().includes(signal))
 }
 
+export async function streamSageResponse(
+  messages: SageMessage[],
+  onChunk: (chunk: string) => void
+): Promise<void> {
+  const visitorName = null
+  const generator = sendSageMessage(messages, visitorName)
+
+  for await (const chunk of generator) {
+    onChunk(chunk)
+  }
+}
+
 export async function* sendSageMessage(
   messages: SageMessage[],
   visitorName: string | null
