@@ -77,8 +77,8 @@ export function Chat() {
     const userMsg = { role: 'user' as const, content: text }
     // Capture messages before the state update — addMessage is async/batched
     // and the closure `messages` won't include the just-added message.
-    // Build the full conversation to send explicitly.
-    const msgsToSend = [...messages, userMsg]
+    // Build the full conversation to send explicitly, with a full SageMessage shape.
+    const msgsToSend = [...messages, { ...userMsg, id: `${Date.now()}`, timestamp: Date.now() }]
     addMessage(userMsg)
     setInput('')
     setStreaming(true)
