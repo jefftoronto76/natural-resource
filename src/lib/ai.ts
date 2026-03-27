@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import type { Message } from './store'
 
 export const SYSTEM_PROMPT = `You are the AI assistant for Natural Resource, Jeff Lougheed's coaching and embedded operator practice.
@@ -26,7 +25,7 @@ Your role:
 - Never fabricate facts about Jeff's background.`
 
 export async function sendMessage(messages: Message[]): Promise<string> {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
+  const apiKey = process.env.ANTHROPIC_API_KEY ?? ''
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
