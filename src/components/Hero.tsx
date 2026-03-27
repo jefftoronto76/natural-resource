@@ -1,4 +1,10 @@
+'use client'
+
+import { useSageStore } from '../lib/store'
+
 export function Hero() {
+  const expand = useSageStore((s) => s.expand)
+
   return (
     <>
       <section id="hero" style={{
@@ -46,12 +52,13 @@ export function Hero() {
               fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
               padding: '16px 32px', textDecoration: 'none',
             }}>Book a Session — $250</a>
-            <a href="#chat" style={{
+            <a href="#chat" onClick={(e) => { e.preventDefault(); expand() }} style={{
               display: 'inline-block', background: 'transparent',
               color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)',
               fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
               padding: '16px 32px', textDecoration: 'none',
               border: '1px solid rgba(26,25,23,0.15)',
+              cursor: 'pointer',
             }}>Ask a Question</a>
           </div>
         </div>
