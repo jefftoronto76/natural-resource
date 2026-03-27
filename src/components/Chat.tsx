@@ -75,13 +75,17 @@ export function Chat() {
     if (!text || isStreaming) return
 
     const userMsg = { role: 'user' as const, content: text }
+    // Capture messages before the state update — addMessage is async/batched
+    // and the closure `messages` won't include the just-added message.
+    // Build the full conversation to send explicitly.
+    const msgsToSend = [...messages, userMsg]
     addMessage(userMsg)
     setInput('')
     setStreaming(true)
     addMessage({ role: 'assistant', content: '' })
 
     try {
-      await streamSageResponse(messages, (chunk: string) => {
+      await streamSageResponse(msgsToSend, (chunk: string) => {
         updateLastMessage(chunk)
       })
     } catch (error) {

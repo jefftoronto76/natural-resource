@@ -26,23 +26,48 @@ export async function POST(req: Request) {
     return new Response('ANTHROPIC_API_KEY is not configured', { status: 500 })
   }
 
-  const { messages } = await req.json()
+  let body: { messages: { role: string; content: string }[] }
+  try {
+    body = await req.json()
+  } catch {
+    return new Response('Invalid JSON body', { status: 400 })
+  }
 
-  // When messages is empty this is the greeting flow — inject a trigger
-  // so the model opens the conversation naturally per the system prompt
-  const conversationMessages = messages.length === 0
-    ? [{ role: 'user' as const, content: 'Hi' }]
-    : messages.map((m: { role: string; content: string }) => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
-      }))
+  const { messages } = body
 
-  const result = await streamText({
-    model: anthropic('claude-sonnet-4-6'),
-    system: SYSTEM_PROMPT,
-    messages: conversationMessages,
-    maxTokens: 1000,
-  })
+  let conversationMessages: { role: 'user' | 'assistant'; content: string }[]
 
-  return result.toDataStreamResponse()
+  if (messages.length === 0) {
+    // Greeting flow — empty array triggers Sage's opening message
+    conversationMessages = [{ role: 'user', content: 'Hi' }]
+  } else {
+    conversationMessages = messages.map((m) => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    }))
+
+    // Anthropic requires conversations to start with a user message.
+    // The greeting response is stored as an assistant message in the client
+    // store, so we prepend the implicit trigger that generated it.
+    if (conversationMessages[0].role === 'assistant') {
+      conversationMessages = [
+        { role: 'user', content: 'Hi' },
+        ...conversationMessages,
+      ]
+    }
+  }
+
+  try {
+    const result = await streamText({
+      model: anthropic('claude-sonnet-4-6'),
+      system: SYSTEM_PROMPT,
+      messages: conversationMessages,
+      maxTokens: 1000,
+    })
+    return result.toDataStreamResponse()
+  } catch (error) {
+    console.error('[sage/route] streamText error:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    return new Response(`Upstream error: ${message}`, { status: 502 })
+  }
 }
