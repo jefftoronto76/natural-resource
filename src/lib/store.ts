@@ -24,3 +24,48 @@ export const useChatStore = create<ChatStore>((set) => ({
   setLoading: (loading) => set({ loading }),
   reset: () => set({ messages: INITIAL_MESSAGES, loading: false }),
 }))
+
+export interface SageMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: number
+}
+
+interface SageStore {
+  messages: SageMessage[]
+  visitorName: string | null
+  hasGreeted: boolean
+  isStreaming: boolean
+  addMessage: (msg: Omit<SageMessage, 'id' | 'timestamp'>) => void
+  updateLastMessage: (content: string) => void
+  setVisitorName: (name: string) => void
+  setGreeted: (greeted: boolean) => void
+  setStreaming: (streaming: boolean) => void
+  reset: () => void
+}
+
+export const useSageStore = create<SageStore>((set) => ({
+  messages: [],
+  visitorName: null,
+  hasGreeted: false,
+  isStreaming: false,
+  addMessage: (msg) => set((state) => ({
+    messages: [...state.messages, {
+      ...msg,
+      id: `${Date.now()}-${Math.random()}`,
+      timestamp: Date.now()
+    }]
+  })),
+  updateLastMessage: (content) => set((state) => {
+    const messages = [...state.messages]
+    if (messages.length > 0) {
+      messages[messages.length - 1] = { ...messages[messages.length - 1], content }
+    }
+    return { messages }
+  }),
+  setVisitorName: (name) => set({ visitorName: name }),
+  setGreeted: (greeted) => set({ hasGreeted: greeted }),
+  setStreaming: (streaming) => set({ isStreaming: streaming }),
+  reset: () => set({ messages: [], visitorName: null, hasGreeted: false, isStreaming: false }),
+}))
