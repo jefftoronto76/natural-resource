@@ -49,9 +49,9 @@ export function Problem() {
           Most problems aren't<br />
           <em style={{ fontStyle: 'italic' }}>what they look like.</em>
         </h2>
-        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>Weak pipeline and stalled growth are usually symptoms.</p>
-        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>The real issue is almost always judgment, alignment, or leadership capacity.</p>
-        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400 }}>I help you find the real constraint and build the capability to remove it.</p>
+        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>Weak pipeline and stalled growth are symptoms.</p>
+        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>Growth is limited by constraints and unlocked by the right levers.</p>
+        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400 }}>I help you find both and build the capability to act on them.</p>
       </div>
     </section>
   )
