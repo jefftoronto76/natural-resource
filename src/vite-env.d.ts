@@ -1,13 +1,6 @@
-/// <reference types="vite/client" />
+/// <reference types="next" />
 
-interface ImportMetaEnv {
-  readonly VITE_ANTHROPIC_API_KEY: string
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv
-}
-
+// Calendly widget — loaded via next/script in app/layout.tsx
 interface Window {
   Calendly?: {
     initPopupWidget: (options: { url: string }) => void

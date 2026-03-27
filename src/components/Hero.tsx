@@ -1,16 +1,9 @@
+'use client'
+
 import { useSageStore } from '../lib/store'
 
 export function Hero() {
-  const expandChat = useSageStore((state) => state.expand)
-
-  const handleAskQuestion = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    const chatSection = document.getElementById('chat')
-    if (chatSection) {
-      chatSection.scrollIntoView({ behavior: 'smooth' })
-      setTimeout(() => expandChat(), 600)
-    }
-  }
+  const expand = useSageStore((s) => s.expand)
 
   return (
     <>
@@ -59,7 +52,7 @@ export function Hero() {
               fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
               padding: '16px 32px', textDecoration: 'none',
             }}>Book a Session — $250</a>
-            <a href="#chat" onClick={handleAskQuestion} style={{
+            <a href="#chat" onClick={(e) => { e.preventDefault(); expand() }} style={{
               display: 'inline-block', background: 'transparent',
               color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)',
               fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
