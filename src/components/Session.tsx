@@ -1,3 +1,5 @@
+'use client'
+
 import { useReveal } from '@/hooks/useReveal'
 import { useEffect } from 'react'
 

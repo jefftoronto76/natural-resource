@@ -1,3 +1,5 @@
+'use client'
+
 import { useRef, useEffect, KeyboardEvent, useState } from 'react'
 import { useSageStore } from '../lib/store'
 import { streamSageResponse } from '../lib/sage'

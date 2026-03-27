@@ -1,8 +1,25 @@
-// Placeholder — components will be assembled here in Phase 5.
+import { Nav } from '@/components/Nav'
+import { Hero } from '@/components/Hero'
+import { Problem } from '@/components/Problem'
+import { WhyMe } from '@/components/WhyMe'
+import { Work } from '@/components/Work'
+import { Session } from '@/components/Session'
+import { Chat } from '@/components/Chat'
+import { Footer } from '@/components/Footer'
+
 export default function Page() {
   return (
-    <main style={{ padding: '64px', fontFamily: 'var(--font-body)', color: 'var(--color-text-primary)' }}>
-      <p>Migration in progress.</p>
-    </main>
+    <>
+      <Nav />
+      <main>
+        <Hero />
+        <Problem />
+        <WhyMe />
+        <Work />
+        {/* <Session /> */}
+        <Chat />
+      </main>
+      <Footer />
+    </>
   )
 }
