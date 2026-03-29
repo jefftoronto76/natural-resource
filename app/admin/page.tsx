@@ -20,36 +20,16 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function AdminPage() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  console.log('[admin/page] url:', url)
-  console.log('[admin/page] key present:', !!key, '| key prefix:', key?.slice(0, 40))
-
   const supabase = getAdminClient()
 
-  // Raw count to verify table access independent of column selection
-  const countResult = await supabase
-    .from('chat_sessions')
-    .select('*', { count: 'exact', head: true })
-  console.log('[admin/page] count query — count:', countResult.count, '| status:', countResult.status, '| error:', JSON.stringify(countResult.error))
-
-  // select('*') to discover actual column names
-  const starResult = await supabase
+  const { data: sessions, error } = await supabase
     .from('chat_sessions')
     .select('*')
-    .limit(1)
-  console.log('[admin/page] select * status:', starResult.status)
-  console.log('[admin/page] select * error:', JSON.stringify(starResult.error))
-  console.log('[admin/page] select * columns:', starResult.data?.[0] ? Object.keys(starResult.data[0]).join(', ') : 'no rows')
-
-  // Named column query
-  const { data: sessions, error, status, statusText } = await supabase
-    .from('chat_sessions')
-    .select('id, created_at, updated_at, visitor_name, message_count, status')
     .order('updated_at', { ascending: false })
 
-  console.log('[admin/page] named select status:', status, statusText)
-  console.log('[admin/page] named select error — code:', (error as any)?.code, '| message:', (error as any)?.message, '| details:', (error as any)?.details, '| hint:', (error as any)?.hint)
+  if (error) {
+    console.error('[admin/page] fetch error:', error)
+  }
 
   return (
     <div>
@@ -96,58 +76,61 @@ export default async function AdminPage() {
             <span>Last Active</span>
           </div>
 
-          {sessions.map((session) => (
-            <Link
-              key={session.id}
-              href={`/admin/sessions/${session.id}`}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 120px 100px 180px',
-                gap: '16px',
-                padding: '16px',
-                background: 'white',
-                border: '1px solid var(--color-border)',
-                textDecoration: 'none',
-                transition: 'border-color 0.15s',
-              }}
-            >
-              <span style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '15px',
-                color: session.visitor_name ? 'var(--color-text-primary)' : 'var(--color-text-dim)',
-                fontWeight: session.visitor_name ? 500 : 400,
-                fontStyle: session.visitor_name ? 'normal' : 'italic',
-              }}>
-                {session.visitor_name ?? 'Anonymous'}
-              </span>
+          {sessions.map((session) => {
+            const messageCount = Array.isArray(session.messages) ? session.messages.length : 0
+            return (
+              <Link
+                key={session.id}
+                href={`/admin/sessions/${session.id}`}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 120px 100px 180px',
+                  gap: '16px',
+                  padding: '16px',
+                  background: 'white',
+                  border: '1px solid var(--color-border)',
+                  textDecoration: 'none',
+                  transition: 'border-color 0.15s',
+                }}
+              >
+                <span style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '15px',
+                  color: session.visitor_name ? 'var(--color-text-primary)' : 'var(--color-text-dim)',
+                  fontWeight: session.visitor_name ? 500 : 400,
+                  fontStyle: session.visitor_name ? 'normal' : 'italic',
+                }}>
+                  {session.visitor_name ?? 'Anonymous'}
+                </span>
 
-              <span style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '13px',
-                color: 'var(--color-text-muted)',
-              }}>
-                {session.message_count ?? 0}
-              </span>
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '13px',
+                  color: 'var(--color-text-muted)',
+                }}>
+                  {messageCount}
+                </span>
 
-              <span style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: STATUS_COLORS[session.status] ?? 'var(--color-text-muted)',
-              }}>
-                {session.status ?? 'active'}
-              </span>
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '10px',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: STATUS_COLORS[session.status] ?? 'var(--color-text-muted)',
+                }}>
+                  {session.status ?? 'active'}
+                </span>
 
-              <span style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '12px',
-                color: 'var(--color-text-dim)',
-              }}>
-                {formatDate(session.updated_at ?? session.created_at)}
-              </span>
-            </Link>
-          ))}
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '12px',
+                  color: 'var(--color-text-dim)',
+                }}>
+                  {formatDate(session.updated_at ?? session.created_at)}
+                </span>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>
