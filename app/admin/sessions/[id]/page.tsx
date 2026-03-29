@@ -1,6 +1,8 @@
-import { createClient } from '@/lib/supabase-server'
+import { getAdminClient } from '@/lib/supabase-admin'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
 
 interface Message {
   id: string
@@ -25,7 +27,7 @@ export default async function SessionPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = getAdminClient()
 
   const { data: session, error } = await supabase
     .from('chat_sessions')
