@@ -12,12 +12,14 @@ export function Chat() {
     isExpanded,
     isStreaming,
     hasGreeted,
+    sessionId,
     expand,
     collapse,
     addMessage,
     updateLastMessage,
     setStreaming,
     setGreeted,
+    setSessionId,
   } = useSageStore()
 
   const [input, setInput] = useState('')
@@ -84,6 +86,21 @@ export function Chat() {
     setStreaming(true)
     addMessage({ role: 'assistant', content: '' })
 
+    // Create session row on the first user message
+    let activeSessionId = sessionId
+    if (!activeSessionId) {
+      try {
+        const res = await fetch('/api/sessions', { method: 'POST' })
+        const data = await res.json()
+        if (data.id) {
+          activeSessionId = data.id
+          setSessionId(data.id)
+        }
+      } catch {
+        // Non-fatal — chat continues without persistence
+      }
+    }
+
     try {
       await streamSageResponse(msgsToSend, (chunk: string) => {
         updateLastMessage(chunk)
@@ -92,6 +109,16 @@ export function Chat() {
       updateLastMessage('I encountered an issue. Please try again.')
     }
     setStreaming(false)
+
+    // Persist the completed conversation after each reply
+    if (activeSessionId) {
+      const { messages: finalMessages, visitorName } = useSageStore.getState()
+      fetch(`/api/sessions/${activeSessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: finalMessages, visitorName }),
+      }).catch(() => {})
+    }
   }
 
   const handleKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
