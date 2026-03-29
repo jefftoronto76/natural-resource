@@ -1,5 +1,7 @@
-import { createClient } from '@/lib/supabase-server'
+import { getAdminClient } from '@/lib/supabase-admin'
 import Link from 'next/link'
+
+export const dynamic = 'force-dynamic'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-US', {
@@ -18,7 +20,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function AdminPage() {
-  const supabase = await createClient()
+  const supabase = getAdminClient()
 
   const { data: sessions, error } = await supabase
     .from('chat_sessions')
