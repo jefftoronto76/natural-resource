@@ -33,15 +33,23 @@ export default async function AdminPage() {
     .select('*', { count: 'exact', head: true })
   console.log('[admin/page] count query — count:', countResult.count, '| status:', countResult.status, '| error:', JSON.stringify(countResult.error))
 
-  // Full query
+  // select('*') to discover actual column names
+  const starResult = await supabase
+    .from('chat_sessions')
+    .select('*')
+    .limit(1)
+  console.log('[admin/page] select * status:', starResult.status)
+  console.log('[admin/page] select * error:', JSON.stringify(starResult.error))
+  console.log('[admin/page] select * columns:', starResult.data?.[0] ? Object.keys(starResult.data[0]).join(', ') : 'no rows')
+
+  // Named column query
   const { data: sessions, error, status, statusText } = await supabase
     .from('chat_sessions')
     .select('id, created_at, updated_at, visitor_name, message_count, status')
     .order('updated_at', { ascending: false })
 
-  console.log('[admin/page] select query — status:', status, statusText)
-  console.log('[admin/page] select error:', JSON.stringify(error))
-  console.log('[admin/page] raw data:', JSON.stringify(sessions))
+  console.log('[admin/page] named select status:', status, statusText)
+  console.log('[admin/page] named select error — code:', (error as any)?.code, '| message:', (error as any)?.message, '| details:', (error as any)?.details, '| hint:', (error as any)?.hint)
 
   return (
     <div>
