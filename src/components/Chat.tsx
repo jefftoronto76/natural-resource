@@ -92,12 +92,13 @@ export function Chat() {
       try {
         const res = await fetch('/api/sessions', { method: 'POST' })
         const data = await res.json()
+        console.log('[Chat] POST /api/sessions status:', res.status, '| response:', JSON.stringify(data))
         if (data.id) {
           activeSessionId = data.id
           setSessionId(data.id)
         }
-      } catch {
-        // Non-fatal — chat continues without persistence
+      } catch (err) {
+        console.error('[Chat] POST /api/sessions failed:', err)
       }
     }
 
@@ -117,7 +118,9 @@ export function Chat() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: finalMessages, visitorName }),
-      }).catch(() => {})
+      })
+        .then((r) => r.json().then((d) => console.log('[Chat] PATCH /api/sessions status:', r.status, '| response:', JSON.stringify(d))))
+        .catch((err) => console.error('[Chat] PATCH /api/sessions failed:', err))
     }
   }
 
