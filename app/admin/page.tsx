@@ -20,15 +20,22 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function AdminPage() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  console.log('[admin/page] env — url present:', !!url, '| service key present:', !!key, '| key prefix:', key?.slice(0, 20))
+
   const supabase = getAdminClient()
 
-  const { data: sessions, error } = await supabase
+  const { data: sessions, error, status, statusText } = await supabase
     .from('chat_sessions')
     .select('id, created_at, updated_at, visitor_name, message_count, status')
     .order('updated_at', { ascending: false })
 
-  if (error) {
-    console.error('[admin/page] fetch error:', error)
+  console.log('[admin/page] query status:', status, statusText)
+  console.log('[admin/page] error:', error ? JSON.stringify(error) : 'none')
+  console.log('[admin/page] row count:', sessions?.length ?? 0)
+  if (sessions?.length) {
+    console.log('[admin/page] first row:', JSON.stringify(sessions[0]))
   }
 
   return (
