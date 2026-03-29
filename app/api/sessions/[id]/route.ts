@@ -2,10 +2,10 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  console.log('[sessions/[id]/route] env check — url present:', !!url, '| service key present:', !!key)
+  return createClient(url!, key!)
 }
 
 export async function PATCH(
@@ -13,7 +13,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  console.log('[sessions/[id]/route] PATCH called for id:', id)
   const { messages, visitorName } = await req.json()
+  console.log('[sessions/[id]/route] message count:', messages?.length, '| visitorName:', visitorName)
 
   const supabase = getAdminClient()
 
@@ -27,9 +29,10 @@ export async function PATCH(
     .eq('id', id)
 
   if (error) {
-    console.error('[sessions/[id]/route] update error:', error)
+    console.error('[sessions/[id]/route] update error:', JSON.stringify(error))
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  console.log('[sessions/[id]/route] updated session:', id)
   return NextResponse.json({ ok: true })
 }
