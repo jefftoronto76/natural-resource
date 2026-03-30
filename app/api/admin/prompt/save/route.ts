@@ -13,11 +13,21 @@ export async function POST(req: Request) {
 
   const { data: existing } = await supabase
     .from('master_prompt')
-    .select('id, version')
+    .select('id, version, content, safety_check_result')
     .limit(1)
     .maybeSingle()
 
   if (existing) {
+    // Archive current version to history before overwriting
+    await supabase
+      .from('master_prompt_history')
+      .insert({
+        content: existing.content,
+        version: existing.version,
+        saved_at: now,
+        safety_check_result: existing.safety_check_result ?? null,
+      })
+
     const newVersion = existing.version + 1
     const { error } = await supabase
       .from('master_prompt')
