@@ -42,9 +42,6 @@ export function WhyMe() {
           </h2>
           <p style={{ ...bodyStyle, marginBottom: '28px' }}>These are the qualities that have made me effective across the teams I've worked with and the outcomes I've delivered.</p>
           <div style={{ marginBottom: '12px' }}>
-            <p style={{ ...bodyStyle, marginBottom: 0 }}>This will pressure-test your instincts to confirm the right move.</p>
-          </div>
-          <div style={{ marginBottom: '12px' }}>
             <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I'm a player-coach.</p>
             <p style={{ ...bodyStyle, marginBottom: 0 }}>I operate at the decision level and get on the field when execution is the lever.</p>
           </div>
