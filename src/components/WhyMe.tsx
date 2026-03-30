@@ -44,7 +44,7 @@ export function WhyMe() {
               backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cpath d='M2,14 C20,8 80,6 98,12 C99,16 95,20 80,21 C50,23 15,22 2,18 Z' fill='%232d6a4f' fill-opacity='0.2'/%3E%3C/svg%3E\")",
               backgroundSize: '100% 100%',
               backgroundRepeat: 'no-repeat',
-            }}>Why Me</span>
+            }}>How I Operate</span>
             <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', maxWidth: '120px', display: 'block' }} />
           </p>
 
@@ -55,10 +55,10 @@ export function WhyMe() {
                 fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
                 color: 'var(--color-text-primary)', marginBottom: '28px',
               }}>
-                We'll start with <em style={{ fontStyle: 'italic' }}>questions.</em>
+                Prioritize. Execute. <em style={{ fontStyle: 'italic' }}>Evolve.</em>
               </h2>
               <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>This will pressure-test your instincts to confirm the right move.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>These are the qualities that have made me effective across the teams I've worked with and the outcomes I've delivered.</p>
               </div>
               <div style={{ marginBottom: '12px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I'm a player-coach.</p>
