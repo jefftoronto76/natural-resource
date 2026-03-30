@@ -26,6 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }}>
             Admin
           </span>
+          <span style={{ width: '1px', height: '18px', background: 'var(--color-border)', flexShrink: 0 }} />
           <nav style={{ display: 'flex', gap: '24px' }}>
             <Link href="/admin" style={{
               fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.15em',
