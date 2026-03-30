@@ -49,9 +49,11 @@ export function Problem() {
           Most problems aren't<br />
           <em style={{ fontStyle: 'italic' }}>what they look like.</em>
         </h2>
-        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>Weak pipeline and stalled growth are symptoms.</p>
-        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>Growth is limited by constraints and unlocked by the right levers.</p>
-        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400 }}>I help you find both — and build the capability to act on them.</p>
+        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>That's why I work backwards from outcomes, not problems.</p>
+        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>When teams chase problems, they look for someone to blame.</p>
+        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>When teams chase outcomes, they engage, they adapt, and they learn.</p>
+        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400, marginBottom: '8px' }}>The problems get solved either way.</p>
+        <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400 }}>My approach builds individuals and teams that keep getting better.</p>
       </div>
     </section>
   )
