@@ -28,7 +28,9 @@ export async function POST(req: Request) {
       })
 
     if (historyError) {
-      console.error('[prompt/save] history insert error:', JSON.stringify(historyError))
+      console.error('[prompt/save] history insert FAILED — code:', historyError.code, '| message:', historyError.message, '| details:', historyError.details, '| hint:', historyError.hint)
+    } else {
+      console.log('[prompt/save] history insert succeeded for version:', existing.version)
     }
 
     const newVersion = existing.version + 1
