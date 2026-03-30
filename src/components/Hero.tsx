@@ -15,9 +15,9 @@ export function Hero() {
       }}>
         <div style={{ maxWidth: '860px' }}>
           <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: '11px',
+            fontFamily: 'var(--font-mono)', fontSize: '13.2px',
             letterSpacing: '0.22em', textTransform: 'uppercase',
-            color: 'var(--color-text-dim)', marginBottom: '40px',
+            color: 'rgba(26,25,23,0.34)', marginBottom: '40px',
           }}>Performance-Driven, <span style={{
             position: 'relative',
             display: 'inline-block',

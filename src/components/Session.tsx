@@ -28,7 +28,7 @@ export function Session() {
   return (
     <section id="session" style={{ padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)', borderBottom: '1px solid rgba(26,25,23,0.08)', overflow: 'hidden' }}>
       <div ref={ref} className="reveal" style={{ maxWidth: '900px', margin: '0 auto', width: '100%', overflow: 'hidden' }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-text-dim)', marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13.2px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(26,25,23,0.34)', marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           How to <span style={{
             position: 'relative',
             display: 'inline-block',

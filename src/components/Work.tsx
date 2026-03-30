@@ -54,10 +54,10 @@ export function Work() {
       {/* Section Label */}
       <p style={{
         fontFamily: 'var(--font-mono)',
-        fontSize: '11px',
+        fontSize: '13.2px',
         letterSpacing: '0.22em',
         textTransform: 'uppercase',
-        color: 'var(--color-text-dim)',
+        color: 'rgba(26,25,23,0.34)',
         marginBottom: '40px',
         display: 'flex',
         alignItems: 'center',
