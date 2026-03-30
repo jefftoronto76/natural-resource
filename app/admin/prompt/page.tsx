@@ -16,7 +16,7 @@ export default async function PromptPage() {
       .maybeSingle(),
     supabase
       .from('master_prompt_history')
-      .select('id, version, content, saved_at')
+      .select('id, version, content, created_at')
       .order('version', { ascending: false })
       .limit(20),
   ])
