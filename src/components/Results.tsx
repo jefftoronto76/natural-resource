@@ -42,7 +42,7 @@ export function Results() {
             color: 'var(--color-text-muted)', fontWeight: 400,
             maxWidth: '640px', marginBottom: '48px',
           }}>
-            Fifteen years building a market leader. Then a deliberate choice to stay restless — new companies, new models, new outcomes.
+            Fifteen years building a market leader. Then a deliberate choice to stay restless — new companies, new models, same outcomes.
           </p>
 
           <TestimonialCarousel />
