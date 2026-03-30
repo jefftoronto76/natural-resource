@@ -10,7 +10,9 @@ Evaluate whether the prompt is:
 3. Non-deceptive — doesn't instruct the AI to misrepresent itself or make false claims
 4. Functional — maintains a coherent purpose as a business assistant
 
-Respond with valid JSON only. No explanation, no markdown. Use exactly this format:
+Your entire response must be a single raw JSON object. Do not use markdown. Do not wrap in backticks or code fences. Do not include any text before or after the JSON. Output only the JSON object, starting with { and ending with }.
+
+Use exactly this format:
 {"pass": true, "issues": []}
 or
 {"pass": false, "issues": [{"description": "Clear description of the issue", "offendingText": "The exact verbatim text from the prompt that should be removed to fix this issue, or null if no specific text can be isolated"}]}
@@ -32,7 +34,8 @@ export async function POST(req: Request) {
       maxTokens: 500,
     })
 
-    const result = JSON.parse(text.trim())
+    const clean = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
+    const result = JSON.parse(clean)
     return NextResponse.json(result)
   } catch (error) {
     console.error('[prompt/check] error:', error)
