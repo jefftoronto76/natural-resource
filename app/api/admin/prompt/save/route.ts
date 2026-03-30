@@ -19,14 +19,17 @@ export async function POST(req: Request) {
 
   if (existing) {
     // Archive current version to history before overwriting
-    await supabase
+    const { error: historyError } = await supabase
       .from('master_prompt_history')
       .insert({
         content: existing.content,
         version: existing.version,
-        saved_at: now,
         safety_check_result: existing.safety_check_result ?? null,
       })
+
+    if (historyError) {
+      console.error('[prompt/save] history insert error:', JSON.stringify(historyError))
+    }
 
     const newVersion = existing.version + 1
     const { error } = await supabase
