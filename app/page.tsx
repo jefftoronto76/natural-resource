@@ -1,8 +1,9 @@
 import { Nav } from '@/components/Nav'
 import { Hero } from '@/components/Hero'
 import { Problem } from '@/components/Problem'
-import { WhyMe } from '@/components/WhyMe'
 import { Results } from '@/components/Results'
+import { WhyMe } from '@/components/WhyMe'
+import { QuoteCarouselSection } from '@/components/QuoteCarouselSection'
 import { Work } from '@/components/Work'
 import { Session } from '@/components/Session'
 import { Chat } from '@/components/Chat'
@@ -15,10 +16,11 @@ export default function Page() {
       <main>
         <Hero />
         <Problem />
-        <WhyMe />
         <Results />
+        <WhyMe />
+        <QuoteCarouselSection />
         <Work />
-        {/* <Session /> */}
+        <Session />
         <Chat />
       </main>
       <Footer />
