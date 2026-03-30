@@ -8,9 +8,9 @@ export function Results() {
 
   const sectionPad = 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)'
   const labelStyle: React.CSSProperties = {
-    fontFamily: 'var(--font-mono)', fontSize: '11px',
+    fontFamily: 'var(--font-mono)', fontSize: '13.75px',
     letterSpacing: '0.22em', textTransform: 'uppercase',
-    color: 'var(--color-text-dim)', marginBottom: '40px',
+    color: 'rgba(26,25,23,0.37)', marginBottom: '40px',
     display: 'flex', alignItems: 'center', gap: '16px',
   }
 

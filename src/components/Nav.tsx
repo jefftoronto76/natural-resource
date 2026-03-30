@@ -45,7 +45,7 @@ export function Nav() {
             <a key={label} href={href}
               onClick={label === 'Chat' ? (e) => { e.preventDefault(); expand() } : undefined}
               style={{
-                fontFamily: 'var(--font-mono)', fontSize: '11px',
+                fontFamily: 'var(--font-mono)', fontSize: '13.75px',
                 letterSpacing: '0.18em', textTransform: 'uppercase',
                 color: 'var(--color-text-muted)', textDecoration: 'none',
                 cursor: 'pointer',
@@ -83,7 +83,7 @@ export function Nav() {
                 : () => setOpen(false)
               }
               style={{
-                fontFamily: 'var(--font-mono)', fontSize: '12px',
+                fontFamily: 'var(--font-mono)', fontSize: '15px',
                 letterSpacing: '0.18em', textTransform: 'uppercase',
                 color: 'var(--color-text-primary)', textDecoration: 'none',
                 padding: '16px 0',

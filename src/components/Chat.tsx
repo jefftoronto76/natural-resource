@@ -145,10 +145,10 @@ export function Chat() {
         <div ref={ref} className="reveal" style={{ maxWidth: '640px' }}>
           <p style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: '11px',
+            fontSize: '13.75px',
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
-            color: 'var(--color-text-dim)',
+            color: 'rgba(26,25,23,0.37)',
             marginBottom: '40px',
             display: 'flex',
             alignItems: 'center',
