@@ -13,7 +13,9 @@ Evaluate whether the prompt is:
 Respond with valid JSON only. No explanation, no markdown. Use exactly this format:
 {"pass": true, "issues": []}
 or
-{"pass": false, "issues": ["Specific issue 1", "Specific issue 2"]}`
+{"pass": false, "issues": [{"description": "Clear description of the issue", "offendingText": "The exact verbatim text from the prompt that should be removed to fix this issue, or null if no specific text can be isolated"}]}
+
+The offendingText must be copied verbatim from the prompt — it will be used for an exact string match removal. Only set it if a specific passage is the problem; set it to null for structural issues.`
 
 export async function POST(req: Request) {
   const { prompt } = await req.json()
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
       model: anthropic('claude-sonnet-4-6'),
       system: META_PROMPT,
       prompt: `System prompt to review:\n---\n${prompt}\n---`,
-      maxTokens: 300,
+      maxTokens: 500,
     })
 
     const result = JSON.parse(text.trim())

@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 
-type CheckResult = { pass: boolean; issues: string[] }
+type Issue = { description: string; offendingText: string | null }
+type CheckResult = { pass: boolean; issues: Issue[] }
 type Status = 'idle' | 'checking' | 'saving' | 'saved' | 'error'
 
 export function PromptEditor({
@@ -22,6 +23,15 @@ export function PromptEditor({
     setPrompt(value)
     if (checkResult) setCheckResult(null)
     if (status === 'saved' || status === 'error') setStatus('idle')
+  }
+
+  const removeOffendingText = (offendingText: string) => {
+    const cleaned = prompt
+      .split(offendingText)
+      .join('')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+    handleChange(cleaned)
   }
 
   const runCheck = async () => {
@@ -152,19 +162,44 @@ export function PromptEditor({
           }}>
             Issues found
           </p>
-          <ul style={{ margin: 0, padding: '0 0 0 18px' }}>
-            {checkResult.issues.map((issue, i) => (
-              <li key={i} style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '14px',
-                color: 'var(--color-text-primary)',
-                lineHeight: 1.6,
-                marginBottom: '4px',
-              }}>
-                {issue}
-              </li>
-            ))}
-          </ul>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {checkResult.issues.map((issue, i) => {
+              const canRemove = !!issue.offendingText && prompt.includes(issue.offendingText)
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
+                  <p style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '14px',
+                    color: 'var(--color-text-primary)',
+                    lineHeight: 1.6,
+                    margin: 0,
+                  }}>
+                    {issue.description}
+                  </p>
+                  {canRemove && (
+                    <button
+                      onClick={() => removeOffendingText(issue.offendingText!)}
+                      style={{
+                        flexShrink: 0,
+                        background: 'transparent',
+                        border: '1px solid rgba(180,83,9,0.4)',
+                        color: '#b45309',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '10px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        padding: '4px 10px',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
 
