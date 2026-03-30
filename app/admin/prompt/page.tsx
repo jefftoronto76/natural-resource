@@ -7,15 +7,28 @@ export const dynamic = 'force-dynamic'
 export default async function PromptPage() {
   const supabase = getAdminClient()
 
-  const { data } = await supabase
-    .from('master_prompt')
-    .select('content, version')
-    .order('version', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  const [{ data: current }, { data: history }] = await Promise.all([
+    supabase
+      .from('master_prompt')
+      .select('content, version')
+      .order('version', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('master_prompt_history')
+      .select('id, version, content, saved_at')
+      .order('version', { ascending: false })
+      .limit(20),
+  ])
 
-  const initialPrompt = data?.content ?? DEFAULT_SYSTEM_PROMPT
-  const initialVersion = data?.version ?? 0
+  const initialPrompt = current?.content ?? DEFAULT_SYSTEM_PROMPT
+  const initialVersion = current?.version ?? 0
 
-  return <PromptEditor initialPrompt={initialPrompt} initialVersion={initialVersion} />
+  return (
+    <PromptEditor
+      initialPrompt={initialPrompt}
+      initialVersion={initialVersion}
+      initialHistory={history ?? []}
+    />
+  )
 }
