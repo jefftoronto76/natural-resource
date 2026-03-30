@@ -130,6 +130,7 @@ export function TestimonialCarousel() {
         boxShadow: '0 4px 24px rgba(0,0,0,0.04)',
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
         position: 'relative',
+        aspectRatio: '1 / 1',
       }}>
         {/* Year stamp - absolute top right */}
         <div style={{
