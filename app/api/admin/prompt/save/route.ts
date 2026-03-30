@@ -22,9 +22,9 @@ export async function POST(req: Request) {
     const { error: historyError } = await supabase
       .from('master_prompt_history')
       .insert({
+        prompt_id: existing.id,
         content: existing.content,
         version: existing.version,
-        safety_check_result: existing.safety_check_result ?? null,
       })
 
     if (historyError) {
