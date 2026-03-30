@@ -38,7 +38,7 @@ export function WhyMe() {
             fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
             color: 'var(--color-text-primary)', marginBottom: '28px',
           }}>
-            Context changes. <em style={{ fontStyle: 'italic' }}>These don't.</em>
+            Prioritize. Execute. <em style={{ fontStyle: 'italic' }}>Evolve.</em>
           </h2>
           <p style={{ ...bodyStyle, marginBottom: '28px' }}>These are the qualities that have made me effective across the teams I've worked with and the outcomes I've delivered.</p>
           <div style={{ marginBottom: '12px' }}>
