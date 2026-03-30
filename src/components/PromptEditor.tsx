@@ -10,7 +10,7 @@ export type HistoryEntry = {
   id: string
   version: number
   content: string
-  created_at: string
+  saved_at: string
 }
 
 function formatDate(iso: string) {
@@ -95,7 +95,7 @@ export function PromptEditor({
             id: `local-${savedVersion}`,
             version: savedVersion,
             content: prevPrompt,
-            created_at: new Date().toISOString(),
+            saved_at: new Date().toISOString(),
           }
           setHistory((prev) => [archivedEntry, ...prev])
         }
@@ -279,7 +279,7 @@ export function PromptEditor({
                     v{entry.version}
                   </span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-dim)' }}>
-                    {formatDate(entry.created_at)}
+                    {formatDate(entry.saved_at)}
                   </span>
                 </div>
                 <button
