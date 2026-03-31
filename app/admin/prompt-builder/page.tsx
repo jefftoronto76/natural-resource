@@ -461,7 +461,7 @@ Be concise and direct. Professional tone.`;
             <TopicCard
               key={topic.id}
               topic={topic}
-              topicAddMode={addMode?.topicId === topic.id ? addMode.type : null}
+              topicAddMode={addMode?.topicId === topic.id ? addMode!.type : null}
               onToggle={() => toggleTopic(topic.id)}
               onDelete={() => deleteTopic(topic.id)}
               onDeleteBlock={(bid: string) => deleteBlock(topic.id, bid)}
