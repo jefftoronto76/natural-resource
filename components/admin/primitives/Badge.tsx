@@ -46,11 +46,11 @@ const sizeStyles: Record<BadgeSize, CSSProperties> = {
   } as CSSProperties
 };
 
-const baseStyle: CSSProperties & Record<string, string> = {
-  '--badge-radius': tokens.radius.pill,
+const baseStyle: CSSProperties = {
+  ['--badge-radius' as string]: tokens.radius.pill,
   fontFamily: tokens.typography.role.label.md.fontFamily,
   fontWeight: tokens.typography.role.label.md.fontWeight,
-  letterSpacing: tokens.typography.role.label.md.letterSpacing
+  letterSpacing: tokens.typography.role.label.md.letterSpacing,
 };
 
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
