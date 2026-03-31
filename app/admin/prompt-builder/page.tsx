@@ -451,6 +451,105 @@ function PreviewModal({ content, onClose }: { content: string, onClose: () => vo
   );
 }
 
+// ─── Mobile add-block strip helpers ──────────────────────────────────────────
+
+function MobileWriteForm({ onSave, onCancel }: { onSave: (name: string, content: string) => void, onCancel: () => void }) {
+  const [name, setName] = useState('');
+  const [content, setContent] = useState('');
+  const inputBase: React.CSSProperties = {
+    width: '100%', padding: '7px 10px', borderRadius: tokens.radius.lg,
+    border: `1px solid ${D.color.border.subtle}`, background: D.color.surface.canvas,
+    fontSize: '13px', color: D.color.text.primary, outline: 'none', boxSizing: 'border-box',
+  };
+  return (
+    <div className="flex flex-col gap-2">
+      <input autoFocus placeholder="Block name..." value={name} onChange={e => setName(e.target.value)} style={inputBase} />
+      <textarea placeholder="Block content..." value={content} onChange={e => setContent(e.target.value)} rows={3}
+        style={{ ...inputBase, resize: 'vertical', fontFamily: 'var(--font-mono)', fontSize: '12px', lineHeight: '1.5' }} />
+      <div className="flex gap-2">
+        <Button size="sm" variant="primary" onClick={() => onSave(name, content)}>Save block</Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+      </div>
+    </div>
+  );
+}
+
+function MobileUrlForm({ onAdd, onCancel }: { onAdd: (url: string) => void, onCancel: () => void }) {
+  const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  async function handle() {
+    if (!url.trim() || loading) return;
+    setLoading(true);
+    await onAdd(url.trim());
+    setLoading(false);
+  }
+  return (
+    <div className="flex flex-col gap-2">
+      <Text variant="muted" style={{ color: D.color.text.muted, fontSize: '11px' }}>Paste a URL — AI synthesizes it into a knowledge block</Text>
+      <input autoFocus placeholder="https://..." value={url} onChange={e => setUrl(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handle(); }}
+        style={{ width: '100%', padding: '7px 10px', borderRadius: tokens.radius.lg, border: `1px solid ${D.color.border.subtle}`, background: D.color.surface.canvas, fontSize: '13px', color: D.color.text.primary, outline: 'none', boxSizing: 'border-box' }} />
+      <div className="flex gap-2">
+        <Button size="sm" variant="primary" onClick={handle} disabled={loading || !url.trim()}>{loading ? 'Synthesizing...' : 'Synthesize'}</Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+      </div>
+    </div>
+  );
+}
+
+function MobileAddBlockMenu({ onSelect, topics }: { onSelect: (topicId: string, type: string) => void, topics: any[] }) {
+  const [open, setOpen] = useState(false);
+  const [topicId, setTopicId] = useState<string>('');
+
+  // Default to first topic
+  const effectiveTopicId = topicId || topics[0]?.id || '';
+
+  return (
+    <div className="flex flex-col gap-2">
+      {open ? (
+        <>
+          {topics.length > 1 && (
+            <select
+              value={effectiveTopicId}
+              onChange={e => setTopicId(e.target.value)}
+              style={{ width: '100%', padding: '7px 10px', borderRadius: tokens.radius.lg, border: `1px solid ${D.color.border.subtle}`, background: D.color.surface.canvas, fontSize: '12px', color: D.color.text.primary, outline: 'none' }}
+            >
+              {topics.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          )}
+          <div className="grid grid-cols-2 gap-2">
+            {ADD_OPTIONS.map(opt => (
+              <button
+                key={opt.type}
+                onClick={() => { setOpen(false); onSelect(effectiveTopicId, opt.type); }}
+                className="flex cursor-pointer flex-col items-start gap-1 rounded-lg p-3 text-left"
+                style={{ border: `1px solid ${D.color.border.subtle}`, background: D.color.surface.canvas }}
+              >
+                <span style={{ fontSize: '14px' }}>{opt.icon}</span>
+                <Text variant="label" style={{ color: D.color.text.primary }}>{opt.label}</Text>
+                <Text variant="muted" style={{ fontSize: '11px', color: D.color.text.muted }}>{opt.desc}</Text>
+              </button>
+            ))}
+          </div>
+          <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+        </>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          disabled={topics.length === 0}
+          style={{
+            width: '100%', padding: '8px', borderRadius: tokens.radius.lg,
+            border: `1px dashed ${D.color.border.subtle}`, background: 'transparent',
+            color: topics.length === 0 ? D.color.text.muted : 'var(--color-accent)',
+            fontSize: '12px', fontWeight: 500, cursor: topics.length === 0 ? 'default' : 'pointer',
+          }}
+        >
+          + Add block
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── PromptBuilder ────────────────────────────────────────────────────────────
 
 export default function PromptBuilder() {
@@ -864,8 +963,31 @@ Be concise and direct. Professional tone.`;
             </button>
           )}
 
-          {/* Step 6: add block strip goes here */}
+        </div>
 
+        {/* Add block strip */}
+        <div
+          className="shrink-0 px-4 py-2"
+          style={{ borderTop: `1px solid ${D.color.border.subtle}`, background: D.color.surface.panel }}
+        >
+          {addMode?.topicId && addMode.type === 'write' && (
+            <MobileWriteForm
+              onSave={(name: string, content: string) => saveWriteBlock(addMode.topicId, name, content)}
+              onCancel={() => setAddMode(null)}
+            />
+          )}
+          {addMode?.topicId && addMode.type === 'url' && (
+            <MobileUrlForm
+              onAdd={(url: string) => addUrlBlock(addMode.topicId, url).then(() => setAddMode(null))}
+              onCancel={() => setAddMode(null)}
+            />
+          )}
+          {!addMode && (
+            <MobileAddBlockMenu
+              onSelect={(topicId: string, type: string) => handleAddBlock(topicId, type)}
+              topics={topics}
+            />
+          )}
         </div>
 
         {/* Bottom tab bar */}
