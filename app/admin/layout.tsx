@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { UserButton } from '@clerk/nextjs';
 
 import { AppLayout } from '@/components/admin/layout/AppLayout';
@@ -36,7 +37,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             header={wordmark}
             footer={<UserButton />}
           >
-            <AdminSidebarNav />
+            <Suspense>
+              <AdminSidebarNav />
+            </Suspense>
           </Sidebar>
         </div>
       }

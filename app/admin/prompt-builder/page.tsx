@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react';
+import { Suspense, useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { AddBlockButton } from '@/components/admin/content/AddBlockButton';
@@ -551,7 +551,15 @@ function MobileAddBlockMenu({ onSelect, topics }: { onSelect: (topicId: string, 
 
 // ─── PromptBuilder ────────────────────────────────────────────────────────────
 
-export default function PromptBuilder() {
+export default function PromptBuilderPage() {
+  return (
+    <Suspense>
+      <PromptBuilder />
+    </Suspense>
+  );
+}
+
+function PromptBuilder() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const canvas = searchParams.get('canvas') ?? 'prompts';
