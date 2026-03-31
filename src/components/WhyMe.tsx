@@ -48,18 +48,19 @@ export function WhyMe() {
             <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', maxWidth: '120px', display: 'block' }} />
           </p>
 
+          <h2 style={{
+            fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 4vw, 52px)',
+            fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
+            color: 'var(--color-text-primary)', marginBottom: '28px',
+          }}>
+            Clear thinking. Direct conversations. <em style={{ fontStyle: 'italic' }}>Measurable progress.</em>
+          </h2>
+          <div style={{ marginBottom: '40px' }}>
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>I work with leaders and companies that don't need more ideas — they need execution that sticks. My role is to help you focus on what matters, build capability, and make progress sustainable.</p>
+          </div>
+
           <div className="nr-split">
             <div ref={ref} className="reveal nr-content-block">
-              <h2 style={{
-                fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 4vw, 52px)',
-                fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
-                color: 'var(--color-text-primary)', marginBottom: '28px',
-              }}>
-                Clear thinking. Direct conversations. <em style={{ fontStyle: 'italic' }}>Measurable progress.</em>
-              </h2>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>I work with leaders and companies that don't need more ideas — they need execution that sticks. My role is to help you focus on what matters, build capability, and make progress sustainable.</p>
-              </div>
               <div style={{ marginBottom: '12px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I am an operator who coaches.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Formal coach training that shows up in how I work — and in dedicated 1-on-1 coaching when that's what's needed.</p>
