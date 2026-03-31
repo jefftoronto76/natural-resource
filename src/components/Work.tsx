@@ -88,7 +88,7 @@ export function Work() {
           className="text-lg leading-relaxed"
           style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400, color: 'rgba(26,25,23,0.6)' }}
         >
-          I studied coaching at the graduate level, and it's embedded in how I approach growth and leadership.
+          I studied coaching at the graduate level, and it shapes how I approach growth and leadership. The goal of every conversation is simple: clearer priorities and 1–2 practical next moves for you.
         </p>
       </div>
 
