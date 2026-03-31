@@ -20,6 +20,7 @@ const baseStyle: CSSProperties = {
   '--sidebar-item-gap': tokens.spacing.gap.sm,
   '--sidebar-item-accent-width': tokens.border.width.accent,
   '--sidebar-item-hover-surface': tokens.themes.dark.state.hover.surface,
+  '--sidebar-item-inactive-text': tokens.themes.dark.color.text.muted,
   '--sidebar-item-active-surface': tokens.themes.dark.state.selected.surface,
   '--sidebar-item-active-text': tokens.themes.dark.state.selected.text,
   '--sidebar-item-active-border': tokens.themes.dark.state.selected.border,
@@ -67,7 +68,7 @@ export function SidebarItem({
         style={{
           color: isActive
             ? 'var(--sidebar-item-active-text)'
-            : undefined
+            : 'var(--sidebar-item-inactive-text)'
         }}
       >
         {label}
