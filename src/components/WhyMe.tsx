@@ -61,6 +61,15 @@ export function WhyMe() {
 
           <div className="nr-split">
             <div ref={ref} className="reveal nr-content-block">
+              <p style={{
+                fontFamily: 'DM Sans, sans-serif', fontSize: '11px',
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                color: 'rgba(26,25,23,0.55)', marginBottom: '20px',
+                display: 'flex', alignItems: 'center', gap: '12px',
+              }}>
+                Principles in Practice
+                <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', display: 'block' }} />
+              </p>
               <div style={{ marginBottom: '12px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I am an operator who coaches.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Formal coach training that shows up in how I work — and in dedicated 1-on-1 coaching when that's what's needed.</p>
