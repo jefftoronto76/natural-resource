@@ -1,6 +1,6 @@
-import { forwardRef, type ButtonHTMLAttributes, type CSSProperties } from 'react';
+import { forwardRef, type ButtonHTMLAttributes } from 'react';
 
-import { tokens } from '../theme/tokens';
+import { tokens, type ThemeStyle } from '../theme/tokens';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -10,52 +10,52 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
 }
 
-const variantStyles: Record<ButtonVariant, CSSProperties> = {
+const variantStyles: Record<ButtonVariant, ThemeStyle> = {
   primary: {
     '--button-bg': tokens.themes.light.color.interactive.primary,
     '--button-bg-hover': tokens.themes.light.color.interactive.primaryHover,
     '--button-text': tokens.themes.light.color.text.inverse,
     '--button-border': tokens.themes.light.color.interactive.primary
-  } as CSSProperties,
+  },
   secondary: {
     '--button-bg': tokens.themes.light.color.surface.panel,
     '--button-bg-hover': tokens.themes.light.state.hover.surface,
     '--button-text': tokens.themes.light.color.text.primary,
     '--button-border': tokens.themes.light.color.border.subtle
-  } as CSSProperties,
+  },
   ghost: {
     '--button-bg': 'transparent',
     '--button-bg-hover': tokens.themes.light.state.hover.surface,
     '--button-text': tokens.themes.light.color.text.primary,
     '--button-border': 'transparent'
-  } as CSSProperties,
+  },
   danger: {
     '--button-bg': tokens.themes.light.color.feedback.danger,
     '--button-bg-hover': tokens.themes.light.state.hover.surface,
     '--button-text': tokens.themes.light.color.text.inverse,
     '--button-border': tokens.themes.light.color.feedback.danger
-  } as CSSProperties
+  }
 };
 
-const sizeStyles: Record<ButtonSize, CSSProperties> = {
+const sizeStyles: Record<ButtonSize, ThemeStyle> = {
   sm: {
     '--button-height': tokens.spacing.inset.lg,
     '--button-padding-inline': tokens.spacing.inline.md,
     '--button-font-size': tokens.typography.role.label.sm.fontSize
-  } as CSSProperties,
+  },
   md: {
     '--button-height': tokens.spacing.inset.xl,
     '--button-padding-inline': tokens.spacing.inline.lg,
     '--button-font-size': tokens.typography.role.label.md.fontSize
-  } as CSSProperties,
+  },
   lg: {
     '--button-height': tokens.spacing.stack.xl,
     '--button-padding-inline': tokens.spacing.inline.xl,
     '--button-font-size': tokens.typography.role.body.md.fontSize
-  } as CSSProperties
+  }
 };
 
-const baseStyle: CSSProperties = {
+const baseStyle: ThemeStyle = {
   '--button-radius': tokens.radius.md,
   '--button-focus-ring': tokens.themes.light.state.focus.ring,
   '--button-disabled-bg': tokens.themes.light.state.disabled.surface,

@@ -31,3 +31,5 @@ export const tokens = {
 } as const;
 
 export type Tokens = typeof tokens;
+
+export type { ThemeStyle } from './types';

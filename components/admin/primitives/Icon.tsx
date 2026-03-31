@@ -1,6 +1,6 @@
-import { forwardRef, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 
-import { tokens } from '../theme/tokens';
+import { tokens, type ThemeStyle } from '../theme/tokens';
 
 type IconSize = 'sm' | 'md' | 'lg';
 type IconVariant = 'default' | 'muted';
@@ -12,18 +12,18 @@ export interface IconProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
 }
 
-const sizeStyles: Record<IconSize, CSSProperties> = {
-  sm: { '--icon-size': tokens.spacing.inline.md } as CSSProperties,
-  md: { '--icon-size': tokens.spacing.inline.lg } as CSSProperties,
-  lg: { '--icon-size': tokens.spacing.inset.lg } as CSSProperties
+const sizeStyles: Record<IconSize, ThemeStyle> = {
+  sm: { '--icon-size': tokens.spacing.inline.md },
+  md: { '--icon-size': tokens.spacing.inline.lg },
+  lg: { '--icon-size': tokens.spacing.inset.lg }
 };
 
-const variantStyles: Record<IconVariant, CSSProperties> = {
-  default: { '--icon-color': tokens.themes.light.color.icon.primary } as CSSProperties,
-  muted: { '--icon-color': tokens.themes.light.color.icon.muted } as CSSProperties
+const variantStyles: Record<IconVariant, ThemeStyle> = {
+  default: { '--icon-color': tokens.themes.light.color.icon.primary },
+  muted: { '--icon-color': tokens.themes.light.color.icon.muted }
 };
 
-const baseStyle: CSSProperties = {
+const baseStyle: ThemeStyle = {
   '--icon-transition-duration': tokens.themes.light.state.hover.duration,
   '--icon-transition-easing': tokens.themes.light.state.hover.easing
 };

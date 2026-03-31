@@ -1,6 +1,6 @@
-import { forwardRef, type CSSProperties, type HTMLAttributes } from 'react';
+import { forwardRef, type HTMLAttributes } from 'react';
 
-import { tokens } from '../theme/tokens';
+import { tokens, type ThemeStyle } from '../theme/tokens';
 
 type CardVariant = 'default' | 'outlined' | 'interactive';
 
@@ -8,24 +8,24 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant;
 }
 
-const variantStyles: Record<CardVariant, CSSProperties> = {
+const variantStyles: Record<CardVariant, ThemeStyle> = {
   default: {
     '--card-surface': tokens.themes.light.color.surface.panel,
     '--card-border': 'transparent'
-  } as CSSProperties,
+  },
   outlined: {
     '--card-surface': tokens.themes.light.color.surface.canvas,
     '--card-border': tokens.themes.light.color.border.subtle
-  } as CSSProperties,
+  },
   interactive: {
     '--card-surface': tokens.themes.light.color.surface.canvas,
     '--card-border': tokens.themes.light.color.border.subtle,
     '--card-hover-surface': tokens.themes.light.state.hover.surface,
     '--card-hover-border': tokens.themes.light.state.hover.border
-  } as CSSProperties
+  }
 };
 
-const baseStyle: CSSProperties = {
+const baseStyle: ThemeStyle = {
   '--card-radius': tokens.radius.lg,
   '--card-padding': tokens.spacing.inset.lg,
   '--card-transition-duration': tokens.themes.light.state.hover.duration,

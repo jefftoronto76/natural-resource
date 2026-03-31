@@ -1,6 +1,6 @@
-import { forwardRef, type CSSProperties, type HTMLAttributes } from 'react';
+import { forwardRef, type HTMLAttributes } from 'react';
 
-import { tokens } from '../theme/tokens';
+import { tokens, type ThemeStyle } from '../theme/tokens';
 
 type TextVariant = 'body' | 'label' | 'title' | 'muted';
 
@@ -8,7 +8,7 @@ export interface TextProps extends HTMLAttributes<HTMLParagraphElement> {
   variant?: TextVariant;
 }
 
-const variantStyles: Record<TextVariant, CSSProperties> = {
+const variantStyles: Record<TextVariant, ThemeStyle> = {
   body: {
     '--text-color': tokens.themes.light.color.text.primary,
     fontFamily: tokens.typography.role.body.md.fontFamily,
