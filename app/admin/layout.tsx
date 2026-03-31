@@ -1,9 +1,9 @@
 import { UserButton } from '@clerk/nextjs';
 
-import { AppLayout } from '../../components/admin/layout/AppLayout';
-import { Sidebar } from '../../components/admin/layout/Sidebar';
-import { MainPanel } from '../../components/admin/layout/MainPanel';
-import { AdminSidebarNav } from '../../components/admin/navigation/AdminSidebarNav';
+import { AppLayout } from '@/components/admin/layout/AppLayout';
+import { Sidebar } from '@/components/admin/layout/Sidebar';
+import { MainPanel } from '@/components/admin/layout/MainPanel';
+import { AdminSidebarNav } from '@/components/admin/navigation/AdminSidebarNav';
 
 const wordmark = (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
