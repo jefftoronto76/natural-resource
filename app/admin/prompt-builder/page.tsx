@@ -615,110 +615,118 @@ Be concise and direct. Professional tone.`;
 
   return (
     <div className="relative flex h-full overflow-hidden">
-      {/* Canvas nav sidebar */}
-      <Sidebar header={sidebarHeader} footer={previewButton}>
-        <SidebarSection label="Canvases">
-          {(['guardrails', 'knowledge', 'prompts'] as const).map(key => (
-            <SidebarItem
-              key={key}
-              label={`${META[key].title} · ${blockCount(key)}`}
-              isActive={canvas === key}
-              onClick={() => { setCanvas(key); setWizard(null); setAddMode(null); setNewTopicMode(false); }}
-            />
-          ))}
-        </SidebarSection>
-      </Sidebar>
 
-      {/* Main content */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* Canvas header */}
-        <div
-          className="flex shrink-0 items-center justify-between px-5 py-4"
-          style={{
-            borderBottom: `1px solid ${L.color.border.subtle}`,
-            background: L.color.surface.canvas,
-          }}
-        >
-          <div>
-            <Text variant="title">{meta.title}</Text>
-            <Text variant="muted" style={{ marginTop: '2px', fontSize: '12px' }}>{meta.desc}</Text>
-          </div>
-          <Badge variant="default" size="sm">{meta.label}</Badge>
-        </div>
-
-        {/* Scrollable topic list */}
-        <div
-          className="flex flex-1 flex-col gap-3 overflow-y-auto p-5"
-          style={{ background: L.color.surface.panel }}
-        >
-          {topics.map((topic: any) => (
-            <TopicCard
-              key={topic.id}
-              topic={topic}
-              topicAddMode={addMode?.topicId === topic.id ? addMode!.type : null}
-              onToggle={() => toggleTopic(topic.id)}
-              onDelete={() => deleteTopic(topic.id)}
-              onDeleteBlock={(bid: string) => deleteBlock(topic.id, bid)}
-              onAddBlock={(type: string) => handleAddBlock(topic.id, type)}
-              onSaveWrite={saveWriteBlock}
-              onCancelAdd={() => setAddMode(null)}
-              onAddUrl={addUrlBlock}
-            />
-          ))}
-
-          {newTopicMode ? (
-            <div
-              className="flex flex-col gap-3 rounded-xl p-3"
-              style={{
-                border: `1px solid ${L.color.border.subtle}`,
-                background: L.color.surface.canvas,
-              }}
-            >
-              <input
-                autoFocus
-                value={newTopicName}
-                onChange={e => setNewTopicName(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') addTopic();
-                  if (e.key === 'Escape') { setNewTopicMode(false); setNewTopicName(''); }
-                }}
-                placeholder="Topic name (e.g. Ideal Client, Philosophy, Pricing)..."
-                style={{ ...inputStyle, marginBottom: 0 }}
+      {/* ── Desktop layout (md+) ────────────────────────────────────────────── */}
+      <div className="relative hidden h-full w-full overflow-hidden md:flex">
+        {/* Canvas nav sidebar */}
+        <Sidebar header={sidebarHeader} footer={previewButton}>
+          <SidebarSection label="Canvases">
+            {(['guardrails', 'knowledge', 'prompts'] as const).map(key => (
+              <SidebarItem
+                key={key}
+                label={`${META[key].title} · ${blockCount(key)}`}
+                isActive={canvas === key}
+                onClick={() => { setCanvas(key); setWizard(null); setAddMode(null); setNewTopicMode(false); }}
               />
-              <div className="flex gap-2">
-                <Button size="sm" variant="primary" onClick={addTopic}>Add topic</Button>
-                <Button size="sm" variant="ghost" onClick={() => { setNewTopicMode(false); setNewTopicName(''); }}>Cancel</Button>
-              </div>
+            ))}
+          </SidebarSection>
+        </Sidebar>
+
+        {/* Main content */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          {/* Canvas header */}
+          <div
+            className="flex shrink-0 items-center justify-between px-5 py-4"
+            style={{
+              borderBottom: `1px solid ${L.color.border.subtle}`,
+              background: L.color.surface.canvas,
+            }}
+          >
+            <div>
+              <Text variant="title">{meta.title}</Text>
+              <Text variant="muted" style={{ marginTop: '2px', fontSize: '12px' }}>{meta.desc}</Text>
             </div>
-          ) : (
-            <button
-              onClick={() => setNewTopicMode(true)}
-              className="w-full cursor-pointer rounded-xl py-3 text-sm"
-              style={{
-                border: `1px dashed ${L.color.border.subtle}`,
-                background: 'transparent',
-                color: L.color.text.muted,
-              }}
-            >
-              + Add topic
-            </button>
-          )}
+            <Badge variant="default" size="sm">{meta.label}</Badge>
+          </div>
+
+          {/* Scrollable topic list */}
+          <div
+            className="flex flex-1 flex-col gap-3 overflow-y-auto p-5"
+            style={{ background: L.color.surface.panel }}
+          >
+            {topics.map((topic: any) => (
+              <TopicCard
+                key={topic.id}
+                topic={topic}
+                topicAddMode={addMode?.topicId === topic.id ? addMode!.type : null}
+                onToggle={() => toggleTopic(topic.id)}
+                onDelete={() => deleteTopic(topic.id)}
+                onDeleteBlock={(bid: string) => deleteBlock(topic.id, bid)}
+                onAddBlock={(type: string) => handleAddBlock(topic.id, type)}
+                onSaveWrite={saveWriteBlock}
+                onCancelAdd={() => setAddMode(null)}
+                onAddUrl={addUrlBlock}
+              />
+            ))}
+
+            {newTopicMode ? (
+              <div
+                className="flex flex-col gap-3 rounded-xl p-3"
+                style={{
+                  border: `1px solid ${L.color.border.subtle}`,
+                  background: L.color.surface.canvas,
+                }}
+              >
+                <input
+                  autoFocus
+                  value={newTopicName}
+                  onChange={e => setNewTopicName(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') addTopic();
+                    if (e.key === 'Escape') { setNewTopicMode(false); setNewTopicName(''); }
+                  }}
+                  placeholder="Topic name (e.g. Ideal Client, Philosophy, Pricing)..."
+                  style={{ ...inputStyle, marginBottom: 0 }}
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" variant="primary" onClick={addTopic}>Add topic</Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setNewTopicMode(false); setNewTopicName(''); }}>Cancel</Button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setNewTopicMode(true)}
+                className="w-full cursor-pointer rounded-xl py-3 text-sm"
+                style={{
+                  border: `1px dashed ${L.color.border.subtle}`,
+                  background: 'transparent',
+                  color: L.color.text.muted,
+                }}
+              >
+                + Add topic
+              </button>
+            )}
+          </div>
         </div>
+
+        {wizard && (
+          <WizardDrawer
+            wizard={wizard}
+            onClose={() => setWizard(null)}
+            onUpdateInput={(v: string) => setWizard((w: any) => ({ ...w, input: v }))}
+            onSend={sendWizardMessage}
+            onConfirm={confirmWizardBlock}
+          />
+        )}
+
+        {preview !== null && (
+          <PreviewModal content={preview} onClose={() => setPreview(null)} />
+        )}
       </div>
 
-      {wizard && (
-        <WizardDrawer
-          wizard={wizard}
-          onClose={() => setWizard(null)}
-          onUpdateInput={(v: string) => setWizard((w: any) => ({ ...w, input: v }))}
-          onSend={sendWizardMessage}
-          onConfirm={confirmWizardBlock}
-        />
-      )}
+      {/* ── Mobile layout (below md) — Steps 2–7 ───────────────────────────── */}
+      <div className="flex h-full w-full flex-col md:hidden" style={{ background: D.color.surface.canvas }} />
 
-      {preview !== null && (
-        <PreviewModal content={preview} onClose={() => setPreview(null)} />
-      )}
     </div>
   );
 }
