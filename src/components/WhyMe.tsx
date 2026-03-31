@@ -55,26 +55,38 @@ export function WhyMe() {
                 fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
                 color: 'var(--color-text-primary)', marginBottom: '28px',
               }}>
-                Prioritize. Execute. <em style={{ fontStyle: 'italic' }}>Evolve.</em>
+                Clear thinking. Direct conversations. <em style={{ fontStyle: 'italic' }}>Measurable progress.</em>
               </h2>
               <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>These are the qualities that have made me effective across the teams I've worked with and the outcomes I've delivered.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>I work with leaders and companies that don't need more ideas — they need execution that sticks. My role is to help you focus on what matters, build capability, and make progress sustainable.</p>
               </div>
               <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I'm a player-coach.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>I operate at the decision level and get on the field when execution is the lever.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I am an operator who coaches.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Formal coach training that shows up in how I work — and in dedicated 1-on-1 coaching when that's what's needed.</p>
               </div>
               <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Most of my career, I've worked directly with founders and GMs.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>I understand how to prioritize, think, and execute — not just advise.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Outcomes over activity.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>We focus on what actually moves performance forward.</p>
               </div>
               <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I deliver results with people, not through them.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Because growth only sticks when your team knows how to carry it forward.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I think at the ownership level.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Most of my career has been at the founder and GM level. That's the lens I bring to every engagement.</p>
+              </div>
+              <div style={{ marginBottom: '12px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>See the system, not just the symptoms.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>I look for the few constraints actually shaping performance, not the noise around them.</p>
+              </div>
+              <div style={{ marginBottom: '12px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Capability over dependency.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>The goal is stronger leaders and stronger organizations.</p>
+              </div>
+              <div style={{ marginBottom: '12px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Confront the brutal facts.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Reality is what it is. Progress requires honest conversations — delivered in a way people can actually use.</p>
               </div>
               <div>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Continuous learner. Active feedback seeker.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>I stay sharp by constantly refining how I think and execute.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Better judgment compounds. I constantly refine how I think, decide, and operate.</p>
               </div>
             </div>
 
