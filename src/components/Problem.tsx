@@ -45,7 +45,7 @@ export function Problem() {
         <h2 style={{
           fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 4vw, 56px)',
           fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
-          color: '#ffffff', marginBottom: '24px',
+          color: '#ffffff', marginBottom: '24px', paddingTop: '24px',
         }}>
           Most problems aren't<br />
           <em style={{ fontStyle: 'italic' }}>what they look like.</em>
