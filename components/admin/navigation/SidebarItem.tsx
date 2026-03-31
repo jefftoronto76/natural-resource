@@ -18,6 +18,7 @@ const baseStyle: CSSProperties = {
   '--sidebar-item-padding-inline': tokens.spacing.inline.md,
   '--sidebar-item-padding-block': tokens.spacing.inline.sm,
   '--sidebar-item-gap': tokens.spacing.gap.sm,
+  '--sidebar-item-accent-width': tokens.border.width.accent,
   '--sidebar-item-hover-surface': tokens.themes.dark.state.hover.surface,
   '--sidebar-item-active-surface': tokens.themes.dark.state.selected.surface,
   '--sidebar-item-active-text': tokens.themes.dark.state.selected.text,
@@ -44,7 +45,7 @@ export function SidebarItem({
         'gap-[var(--sidebar-item-gap)]',
         'rounded-[var(--sidebar-item-radius)]',
         'px-[var(--sidebar-item-padding-inline)] py-[var(--sidebar-item-padding-block)]',
-        'border-l-[3px]',
+        'border-l-[length:var(--sidebar-item-accent-width)]',
         'transition-colors duration-[var(--sidebar-item-transition-duration)] ease-[var(--sidebar-item-transition-easing)]',
         isActive
           ? 'border-l-[var(--sidebar-item-active-border)] bg-[var(--sidebar-item-active-surface)]'

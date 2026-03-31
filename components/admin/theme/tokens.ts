@@ -1,3 +1,4 @@
+import { internalBorderTokens } from './borders';
 import { internalColorTokens } from './colors';
 import { internalMotionTokens } from './motion';
 import { internalRadiusTokens } from './radius';
@@ -22,6 +23,7 @@ export const tokens = {
   spacing: internalSpacingTokens,
   typography: internalTypographyTokens,
   radius: internalRadiusTokens,
+  border: internalBorderTokens,
   motion: internalMotionTokens,
   zIndex: internalZIndexTokens
 } as const;
