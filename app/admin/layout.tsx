@@ -11,7 +11,7 @@ const wordmark = (
       fontFamily: 'var(--font-display)',
       fontSize: '15px',
       fontWeight: 400,
-      color: 'var(--color-text-inverse)',
+      color: '#F9FAFB',
       letterSpacing: '-0.01em',
     }}>
       Natural Resource
@@ -20,7 +20,6 @@ const wordmark = (
       fontFamily: 'var(--font-mono)',
       fontSize: '9px',
       letterSpacing: '0.18em',
-      textTransform: 'uppercase' as const,
       color: 'var(--color-accent)',
     }}>
       Admin
