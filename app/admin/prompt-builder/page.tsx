@@ -761,7 +761,40 @@ Be concise and direct. Professional tone.`;
         {/* Scrollable body — Steps 4–6 */}
         <div className="flex flex-1 flex-col overflow-y-auto" style={{ background: D.color.surface.canvas }} />
 
-        {/* Bottom tab bar — Step 3 */}
+        {/* Bottom tab bar */}
+        <div
+          className="flex shrink-0"
+          style={{
+            borderTop: `1px solid ${D.color.border.subtle}`,
+            background: D.color.surface.panel,
+          }}
+        >
+          {(['guardrails', 'knowledge', 'prompts'] as const).map(key => {
+            const isActive = canvas === key;
+            return (
+              <button
+                key={key}
+                onClick={() => { setCanvas(key); setWizard(null); setAddMode(null); setNewTopicMode(false); }}
+                style={{
+                  flex: 1,
+                  padding: '10px 4px 12px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderTop: `2px solid ${isActive ? 'var(--color-accent)' : 'transparent'}`,
+                  color: isActive ? 'var(--color-accent)' : D.color.text.muted,
+                  fontSize: '11px',
+                  fontWeight: isActive ? 600 : 400,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.03em',
+                  transition: 'color 0.15s',
+                }}
+              >
+                {META[key].title}
+              </button>
+            );
+          })}
+        </div>
 
       </div>
 
