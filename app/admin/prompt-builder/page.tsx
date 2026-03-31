@@ -1,15 +1,13 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-import { Sidebar } from '@/components/admin/layout/Sidebar';
 import { AddBlockButton } from '@/components/admin/content/AddBlockButton';
 import { Badge } from '@/components/admin/primitives/Badge';
 import { Button } from '@/components/admin/primitives/Button';
 import { Card } from '@/components/admin/primitives/Card';
 import { Text } from '@/components/admin/primitives/Text';
-import { SidebarSection } from '@/components/admin/navigation/SidebarSection';
-import { SidebarItem } from '@/components/admin/navigation/SidebarItem';
 import { tokens } from '@/components/admin/theme/tokens';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -554,13 +552,22 @@ function MobileAddBlockMenu({ onSelect, topics }: { onSelect: (topicId: string, 
 // ─── PromptBuilder ────────────────────────────────────────────────────────────
 
 export default function PromptBuilder() {
-  const [canvas, setCanvas] = useState('prompts');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const canvas = searchParams.get('canvas') ?? 'prompts';
+
   const [data, setData] = useState(INIT);
   const [addMode, setAddMode] = useState<{ topicId: string, type: string } | null>(null);
   const [newTopicMode, setNewTopicMode] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
   const [wizard, setWizard] = useState<any>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    setWizard(null);
+    setAddMode(null);
+    setNewTopicMode(false);
+  }, [canvas]);
 
   const meta = META[canvas as keyof typeof META];
   const topics = data[canvas as keyof typeof data].topics;
@@ -679,58 +686,11 @@ Be concise and direct. Professional tone.`;
     setPreview(compiled);
   }
 
-  const blockCount = (k: string) => data[k as keyof typeof data].topics.reduce((a: number, t: any) => a + t.blocks.length, 0);
-
-  const sidebarHeader = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-      <Text variant="label" style={{ color: D.color.text.primary, fontFamily: 'var(--font-display)', fontSize: '15px' }}>
-        Sage
-      </Text>
-      <Text variant="muted" style={{ color: D.color.text.muted, fontSize: '11px' }}>
-        Prompt Builder
-      </Text>
-    </div>
-  );
-
-  const previewButton = (
-    <button
-      onClick={openPreview}
-      style={{
-        width: '100%',
-        padding: '10px',
-        borderRadius: tokens.radius.lg,
-        border: '1px solid var(--color-accent)',
-        background: 'transparent',
-        color: 'var(--color-accent)',
-        fontSize: '12px',
-        fontWeight: 500,
-        cursor: 'pointer',
-        fontFamily: 'var(--font-mono)',
-        letterSpacing: '0.02em',
-      }}
-    >
-      Preview compiled ↗
-    </button>
-  );
-
   return (
     <div className="relative flex h-full overflow-hidden">
 
       {/* ── Desktop layout (md+) ────────────────────────────────────────────── */}
       <div className="relative hidden h-full w-full overflow-hidden md:flex">
-        {/* Canvas nav sidebar */}
-        <Sidebar header={sidebarHeader} footer={previewButton}>
-          <SidebarSection label="Canvases">
-            {(['guardrails', 'knowledge', 'prompts'] as const).map(key => (
-              <SidebarItem
-                key={key}
-                label={`${META[key].title} · ${blockCount(key)}`}
-                isActive={canvas === key}
-                onClick={() => { setCanvas(key); setWizard(null); setAddMode(null); setNewTopicMode(false); }}
-              />
-            ))}
-          </SidebarSection>
-        </Sidebar>
 
         {/* Main content */}
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -746,7 +706,25 @@ Be concise and direct. Professional tone.`;
               <Text variant="title">{meta.title}</Text>
               <Text variant="muted" style={{ marginTop: '2px', fontSize: '12px' }}>{meta.desc}</Text>
             </div>
-            <Badge variant="default" size="sm">{meta.label}</Badge>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={openPreview}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: tokens.radius.lg,
+                  border: '1px solid var(--color-accent)',
+                  background: 'transparent',
+                  color: 'var(--color-accent)',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-mono)',
+                }}
+              >
+                Preview ↗
+              </button>
+              <Badge variant="default" size="sm">{meta.label}</Badge>
+            </div>
           </div>
 
           {/* Scrollable topic list */}
@@ -1004,7 +982,7 @@ Be concise and direct. Professional tone.`;
             return (
               <button
                 key={key}
-                onClick={() => { setCanvas(key); setWizard(null); setAddMode(null); setNewTopicMode(false); }}
+                onClick={() => router.push(`/admin/prompt-builder?canvas=${key}`)}
                 style={{
                   flex: 1,
                   padding: '10px 4px 12px',
