@@ -31,12 +31,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AppLayout
       sidebar={
-        <Sidebar
-          header={wordmark}
-          footer={<UserButton />}
-        >
-          <AdminSidebarNav />
-        </Sidebar>
+        <div className="hidden md:flex h-full shrink-0">
+          <Sidebar
+            header={wordmark}
+            footer={<UserButton />}
+          >
+            <AdminSidebarNav />
+          </Sidebar>
+        </div>
       }
     >
       <MainPanel>
