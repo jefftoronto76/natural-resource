@@ -42,7 +42,7 @@ export function Hero() {
             fontSize: 'clamp(16px, 2vw, 18px)', lineHeight: 1.7, fontWeight: 400,
             color: 'var(--color-text-muted)', maxWidth: '540px', marginBottom: '48px',
           }}>
-            I'm Jeff Lougheed, a revenue and operations leader who helps technology companies and ambitious professionals fix the problems slowing growth.
+            I'm Jeff Lougheed, a revenue and operations leader who helps technology companies and ambitious professionals achieve the growth they're after.
           </p>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
