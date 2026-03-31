@@ -274,12 +274,13 @@ function WizardDrawer({ wizard, onClose, onUpdateInput, onSend, onConfirm }: any
   const displayMessages = wizard.messages.slice(1);
 
   return (
-    <div style={{
-      position: 'absolute', top: 0, right: 0, bottom: 0, width: '380px',
-      background: D.color.surface.canvas,
-      borderLeft: `1px solid ${D.color.border.subtle}`,
-      display: 'flex', flexDirection: 'column', zIndex: 30,
-    }}>
+    <div
+      className="fixed inset-0 z-30 flex flex-col md:absolute md:inset-y-0 md:left-auto md:right-0 md:w-[380px]"
+      style={{
+        background: D.color.surface.canvas,
+        borderLeft: `1px solid ${D.color.border.subtle}`,
+      }}
+    >
       <div style={{
         padding: '14px 16px',
         borderBottom: `1px solid ${D.color.border.subtle}`,
