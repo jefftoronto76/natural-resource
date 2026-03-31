@@ -334,6 +334,7 @@ export default function PromptBuilder() {
 
   async function openWizard(tid: string) {
     const topic = topics.find((t: any) => t.id === tid);
+    if (!topic) return;
     const sys = `You are a setup assistant helping configure the Sage AI assistant.
 Canvas: ${meta.title} — ${meta.desc}
 Topic: ${topic.name}
