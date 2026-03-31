@@ -312,6 +312,7 @@ export default function PromptBuilder() {
 
   async function addUrlBlock(tid: string, url: string) {
     const topic = topics.find((t: any) => t.id === tid);
+    if (!topic) return;
     const sys = `You synthesize URLs into knowledge blocks for an AI assistant. Return ONLY valid JSON, no other text: {"blockName":"...","content":"..."} Keep content under 150 words, clear and factual.`;
     const reply = await callClaude([{ role: 'user', content: `Synthesize this URL for the "${topic.name}" topic: ${url}` }], sys);
     let block;
