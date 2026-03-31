@@ -5,7 +5,8 @@ import { useReveal } from '@/hooks/useReveal'
 export function Problem() {
   const ref = useReveal()
   return (
-    <section style={{
+    <>
+    <section className="problem-section" style={{
       padding: 'clamp(80px, 10vw, 120px) clamp(24px, 5vw, 48px)',
       borderBottom: '1px solid rgba(26,25,23,0.08)',
       backgroundImage: 'url(/ProblemBackground.webp)',
@@ -55,5 +56,17 @@ export function Problem() {
         <p style={{ fontSize: 'clamp(16px, 1.8vw, 18px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.85)', fontWeight: 400 }}>The problems get solved either way.</p>
       </div>
     </section>
+    <style>{`
+      @media (max-width: 768px) {
+        .problem-section {
+          background-position: center top;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          padding-bottom: 64px;
+        }
+      }
+    `}</style>
+    </>
   )
 }
