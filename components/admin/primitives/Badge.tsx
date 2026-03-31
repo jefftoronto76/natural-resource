@@ -46,7 +46,7 @@ const sizeStyles: Record<BadgeSize, CSSProperties> = {
   } as CSSProperties
 };
 
-const baseStyle: CSSProperties = {
+const baseStyle: CSSProperties & Record<string, string> = {
   '--badge-radius': tokens.radius.pill,
   fontFamily: tokens.typography.role.label.md.fontFamily,
   fontWeight: tokens.typography.role.label.md.fontWeight,
