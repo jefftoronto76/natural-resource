@@ -1,9 +1,18 @@
 'use client'
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from 'react';
 
-const G = '#2d6a4f';
-const GL = 'rgba(45,106,79,0.08)';
+import { Sidebar } from '@/components/admin/layout/Sidebar';
+import { AddBlockButton } from '@/components/admin/content/AddBlockButton';
+import { Badge } from '@/components/admin/primitives/Badge';
+import { Button } from '@/components/admin/primitives/Button';
+import { Card } from '@/components/admin/primitives/Card';
+import { Text } from '@/components/admin/primitives/Text';
+import { SidebarSection } from '@/components/admin/navigation/SidebarSection';
+import { SidebarItem } from '@/components/admin/navigation/SidebarItem';
+import { tokens } from '@/components/admin/theme/tokens';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 function uid() { return Math.random().toString(36).slice(2, 8); }
 
@@ -51,27 +60,37 @@ async function callClaude(messages: {role: string, content: string}[], system: s
   return d.text || '';
 }
 
-function Badge({ type }: { type: string }) {
-  const map: Record<string, { bg: string, c: string }> = {
-    text:   { bg: 'var(--color-background-secondary)', c: 'var(--color-text-secondary)' },
-    doc:    { bg: 'rgba(45,106,79,0.1)', c: G },
-    url:    { bg: 'rgba(23,91,161,0.08)', c: '#175ba1' },
-    wizard: { bg: 'rgba(120,60,180,0.08)', c: '#783cb4' },
-  };
-  const s = map[type] || map.text;
-  return (
-    <span style={{ fontSize: '10px', fontWeight: 500, padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.04em', textTransform: 'uppercase', background: s.bg, color: s.c, flexShrink: 0, whiteSpace: 'nowrap' }}>
-      {type}
-    </span>
-  );
-}
+const BLOCK_TYPE_VARIANT: Record<string, 'default' | 'success' | 'warning' | 'danger'> = {
+  text: 'default',
+  doc: 'success',
+  url: 'default',
+  wizard: 'warning',
+};
 
 const ADD_OPTIONS = [
-  { type: 'write',  icon: '✏️', label: 'Write it',     desc: 'Type directly' },
-  { type: 'wizard', icon: '✦',  label: 'AI wizard',    desc: 'Guided Q&A' },
-  { type: 'url',    icon: '🔗', label: 'Paste URL',    desc: 'Auto-synthesize' },
-  { type: 'doc',    icon: '📄', label: 'Upload doc',   desc: 'PDF, Word, image' },
+  { type: 'write',  icon: '✏️', label: 'Write it',   desc: 'Type directly' },
+  { type: 'wizard', icon: '✦',  label: 'AI wizard',  desc: 'Guided Q&A' },
+  { type: 'url',    icon: '🔗', label: 'Paste URL',  desc: 'Auto-synthesize' },
+  { type: 'doc',    icon: '📄', label: 'Upload doc', desc: 'PDF, Word, image' },
 ];
+
+// Token shortcuts
+const L = tokens.themes.light;
+const D = tokens.themes.dark;
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '7px 10px',
+  borderRadius: tokens.radius.lg,
+  border: `1px solid ${L.color.border.subtle}`,
+  background: L.color.surface.canvas,
+  fontSize: '13px',
+  color: L.color.text.primary,
+  outline: 'none',
+  boxSizing: 'border-box',
+};
+
+// ─── TopicCard ────────────────────────────────────────────────────────────────
 
 function TopicCard({ topic, topicAddMode, onToggle, onDelete, onDeleteBlock, onAddBlock, onSaveWrite, onCancelAdd, onAddUrl }: any) {
   const [showMenu, setShowMenu] = useState(false);
@@ -87,83 +106,153 @@ function TopicCard({ topic, topicAddMode, onToggle, onDelete, onDeleteBlock, onA
     setUrlLoading(false);
   }
 
-  const blockBorder = '0.5px solid var(--color-border-tertiary)';
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '7px 10px', borderRadius: '6px', border: '0.5px solid var(--color-border-secondary)', background: 'var(--color-background-primary)', fontSize: '13px', color: 'var(--color-text-primary)', outline: 'none', boxSizing: 'border-box' };
-
   return (
-    <div style={{ border: blockBorder, borderRadius: '10px', background: 'var(--color-background-primary)' }}>
-      <div onClick={onToggle} style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
-        <span style={{ fontSize: '10px', color: 'var(--color-text-secondary)', display: 'inline-block', transition: 'transform 0.15s', transform: topic.open ? 'rotate(90deg)' : 'none' }}>▶</span>
-        <span style={{ flex: 1, fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{topic.name}</span>
-        <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginRight: '4px' }}>{topic.blocks.length} block{topic.blocks.length !== 1 ? 's' : ''}</span>
-        <button onClick={e => { e.stopPropagation(); onDelete(); }}
-          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: '16px', lineHeight: 1, padding: '0 2px', opacity: 0.5 }}>×</button>
+    <Card variant="outlined" className="flex flex-col overflow-hidden">
+      {/* Header */}
+      <div
+        onClick={onToggle}
+        className="flex cursor-pointer select-none items-center gap-2 px-4 py-3"
+        style={{ background: topic.open ? L.color.surface.panel : L.color.surface.canvas }}
+      >
+        <span style={{
+          fontSize: '10px',
+          color: L.color.text.muted,
+          display: 'inline-block',
+          transition: 'transform 0.15s',
+          transform: topic.open ? 'rotate(90deg)' : 'none',
+        }}>▶</span>
+        <Text variant="label" className="flex-1">{topic.name}</Text>
+        <Text variant="muted" style={{ fontSize: '11px', marginRight: '4px' }}>
+          {topic.blocks.length} block{topic.blocks.length !== 1 ? 's' : ''}
+        </Text>
+        <button
+          onClick={e => { e.stopPropagation(); onDelete(); }}
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: L.color.text.muted, fontSize: '16px', lineHeight: 1, padding: '0 2px', opacity: 0.5 }}
+        >×</button>
       </div>
 
       {topic.open && (
-        <div style={{ borderTop: blockBorder, padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div
+          className="flex flex-col gap-2 px-4 py-3"
+          style={{ borderTop: `1px solid ${L.color.border.subtle}` }}
+        >
+          {/* Block rows */}
           {topic.blocks.map((block: any) => (
-            <div key={block.id} style={{ border: blockBorder, borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <div style={{ paddingTop: '1px' }}><Badge type={block.type} /></div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '3px' }}>{block.name}</div>
-                <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.5', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{block.content}</div>
+            <div
+              key={block.id}
+              className="flex items-start gap-3 rounded-lg px-3 py-2"
+              style={{ border: `1px solid ${L.color.border.subtle}`, background: L.color.surface.canvas }}
+            >
+              <div style={{ paddingTop: '1px', flexShrink: 0 }}>
+                <Badge variant={BLOCK_TYPE_VARIANT[block.type] ?? 'default'} size="sm">
+                  {block.type}
+                </Badge>
               </div>
-              <button onClick={() => onDeleteBlock(block.id)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: '14px', flexShrink: 0, lineHeight: 1, opacity: 0.5, padding: '1px 2px' }}>×</button>
+              <div className="min-w-0 flex-1">
+                <Text variant="label" style={{ marginBottom: '2px' }}>{block.name}</Text>
+                <Text
+                  variant="muted"
+                  style={{ fontSize: '12px', lineHeight: '1.5', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' } as React.CSSProperties}
+                >
+                  {block.content}
+                </Text>
+              </div>
+              <button
+                onClick={() => onDeleteBlock(block.id)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: L.color.text.muted, fontSize: '14px', flexShrink: 0, lineHeight: 1, opacity: 0.5, padding: '1px 2px' }}
+              >×</button>
             </div>
           ))}
 
+          {/* Write form */}
           {topicAddMode === 'write' && (
-            <div style={{ border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', padding: '10px', background: 'var(--color-background-secondary)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <input autoFocus placeholder="Block name..." value={writeForm.name}
+            <div
+              className="flex flex-col gap-2 rounded-lg p-3"
+              style={{ border: `1px solid ${L.color.border.subtle}`, background: L.color.surface.panel }}
+            >
+              <input
+                autoFocus
+                placeholder="Block name..."
+                value={writeForm.name}
                 onChange={e => setWriteForm(f => ({ ...f, name: e.target.value }))}
-                style={inputStyle} />
-              <textarea placeholder="Block content..." value={writeForm.content}
-                onChange={e => setWriteForm(f => ({ ...f, content: e.target.value }))} rows={3}
-                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'var(--font-mono)', fontSize: '12px', lineHeight: '1.5' }} />
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button onClick={() => { onSaveWrite(topic.id, writeForm.name, writeForm.content); setWriteForm({ name: '', content: '' }); }}
-                  style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: G, color: 'white', fontSize: '12px', cursor: 'pointer', fontWeight: 500 }}>Save block</button>
-                <button onClick={() => { onCancelAdd(); setWriteForm({ name: '', content: '' }); }}
-                  style={{ padding: '6px 10px', borderRadius: '6px', border: '0.5px solid var(--color-border-tertiary)', background: 'transparent', color: 'var(--color-text-secondary)', fontSize: '12px', cursor: 'pointer' }}>Cancel</button>
+                style={inputStyle}
+              />
+              <textarea
+                placeholder="Block content..."
+                value={writeForm.content}
+                onChange={e => setWriteForm(f => ({ ...f, content: e.target.value }))}
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'var(--font-mono)', fontSize: '12px', lineHeight: '1.5' }}
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={() => { onSaveWrite(topic.id, writeForm.name, writeForm.content); setWriteForm({ name: '', content: '' }); }}
+                >
+                  Save block
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => { onCancelAdd(); setWriteForm({ name: '', content: '' }); }}
+                >
+                  Cancel
+                </Button>
               </div>
             </div>
           )}
 
+          {/* URL form */}
           {topicAddMode === 'url' && (
-            <div style={{ border: '0.5px solid var(--color-border-secondary)', borderRadius: '8px', padding: '10px', background: 'var(--color-background-secondary)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>Paste a URL — AI synthesizes it into a knowledge block</div>
-              <input autoFocus placeholder="https://..." value={urlVal}
+            <div
+              className="flex flex-col gap-2 rounded-lg p-3"
+              style={{ border: `1px solid ${L.color.border.subtle}`, background: L.color.surface.panel }}
+            >
+              <Text variant="muted" style={{ fontSize: '11px' }}>
+                Paste a URL — AI synthesizes it into a knowledge block
+              </Text>
+              <input
+                autoFocus
+                placeholder="https://..."
+                value={urlVal}
                 onChange={e => setUrlVal(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleUrl(); }}
-                style={inputStyle} />
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button onClick={handleUrl} disabled={urlLoading || !urlVal.trim()}
-                  style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: (urlLoading || !urlVal.trim()) ? 'var(--color-background-secondary)' : G, color: (urlLoading || !urlVal.trim()) ? 'var(--color-text-secondary)' : 'white', fontSize: '12px', cursor: (urlLoading || !urlVal.trim()) ? 'not-allowed' : 'pointer', fontWeight: 500 }}>
+                style={inputStyle}
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={handleUrl}
+                  disabled={urlLoading || !urlVal.trim()}
+                >
                   {urlLoading ? 'Synthesizing...' : 'Synthesize'}
-                </button>
-                <button onClick={onCancelAdd}
-                  style={{ padding: '6px 10px', borderRadius: '6px', border: '0.5px solid var(--color-border-tertiary)', background: 'transparent', color: 'var(--color-text-secondary)', fontSize: '12px', cursor: 'pointer' }}>Cancel</button>
+                </Button>
+                <Button size="sm" variant="ghost" onClick={onCancelAdd}>Cancel</Button>
               </div>
             </div>
           )}
 
+          {/* Add block menu */}
           {topicAddMode === null && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <button onClick={() => setShowMenu(v => !v)}
-                style={{ width: '100%', padding: '8px', border: `0.5px dashed ${showMenu ? G : 'var(--color-border-secondary)'}`, borderRadius: '8px', background: showMenu ? GL : 'transparent', color: showMenu ? G : 'var(--color-text-secondary)', fontSize: '12px', cursor: 'pointer' }}>
-                {showMenu ? '× Close' : '+ Add block'}
-              </button>
+            <div className="flex flex-col gap-2">
+              <AddBlockButton
+                onClick={() => setShowMenu(v => !v)}
+                label={showMenu ? '× Close' : '+ Add block'}
+              />
               {showMenu && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <div className="grid grid-cols-2 gap-2">
                   {ADD_OPTIONS.map(opt => (
-                    <button key={opt.type}
+                    <button
+                      key={opt.type}
                       onClick={() => { setShowMenu(false); onAddBlock(opt.type); }}
-                      style={{ padding: '10px 12px', borderRadius: '8px', border: '0.5px solid var(--color-border-tertiary)', background: 'var(--color-background-secondary)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px', textAlign: 'left' }}>
+                      className="flex cursor-pointer flex-col items-start gap-1 rounded-lg p-3 text-left"
+                      style={{ border: `1px solid ${L.color.border.subtle}`, background: L.color.surface.panel }}
+                    >
                       <span style={{ fontSize: '14px' }}>{opt.icon}</span>
-                      <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{opt.label}</span>
-                      <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>{opt.desc}</span>
+                      <Text variant="label">{opt.label}</Text>
+                      <Text variant="muted" style={{ fontSize: '11px' }}>{opt.desc}</Text>
                     </button>
                   ))}
                 </div>
@@ -172,9 +261,11 @@ function TopicCard({ topic, topicAddMode, onToggle, onDelete, onDeleteBlock, onA
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
+
+// ─── WizardDrawer ─────────────────────────────────────────────────────────────
 
 function WizardDrawer({ wizard, onClose, onUpdateInput, onSend, onConfirm }: any) {
   const endRef = useRef<HTMLDivElement>(null);
@@ -183,18 +274,32 @@ function WizardDrawer({ wizard, onClose, onUpdateInput, onSend, onConfirm }: any
   const displayMessages = wizard.messages.slice(1);
 
   return (
-    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '380px', background: 'var(--color-background-primary)', borderLeft: '0.5px solid var(--color-border-tertiary)', display: 'flex', flexDirection: 'column', zIndex: 30 }}>
-      <div style={{ padding: '14px 16px', borderBottom: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+    <div style={{
+      position: 'absolute', top: 0, right: 0, bottom: 0, width: '380px',
+      background: D.color.surface.canvas,
+      borderLeft: `1px solid ${D.color.border.subtle}`,
+      display: 'flex', flexDirection: 'column', zIndex: 30,
+    }}>
+      <div style={{
+        padding: '14px 16px',
+        borderBottom: `1px solid ${D.color.border.subtle}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
+      }}>
         <div>
-          <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)' }}>Block Wizard</div>
-          <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '1px' }}>AI-assisted block creation</div>
+          <Text variant="label" style={{ color: D.color.text.primary }}>Block Wizard</Text>
+          <Text variant="muted" style={{ color: D.color.text.muted, marginTop: '1px', fontSize: '11px' }}>
+            AI-assisted block creation
+          </Text>
         </div>
-        <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: '20px', lineHeight: 1, padding: '2px 6px' }}>×</button>
+        <button
+          onClick={onClose}
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: D.color.text.muted, fontSize: '20px', lineHeight: 1, padding: '2px 6px' }}
+        >×</button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {wizard.initialLoading && (
-          <div style={{ color: 'var(--color-text-secondary)', fontSize: '13px' }}>Setting up...</div>
+          <Text variant="muted" style={{ color: D.color.text.muted, fontSize: '13px' }}>Setting up...</Text>
         )}
 
         {displayMessages.map((msg: any, i: number) => {
@@ -204,8 +309,8 @@ function WizardDrawer({ wizard, onClose, onUpdateInput, onSend, onConfirm }: any
               <div style={{
                 maxWidth: '88%', padding: '9px 12px',
                 borderRadius: msg.role === 'user' ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
-                background: msg.role === 'user' ? G : 'var(--color-background-secondary)',
-                color: msg.role === 'user' ? 'white' : (isDoneJson ? 'var(--color-text-secondary)' : 'var(--color-text-primary)'),
+                background: msg.role === 'user' ? 'var(--color-accent)' : D.color.surface.panel,
+                color: msg.role === 'user' ? '#fff' : (isDoneJson ? D.color.text.muted : D.color.text.primary),
                 fontSize: '13px', lineHeight: '1.5',
                 fontStyle: isDoneJson ? 'italic' : 'normal',
               }}>
@@ -217,23 +322,47 @@ function WizardDrawer({ wizard, onClose, onUpdateInput, onSend, onConfirm }: any
 
         {wizard.loading && (
           <div style={{ display: 'flex' }}>
-            <div style={{ padding: '9px 12px', borderRadius: '12px 12px 12px 4px', background: 'var(--color-background-secondary)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+            <div style={{
+              padding: '9px 12px', borderRadius: '12px 12px 12px 4px',
+              background: D.color.surface.panel, fontSize: '13px', color: D.color.text.muted,
+            }}>
               Thinking...
             </div>
           </div>
         )}
 
         {wizard.generated && (
-          <div style={{ border: `0.5px solid ${G}`, borderRadius: '10px', padding: '12px', background: GL }}>
-            <div style={{ fontSize: '10px', fontWeight: 500, color: G, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Block ready</div>
-            <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '6px' }}>{wizard.generated.blockName}</div>
-            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.6', background: 'var(--color-background-primary)', padding: '8px 10px', borderRadius: '6px', fontFamily: 'var(--font-mono)' }}>
+          <div style={{
+            border: '1px solid var(--color-accent)',
+            borderRadius: tokens.radius.xl,
+            padding: '12px',
+            background: 'rgba(45,106,79,0.12)',
+          }}>
+            <Text variant="muted" style={{
+              fontSize: '10px', fontWeight: 500, color: 'var(--color-accent)',
+              textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px',
+            }}>
+              Block ready
+            </Text>
+            <Text variant="label" style={{ color: D.color.text.primary, marginBottom: '6px', display: 'block' }}>
+              {wizard.generated.blockName}
+            </Text>
+            <div style={{
+              fontSize: '12px', color: D.color.text.muted, lineHeight: '1.6',
+              background: D.color.surface.canvas,
+              padding: '8px 10px', borderRadius: tokens.radius.lg,
+              fontFamily: 'var(--font-mono)',
+            }}>
               {wizard.generated.content}
             </div>
-            <button onClick={onConfirm}
-              style={{ marginTop: '10px', width: '100%', padding: '9px', borderRadius: '8px', border: 'none', background: G, color: 'white', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onConfirm}
+              className="mt-3 w-full"
+            >
               Add this block →
-            </button>
+            </Button>
           </div>
         )}
 
@@ -241,42 +370,88 @@ function WizardDrawer({ wizard, onClose, onUpdateInput, onSend, onConfirm }: any
       </div>
 
       {!wizard.generated && !wizard.initialLoading && (
-        <div style={{ padding: '12px 16px', borderTop: '0.5px solid var(--color-border-tertiary)', display: 'flex', gap: '8px', flexShrink: 0 }}>
-          <input value={wizard.input}
+        <div style={{
+          padding: '12px 16px',
+          borderTop: `1px solid ${D.color.border.subtle}`,
+          display: 'flex', gap: '8px', flexShrink: 0,
+        }}>
+          <input
+            value={wizard.input}
             onChange={e => onUpdateInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) onSend(); }}
             placeholder="Type your answer..."
             disabled={wizard.loading}
-            style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', border: '0.5px solid var(--color-border-secondary)', background: 'var(--color-background-secondary)', fontSize: '13px', color: 'var(--color-text-primary)', outline: 'none' }} />
-          <button onClick={onSend} disabled={wizard.loading || !wizard.input.trim()}
-            style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', background: (wizard.loading || !wizard.input.trim()) ? 'var(--color-background-secondary)' : G, color: (wizard.loading || !wizard.input.trim()) ? 'var(--color-text-secondary)' : 'white', fontSize: '14px', cursor: 'pointer', fontWeight: 500 }}>
+            style={{
+              flex: 1, padding: '8px 12px',
+              borderRadius: tokens.radius.lg,
+              border: `1px solid ${D.color.border.subtle}`,
+              background: D.color.surface.panel,
+              fontSize: '13px', color: D.color.text.primary, outline: 'none',
+            }}
+          />
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={onSend}
+            disabled={wizard.loading || !wizard.input.trim()}
+          >
             →
-          </button>
+          </Button>
         </div>
       )}
     </div>
   );
 }
 
+// ─── PreviewModal ─────────────────────────────────────────────────────────────
+
 function PreviewModal({ content, onClose }: { content: string, onClose: () => void }) {
   return (
-    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '24px' }}>
-      <div style={{ background: 'var(--color-background-primary)', borderRadius: '12px', border: '0.5px solid var(--color-border-tertiary)', width: '100%', maxWidth: '580px', maxHeight: '500px', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '14px 20px', borderBottom: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)' }}>Compiled system prompt</div>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: '20px', lineHeight: 1 }}>×</button>
+    <div style={{
+      position: 'absolute', inset: 0,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 50, padding: '24px',
+    }}>
+      <div style={{
+        background: L.color.surface.canvas,
+        borderRadius: tokens.radius.xl,
+        border: `1px solid ${L.color.border.subtle}`,
+        width: '100%', maxWidth: '580px', maxHeight: '500px',
+        display: 'flex', flexDirection: 'column',
+      }}>
+        <div style={{
+          padding: '14px 20px',
+          borderBottom: `1px solid ${L.color.border.subtle}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
+        }}>
+          <Text variant="label">Compiled system prompt</Text>
+          <button
+            onClick={onClose}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: L.color.text.muted, fontSize: '20px', lineHeight: 1 }}
+          >×</button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
-          <pre style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.8', whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono)', margin: 0 }}>{content}</pre>
+          <pre style={{
+            fontSize: '12px', color: L.color.text.muted,
+            lineHeight: '1.8', whiteSpace: 'pre-wrap',
+            fontFamily: 'var(--font-mono)', margin: 0,
+          }}>{content}</pre>
         </div>
-        <div style={{ padding: '12px 20px', borderTop: '0.5px solid var(--color-border-tertiary)', display: 'flex', justifyContent: 'flex-end', gap: '8px', flexShrink: 0 }}>
-          <button onClick={onClose} style={{ padding: '7px 14px', borderRadius: '8px', border: '0.5px solid var(--color-border-tertiary)', background: 'transparent', color: 'var(--color-text-secondary)', fontSize: '12px', cursor: 'pointer' }}>Close</button>
-          <button style={{ padding: '7px 16px', borderRadius: '8px', border: 'none', background: G, color: 'white', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}>Activate ↗</button>
+        <div style={{
+          padding: '12px 20px',
+          borderTop: `1px solid ${L.color.border.subtle}`,
+          display: 'flex', justifyContent: 'flex-end', gap: '8px', flexShrink: 0,
+        }}>
+          <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
+          <Button variant="primary" size="sm">Activate ↗</Button>
         </div>
       </div>
     </div>
   );
 }
+
+// ─── PromptBuilder ────────────────────────────────────────────────────────────
 
 export default function PromptBuilder() {
   const [canvas, setCanvas] = useState('prompts');
@@ -406,57 +581,76 @@ Be concise and direct. Professional tone.`;
 
   const blockCount = (k: string) => data[k as keyof typeof data].topics.reduce((a: number, t: any) => a + t.blocks.length, 0);
 
-  const inputBase: React.CSSProperties = { width: '100%', padding: '8px 10px', borderRadius: '6px', border: '0.5px solid var(--color-border-secondary)', background: 'var(--color-background-primary)', fontSize: '13px', color: 'var(--color-text-primary)', outline: 'none', boxSizing: 'border-box', marginBottom: '8px' };
+  const sidebarHeader = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <Text variant="label" style={{ color: D.color.text.primary, fontFamily: 'var(--font-display)', fontSize: '15px' }}>
+        Sage
+      </Text>
+      <Text variant="muted" style={{ color: D.color.text.muted, fontSize: '11px' }}>
+        Prompt Builder
+      </Text>
+    </div>
+  );
+
+  const previewButton = (
+    <button
+      onClick={openPreview}
+      style={{
+        width: '100%',
+        padding: '10px',
+        borderRadius: tokens.radius.lg,
+        border: '1px solid var(--color-accent)',
+        background: 'transparent',
+        color: 'var(--color-accent)',
+        fontSize: '12px',
+        fontWeight: 500,
+        cursor: 'pointer',
+        fontFamily: 'var(--font-mono)',
+        letterSpacing: '0.02em',
+      }}
+    >
+      Preview compiled ↗
+    </button>
+  );
 
   return (
-    <div style={{ fontFamily: 'var(--font-sans)', fontSize: '14px', display: 'flex', height: '640px', border: '0.5px solid var(--color-border-tertiary)', borderRadius: '12px', overflow: 'hidden', position: 'relative', background: 'var(--color-background-primary)' }}>
+    <div className="relative flex h-full overflow-hidden">
+      {/* Canvas nav sidebar */}
+      <Sidebar header={sidebarHeader} footer={previewButton}>
+        <SidebarSection label="Canvases">
+          {(['guardrails', 'knowledge', 'prompts'] as const).map(key => (
+            <SidebarItem
+              key={key}
+              label={`${META[key].title} · ${blockCount(key)}`}
+              isActive={canvas === key}
+              onClick={() => { setCanvas(key); setWizard(null); setAddMode(null); setNewTopicMode(false); }}
+            />
+          ))}
+        </SidebarSection>
+      </Sidebar>
 
-      {/* Sidebar */}
-      <div style={{ width: '210px', borderRight: '0.5px solid var(--color-border-tertiary)', display: 'flex', flexDirection: 'column', background: 'var(--color-background-secondary)', flexShrink: 0 }}>
-        <div style={{ padding: '16px', borderBottom: '0.5px solid var(--color-border-tertiary)' }}>
-          <div style={{ fontSize: '16px', fontWeight: 500, color: 'var(--color-text-primary)', fontFamily: 'Georgia, var(--font-serif), serif' }}>Sage</div>
-          <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>Prompt Builder</div>
-        </div>
-
-        <div style={{ padding: '8px', flex: 1 }}>
-          <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '8px 10px 6px' }}>Canvases</div>
-          {['guardrails', 'knowledge', 'prompts'].map(key => {
-            const active = canvas === key;
-            return (
-              <button key={key}
-                onClick={() => { setCanvas(key); setWizard(null); setAddMode(null); setNewTopicMode(false); }}
-                style={{ width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: '8px', border: 'none', background: active ? 'var(--color-background-primary)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: active ? 'var(--color-text-primary)' : 'var(--color-text-secondary)', marginBottom: '2px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: active ? G : 'var(--color-border-secondary)', flexShrink: 0 }} />
-                <span style={{ flex: 1 }}>{META[key as keyof typeof META].title}</span>
-                <span style={{ fontSize: '11px', padding: '1px 5px', borderRadius: '10px', background: active ? GL : 'transparent', color: active ? G : 'var(--color-text-secondary)' }}>
-                  {blockCount(key)}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div style={{ padding: '12px' }}>
-          <button onClick={openPreview}
-            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: `0.5px solid ${G}`, background: 'transparent', color: G, fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}>
-            Preview compiled ↗
-          </button>
-        </div>
-      </div>
-
-      {/* Main */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-        <div style={{ padding: '14px 20px', borderBottom: '0.5px solid var(--color-border-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+      {/* Main content */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Canvas header */}
+        <div
+          className="flex shrink-0 items-center justify-between px-5 py-4"
+          style={{
+            borderBottom: `1px solid ${L.color.border.subtle}`,
+            background: L.color.surface.canvas,
+          }}
+        >
           <div>
-            <div style={{ fontSize: '15px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{meta.title}</div>
-            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{meta.desc}</div>
+            <Text variant="title">{meta.title}</Text>
+            <Text variant="muted" style={{ marginTop: '2px', fontSize: '12px' }}>{meta.desc}</Text>
           </div>
-          <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: GL, color: G, fontWeight: 500, whiteSpace: 'nowrap', marginLeft: '12px' }}>
-            {meta.label}
-          </span>
+          <Badge variant="default" size="sm">{meta.label}</Badge>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {/* Scrollable topic list */}
+        <div
+          className="flex flex-1 flex-col gap-3 overflow-y-auto p-5"
+          style={{ background: L.color.surface.panel }}
+        >
           {topics.map((topic: any) => (
             <TopicCard
               key={topic.id}
@@ -473,22 +667,39 @@ Be concise and direct. Professional tone.`;
           ))}
 
           {newTopicMode ? (
-            <div style={{ border: '0.5px solid var(--color-border-secondary)', borderRadius: '10px', padding: '12px', background: 'var(--color-background-secondary)' }}>
-              <input autoFocus value={newTopicName}
+            <div
+              className="flex flex-col gap-3 rounded-xl p-3"
+              style={{
+                border: `1px solid ${L.color.border.subtle}`,
+                background: L.color.surface.canvas,
+              }}
+            >
+              <input
+                autoFocus
+                value={newTopicName}
                 onChange={e => setNewTopicName(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') addTopic(); if (e.key === 'Escape') { setNewTopicMode(false); setNewTopicName(''); } }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') addTopic();
+                  if (e.key === 'Escape') { setNewTopicMode(false); setNewTopicName(''); }
+                }}
                 placeholder="Topic name (e.g. Ideal Client, Philosophy, Pricing)..."
-                style={inputBase} />
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button onClick={addTopic}
-                  style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: G, color: 'white', fontSize: '12px', cursor: 'pointer', fontWeight: 500 }}>Add topic</button>
-                <button onClick={() => { setNewTopicMode(false); setNewTopicName(''); }}
-                  style={{ padding: '6px 10px', borderRadius: '6px', border: '0.5px solid var(--color-border-tertiary)', background: 'transparent', color: 'var(--color-text-secondary)', fontSize: '12px', cursor: 'pointer' }}>Cancel</button>
+                style={{ ...inputStyle, marginBottom: 0 }}
+              />
+              <div className="flex gap-2">
+                <Button size="sm" variant="primary" onClick={addTopic}>Add topic</Button>
+                <Button size="sm" variant="ghost" onClick={() => { setNewTopicMode(false); setNewTopicName(''); }}>Cancel</Button>
               </div>
             </div>
           ) : (
-            <button onClick={() => setNewTopicMode(true)}
-              style={{ padding: '10px', border: '0.5px dashed var(--color-border-secondary)', borderRadius: '10px', background: 'transparent', color: 'var(--color-text-secondary)', fontSize: '13px', cursor: 'pointer', width: '100%' }}>
+            <button
+              onClick={() => setNewTopicMode(true)}
+              className="w-full cursor-pointer rounded-xl py-3 text-sm"
+              style={{
+                border: `1px dashed ${L.color.border.subtle}`,
+                background: 'transparent',
+                color: L.color.text.muted,
+              }}
+            >
               + Add topic
             </button>
           )}
