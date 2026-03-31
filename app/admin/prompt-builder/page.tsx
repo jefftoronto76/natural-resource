@@ -758,8 +758,83 @@ Be concise and direct. Professional tone.`;
           </button>
         </div>
 
-        {/* Scrollable body — Steps 4–6 */}
-        <div className="flex flex-1 flex-col overflow-y-auto" style={{ background: D.color.surface.canvas }} />
+        {/* Scrollable body */}
+        <div className="flex flex-1 flex-col overflow-y-auto px-4 py-3" style={{ background: D.color.surface.canvas }}>
+
+          {/* Canvas title */}
+          <div className="mb-3">
+            <Text variant="label" style={{ color: D.color.text.primary }}>{meta.title}</Text>
+            <Text variant="muted" style={{ color: D.color.text.muted, fontSize: '11px', marginTop: '1px' }}>{meta.desc}</Text>
+          </div>
+
+          {/* Topic list */}
+          {topics.map((topic: any) => (
+            <div
+              key={topic.id}
+              className="mb-3 overflow-hidden rounded-xl"
+              style={{ border: `1px solid ${D.color.border.subtle}` }}
+            >
+              {/* Topic header */}
+              <div
+                onClick={() => toggleTopic(topic.id)}
+                className="flex cursor-pointer select-none items-center gap-2 px-4 py-3"
+                style={{ background: topic.open ? D.color.surface.panel : D.color.surface.canvas }}
+              >
+                <span style={{
+                  fontSize: '10px', color: D.color.text.muted,
+                  display: 'inline-block', transition: 'transform 0.15s',
+                  transform: topic.open ? 'rotate(90deg)' : 'none',
+                }}>▶</span>
+                <Text variant="label" className="flex-1" style={{ color: D.color.text.primary }}>{topic.name}</Text>
+                <Text variant="muted" style={{ fontSize: '11px', color: D.color.text.muted, marginRight: '4px' }}>
+                  {topic.blocks.length} block{topic.blocks.length !== 1 ? 's' : ''}
+                </Text>
+                <button
+                  onClick={e => { e.stopPropagation(); deleteTopic(topic.id); }}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: D.color.text.muted, fontSize: '16px', lineHeight: 1, padding: '0 2px', opacity: 0.5 }}
+                >×</button>
+              </div>
+
+              {/* Block rows */}
+              {topic.open && (
+                <div
+                  className="flex flex-col gap-2 px-4 py-3"
+                  style={{ borderTop: `1px solid ${D.color.border.subtle}` }}
+                >
+                  {topic.blocks.map((block: any) => (
+                    <div
+                      key={block.id}
+                      className="flex items-start gap-3 rounded-lg px-3 py-2"
+                      style={{ border: `1px solid ${D.color.border.subtle}`, background: D.color.surface.canvas }}
+                    >
+                      <div style={{ paddingTop: '1px', flexShrink: 0 }}>
+                        <Badge variant={BLOCK_TYPE_VARIANT[block.type] ?? 'default'} size="sm">
+                          {block.type}
+                        </Badge>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <Text variant="label" style={{ color: D.color.text.primary, marginBottom: '2px' }}>{block.name}</Text>
+                        <Text
+                          variant="muted"
+                          style={{ fontSize: '12px', lineHeight: '1.5', color: D.color.text.muted, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' } as React.CSSProperties}
+                        >
+                          {block.content}
+                        </Text>
+                      </div>
+                      <button
+                        onClick={() => deleteBlock(topic.id, block.id)}
+                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: D.color.text.muted, fontSize: '14px', flexShrink: 0, lineHeight: 1, opacity: 0.5, padding: '1px 2px' }}
+                      >×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Steps 5–6: add topic + add block forms go here */}
+
+        </div>
 
         {/* Bottom tab bar */}
         <div
