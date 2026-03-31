@@ -832,7 +832,39 @@ Be concise and direct. Professional tone.`;
             </div>
           ))}
 
-          {/* Steps 5–6: add topic + add block forms go here */}
+          {/* Add topic */}
+          {newTopicMode ? (
+            <div
+              className="flex flex-col gap-3 rounded-xl p-3"
+              style={{ border: `1px solid ${D.color.border.subtle}`, background: D.color.surface.panel }}
+            >
+              <input
+                autoFocus
+                value={newTopicName}
+                onChange={e => setNewTopicName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') addTopic();
+                  if (e.key === 'Escape') { setNewTopicMode(false); setNewTopicName(''); }
+                }}
+                placeholder="Topic name (e.g. Ideal Client, Philosophy, Pricing)..."
+                style={{ ...inputStyle, background: D.color.surface.canvas, color: D.color.text.primary, border: `1px solid ${D.color.border.subtle}`, marginBottom: 0 }}
+              />
+              <div className="flex gap-2">
+                <Button size="sm" variant="primary" onClick={addTopic}>Add topic</Button>
+                <Button size="sm" variant="ghost" onClick={() => { setNewTopicMode(false); setNewTopicName(''); }}>Cancel</Button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setNewTopicMode(true)}
+              className="w-full cursor-pointer rounded-xl py-3 text-sm"
+              style={{ border: `1px dashed ${D.color.border.subtle}`, background: 'transparent', color: D.color.text.muted }}
+            >
+              + Add topic
+            </button>
+          )}
+
+          {/* Step 6: add block strip goes here */}
 
         </div>
 
