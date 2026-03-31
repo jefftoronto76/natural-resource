@@ -724,8 +724,46 @@ Be concise and direct. Professional tone.`;
         )}
       </div>
 
-      {/* ── Mobile layout (below md) — Steps 2–7 ───────────────────────────── */}
-      <div className="flex h-full w-full flex-col md:hidden" style={{ background: D.color.surface.canvas }} />
+      {/* ── Mobile layout (below md) ────────────────────────────────────────── */}
+      <div className="flex h-full w-full flex-col md:hidden" style={{ background: D.color.surface.canvas }}>
+
+        {/* Mobile header */}
+        <div
+          className="flex shrink-0 items-center justify-between px-4 py-3"
+          style={{ borderBottom: `1px solid ${D.color.border.subtle}`, background: D.color.surface.panel }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+            <Text variant="label" style={{ color: D.color.text.primary, fontFamily: 'var(--font-display)', fontSize: '15px' }}>
+              Sage
+            </Text>
+            <Text variant="muted" style={{ color: D.color.text.muted, fontSize: '11px' }}>
+              Prompt Builder
+            </Text>
+          </div>
+          <button
+            onClick={openPreview}
+            style={{
+              padding: '5px 12px',
+              borderRadius: tokens.radius.lg,
+              border: '1px solid var(--color-accent)',
+              background: 'transparent',
+              color: 'var(--color-accent)',
+              fontSize: '12px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            Preview ↗
+          </button>
+        </div>
+
+        {/* Scrollable body — Steps 4–6 */}
+        <div className="flex flex-1 flex-col overflow-y-auto" style={{ background: D.color.surface.canvas }} />
+
+        {/* Bottom tab bar — Step 3 */}
+
+      </div>
 
     </div>
   );
