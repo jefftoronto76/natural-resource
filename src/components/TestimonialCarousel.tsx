@@ -140,6 +140,7 @@ export function TestimonialCarousel() {
         border: '1px solid rgba(26,25,23,0.12)',
         borderRadius: '16px',
         padding: 'clamp(40px, 5vw, 60px)',
+        minHeight: '400px',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: '0 4px 24px rgba(0,0,0,0.04)',
