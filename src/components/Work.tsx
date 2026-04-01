@@ -50,7 +50,7 @@ export function Work() {
   }
 
   return (
-    <section id="work" className="w-full px-8 py-32 max-w-7xl mx-auto">
+    <section id="work" className="w-full px-8 py-16 max-w-7xl mx-auto">
       {/* Section Label */}
       <p style={{
         fontFamily: 'var(--font-mono)',
@@ -85,10 +85,16 @@ export function Work() {
           <span className="italic">Two ways in.</span>
         </h2>
         <p
+          className="text-lg leading-relaxed mb-4"
+          style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400, color: 'rgba(26,25,23,0.6)' }}
+        >
+          I studied coaching at the graduate level, and it shapes how I approach growth and leadership.
+        </p>
+        <p
           className="text-lg leading-relaxed"
           style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400, color: 'rgba(26,25,23,0.6)' }}
         >
-          I studied coaching at the graduate level, and it shapes how I approach growth and leadership.<br />The goal of every conversation is simple: clearer priorities and 1–2 practical next moves for you.
+          The goal of every conversation is simple: clearer priorities and 1–2 practical next moves for you.
         </p>
       </div>
 
@@ -122,9 +128,9 @@ export function Work() {
           </h3>
 
           {/* Description */}
-          <div className="max-w-md space-y-2">
+          <div className="max-w-md">
             <p
-              className="text-base leading-relaxed text-gray-600"
+              className="text-base leading-relaxed text-gray-600 mb-4"
               style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
             >
               Structured thinking work, not just conversations.
@@ -317,9 +323,9 @@ export function Work() {
           </h3>
 
           {/* Description */}
-          <div className="max-w-md space-y-2">
+          <div className="max-w-md">
             <p
-              className="text-base leading-relaxed text-gray-600"
+              className="text-base leading-relaxed text-gray-600 mb-4"
               style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
             >
               For organizations that want to grow without the drama.

@@ -9,7 +9,7 @@ export function Hero() {
     <>
       <section id="hero" style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
-        justifyContent: 'center', padding: 'clamp(100px, 12vw, 140px) clamp(24px, 5vw, 48px) 80px',
+        justifyContent: 'center', padding: '64px clamp(24px, 5vw, 48px)',
         borderBottom: '1px solid rgba(26,25,23,0.08)',
         background: 'var(--color-bg)',
       }}>
@@ -46,11 +46,12 @@ export function Hero() {
           </p>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <a href="#session" style={{
+            <a href="#session" onClick={(e) => { e.preventDefault(); document.getElementById('session')?.scrollIntoView({ behavior: 'smooth' }) }} style={{
               display: 'inline-block', background: 'var(--color-text-primary)',
               color: 'var(--color-bg)', fontFamily: 'var(--font-mono)',
               fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
               padding: '16px 32px', textDecoration: 'none',
+              cursor: 'pointer',
             }}>Book a Session — $250</a>
             <a href="#chat" onClick={(e) => { e.preventDefault(); expand() }} style={{
               display: 'inline-block', background: 'transparent',

@@ -91,7 +91,7 @@ export function QuoteCarouselSection() {
   return (
     <section
       style={{
-        padding: 'clamp(80px, 10vw, 120px) clamp(24px, 5vw, 48px)',
+        padding: '64px clamp(24px, 5vw, 48px)',
         borderBottom: '1px solid rgba(26,25,23,0.08)',
       }}
     >
@@ -127,7 +127,7 @@ export function QuoteCarouselSection() {
           lineHeight: 1.08,
           letterSpacing: '-0.02em',
           color: 'var(--color-text-primary)',
-          marginBottom: '64px',
+          marginBottom: '48px',
         }}>
           What it's like to <em style={{ fontStyle: 'italic' }}>work together.</em>
         </h2>

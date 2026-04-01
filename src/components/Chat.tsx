@@ -43,9 +43,23 @@ export function Chat() {
     }
   }, [isExpanded])
 
+  const messageListRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // On mobile keyboard open, scroll message list to bottom
+  useEffect(() => {
+    if (!isExpanded) return
+    const vv = window.visualViewport
+    if (!vv) return
+    const onResize = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+    vv.addEventListener('resize', onResize)
+    return () => vv.removeEventListener('resize', onResize)
+  }, [isExpanded])
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -137,7 +151,7 @@ export function Chat() {
       <section
         id="chat"
         style={{
-          padding: 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)',
+          padding: '64px clamp(24px, 5vw, 48px)',
           borderBottom: '1px solid rgba(26,25,23,0.08)',
           background: '#f9f8f5',
         }}
@@ -240,6 +254,7 @@ export function Chat() {
           }}>
             <a
               href="#session"
+              onClick={(e) => { e.preventDefault(); document.getElementById('session')?.scrollIntoView({ behavior: 'smooth' }) }}
               style={{
                 display: 'inline-block',
                 border: '1px solid rgba(26,25,23,0.15)',
@@ -250,6 +265,7 @@ export function Chat() {
                 textTransform: 'uppercase',
                 padding: '14px 28px',
                 textDecoration: 'none',
+                cursor: 'pointer',
               }}
             >
               Book the $250 Session
@@ -262,7 +278,10 @@ export function Chat() {
       {isExpanded && (
         <div style={{
           position: 'fixed',
-          inset: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '100dvh',
           zIndex: 100,
           display: 'flex',
           flexDirection: 'column',
@@ -388,7 +407,7 @@ export function Chat() {
           <div style={{
             background: 'white',
             borderTop: '1px solid rgba(26,25,23,0.08)',
-            padding: '16px clamp(24px, 5vw, 48px)',
+            padding: '12px clamp(16px, 4vw, 48px)',
             flexShrink: 0,
           }}>
             <div style={{
@@ -396,7 +415,7 @@ export function Chat() {
               margin: '0 auto',
               display: 'flex',
               gap: '12px',
-              alignItems: 'flex-end',
+              alignItems: 'center',
             }}>
               <textarea
                 ref={textareaRef}
@@ -407,16 +426,17 @@ export function Chat() {
                 rows={1}
                 style={{
                   flex: 1,
-                  background: 'white',
+                  background: '#f9f8f5',
                   border: '1px solid rgba(26,25,23,0.12)',
-                  borderRadius: '8px',
-                  padding: '14px 16px',
+                  borderRadius: '12px',
+                  padding: '14px 18px',
                   fontFamily: 'var(--font-body)',
                   fontSize: '16px',
                   color: 'var(--color-text-primary)',
                   resize: 'none',
                   outline: 'none',
                   lineHeight: 1.5,
+                  minHeight: '48px',
                   maxHeight: '120px',
                 }}
               />
@@ -427,8 +447,8 @@ export function Chat() {
                   background: '#2d6a4f',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '48px',
-                  height: '48px',
+                  width: '44px',
+                  height: '44px',
                   cursor: isStreaming || !input.trim() ? 'not-allowed' : 'pointer',
                   opacity: isStreaming || !input.trim() ? 0.4 : 1,
                   display: 'flex',

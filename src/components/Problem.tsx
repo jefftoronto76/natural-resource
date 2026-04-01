@@ -7,7 +7,7 @@ export function Problem() {
   return (
     <>
     <section className="problem-section" style={{
-      padding: 'clamp(80px, 10vw, 120px) clamp(24px, 5vw, 48px)',
+      padding: '64px clamp(24px, 5vw, 48px)',
       borderBottom: '1px solid rgba(26,25,23,0.08)',
       backgroundImage: 'url(/ProblemBackground.webp)',
       backgroundSize: 'cover',

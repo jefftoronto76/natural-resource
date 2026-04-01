@@ -16,7 +16,7 @@ export function WhyMe() {
   const ref = useReveal()
   const carouselRef = useReveal()
 
-  const sectionPad = 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)'
+  const sectionPad = '64px clamp(24px, 5vw, 48px)'
   const labelStyle: React.CSSProperties = {
     fontFamily: 'var(--font-mono)', fontSize: '13.2px',
     letterSpacing: '0.22em', textTransform: 'uppercase',
@@ -56,7 +56,8 @@ export function WhyMe() {
             Clear thinking. Direct conversations. <em style={{ fontStyle: 'italic' }}>Measurable progress.</em>
           </h2>
           <div style={{ marginBottom: '40px' }}>
-            <p style={{ ...bodyStyle, marginBottom: 0 }}>I work with leaders and companies that don't need more ideas, they need execution that sticks.<br />My role is to help you focus on what matters, build capability, and make progress sustainable.</p>
+            <p style={{ ...bodyStyle, marginBottom: '16px' }}>I work with leaders and companies that don't need more ideas, they need execution that sticks.</p>
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>My role is to help you focus on what matters, build capability, and make progress sustainable.</p>
           </div>
 
           <div className="nr-split">
@@ -70,32 +71,32 @@ export function WhyMe() {
                 Principles in Practice
                 <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', display: 'block' }} />
               </p>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I am an operator who coaches.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>I am an operator who coaches.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Formal coach training that shows up in how I work — and in dedicated 1-on-1 coaching when that's what's needed.</p>
               </div>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Outcomes over activity.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Outcomes over activity.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>We focus on what actually moves performance forward.</p>
               </div>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I think at the ownership level.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>I think at the ownership level.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Most of my career has been at the founder and GM level. That's the lens I bring to every engagement.</p>
               </div>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>See the system, not just the symptoms.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>See the system, not just the symptoms.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>I look for the few constraints actually shaping performance, not the noise around them.</p>
               </div>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Capability over dependency.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Capability over dependency.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>The goal is stronger leaders and stronger organizations.</p>
               </div>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Confront the brutal facts.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Confront the brutal facts.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Reality is what it is. Progress requires honest conversations — delivered in a way people can actually use.</p>
               </div>
               <div>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Continuous learner. Active feedback seeker.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Continuous learner. Active feedback seeker.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Better judgment compounds. I constantly refine how I think, decide, and operate.</p>
               </div>
             </div>
