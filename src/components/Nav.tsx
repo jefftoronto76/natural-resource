@@ -4,9 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSageStore } from '../lib/store'
 
 const LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Work', href: '#work' },
-  { label: 'Session', href: '#work' },
+  { label: 'Schedule', href: '#work' },
   { label: 'Chat', href: '#chat' },
 ]
 
