@@ -2,7 +2,14 @@
 
 import { useState } from 'react'
 
+interface IntroCard {
+  type: 'intro'
+  headline: string
+  subheader: string
+}
+
 interface StatsCard {
+  type?: 'company'
   logo: string
   year: string
   tagline: string
@@ -15,7 +22,14 @@ interface StatsCard {
   quoteAuthor?: string
 }
 
-const STATS_CARDS: StatsCard[] = [
+type CarouselCard = IntroCard | StatsCard
+
+const CARDS: CarouselCard[] = [
+  {
+    type: 'intro',
+    headline: 'Career Highlights',
+    subheader: 'Strong outcomes across diverse businesses.',
+  },
   {
     logo: "/logos/Trapeze.svg",
     year: "2000",
@@ -92,15 +106,15 @@ const STATS_CARDS: StatsCard[] = [
 ]
 
 export function TestimonialCarousel() {
-  const [activeIndex, setActiveIndex] = useState(3)
+  const [activeIndex, setActiveIndex] = useState(0)
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
 
   const handlePrev = () => {
-    setActiveIndex((prev) => (prev === 0 ? STATS_CARDS.length - 1 : prev - 1))
+    setActiveIndex((prev) => (prev === 0 ? CARDS.length - 1 : prev - 1))
   }
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev === STATS_CARDS.length - 1 ? 0 : prev + 1))
+    setActiveIndex((prev) => (prev === CARDS.length - 1 ? 0 : prev + 1))
   }
 
   const toggleExpanded = (index: number) => {
@@ -115,7 +129,8 @@ export function TestimonialCarousel() {
     })
   }
 
-  const currentCard = STATS_CARDS[activeIndex]
+  const currentCard = CARDS[activeIndex]
+  const isIntro = currentCard.type === 'intro'
   const isExpanded = expandedCards.has(activeIndex)
 
   return (
@@ -131,24 +146,58 @@ export function TestimonialCarousel() {
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
         position: 'relative',
       }}>
-        {/* Year stamp - absolute top right */}
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          fontFamily: 'DM Mono, monospace',
-          fontSize: '11px',
-          color: 'rgba(26,25,23,0.25)',
-          letterSpacing: '0.15em',
-        }}>
-          {currentCard.year}
-        </div>
+        {/* Year stamp - company cards only */}
+        {!isIntro && (
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            fontFamily: 'DM Mono, monospace',
+            fontSize: '11px',
+            color: 'rgba(26,25,23,0.25)',
+            letterSpacing: '0.15em',
+          }}>
+            {(currentCard as StatsCard).year}
+          </div>
+        )}
 
-        <div>
+        {/* Intro card content */}
+        {isIntro && (
+          <div>
+            <h2 style={{
+              fontFamily: 'Playfair Display, serif',
+              fontSize: 'clamp(32px, 4vw, 52px)',
+              fontWeight: 400,
+              lineHeight: 1.1,
+              letterSpacing: '-0.02em',
+              color: '#1a1917',
+              marginBottom: 0,
+            }}>
+              {(currentCard as IntroCard).headline}
+            </h2>
+            <hr style={{
+              border: 'none',
+              borderTop: '1px solid #2d6a4f',
+              margin: '16px 0',
+            }} />
+            <p style={{
+              fontFamily: 'DM Sans, sans-serif',
+              fontSize: '16px',
+              lineHeight: 1.7,
+              color: 'rgba(26,25,23,0.55)',
+              margin: 0,
+            }}>
+              {(currentCard as IntroCard).subheader}
+            </p>
+          </div>
+        )}
+
+        {/* Company card content */}
+        {!isIntro && <div>
           {/* Logo - left aligned */}
           <div style={{ marginBottom: '20px' }}>
             <img
-              src={currentCard.logo}
+              src={(currentCard as StatsCard).logo}
               alt="Company logo"
               style={{
                 height: '40px',
@@ -167,7 +216,7 @@ export function TestimonialCarousel() {
             marginBottom: '24px',
             letterSpacing: '0.02em',
           }}>
-            {currentCard.tagline.split('→').map((part, i, arr) => (
+            {(currentCard as StatsCard).tagline.split('→').map((part, i, arr) => (
               <span key={i}>
                 {part.trim()}
                 {i < arr.length - 1 && (
@@ -181,23 +230,23 @@ export function TestimonialCarousel() {
           <div style={{ marginBottom: '20px' }}>
             <div style={{
               fontFamily: 'Playfair Display, serif',
-              fontSize: (currentCard.logo === "/logos/Keyhole.svg" || currentCard.logo === "/logos/MealGarden.svg")
+              fontSize: ((currentCard as StatsCard).logo === "/logos/Keyhole.svg" || (currentCard as StatsCard).logo === "/logos/MealGarden.svg")
                 ? 'clamp(40px, 5vw, 64px)'
                 : 'clamp(32px, 4vw, 48px)',
               fontWeight: 400,
               color: 'rgba(26,25,23,0.9)',
               lineHeight: 1.2,
             }}>
-              {currentCard.metric}
+              {(currentCard as StatsCard).metric}
             </div>
-            {currentCard.metricLabel && (
+            {(currentCard as StatsCard).metricLabel && (
               <div style={{
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: '14px',
                 color: 'rgba(26,25,23,0.5)',
                 marginTop: '4px',
               }}>
-                {currentCard.metricLabel}
+                {(currentCard as StatsCard).metricLabel}
               </div>
             )}
           </div>
@@ -210,12 +259,12 @@ export function TestimonialCarousel() {
             fontFamily: 'DM Sans, sans-serif',
             marginBottom: '24px',
           }}>
-            {currentCard.outcome}
+            {(currentCard as StatsCard).outcome}
           </p>
 
           {/* Expandable section */}
           <div style={{
-            maxHeight: isExpanded ? ((activeIndex === 0 || activeIndex === 1 || activeIndex === 2 || activeIndex === 3) ? '2000px' : '800px') : '0',
+            maxHeight: isExpanded ? '2000px' : '0',
             opacity: isExpanded ? 1 : 0,
             overflow: 'hidden',
             transition: 'max-height 0.3s ease, opacity 0.3s ease',
@@ -225,7 +274,7 @@ export function TestimonialCarousel() {
               paddingTop: '24px',
               paddingBottom: '24px'
             }}>
-              {activeIndex === 0 ? (
+              {activeIndex === 1 ? (
                 <>
                   {/* Trapeze custom expanded content */}
 
@@ -341,7 +390,7 @@ export function TestimonialCarousel() {
                     ))}
                   </ul>
                 </>
-              ) : activeIndex === 1 ? (
+              ) : activeIndex === 2 ? (
                 <>
                   {/* Infor custom expanded content */}
 
@@ -444,7 +493,7 @@ export function TestimonialCarousel() {
                     ))}
                   </ul>
                 </>
-              ) : activeIndex === 2 ? (
+              ) : activeIndex === 3 ? (
                 <>
                   {/* Keyhole custom expanded content */}
 
@@ -829,10 +878,10 @@ export function TestimonialCarousel() {
               )}
             </div>
           </div>
-        </div>
+        </div>}
 
-        {/* See More toggle */}
-        <button
+        {/* See More toggle - company cards only */}
+        {!isIntro && <button
           onClick={() => toggleExpanded(activeIndex)}
           style={{
             marginTop: isExpanded ? '16px' : '0',
@@ -874,7 +923,7 @@ export function TestimonialCarousel() {
           >
             <path d="M4 6L8 10L12 6" />
           </svg>
-        </button>
+        </button>}
       </div>
 
       <div style={{
@@ -915,7 +964,7 @@ export function TestimonialCarousel() {
         </button>
 
         <div style={{ display: 'flex', gap: '10px' }}>
-          {STATS_CARDS.map((_, index) => (
+          {CARDS.map((_, index) => (
             <button
               key={index}
               onClick={() => setActiveIndex(index)}
