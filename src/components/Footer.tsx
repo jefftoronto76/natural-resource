@@ -6,7 +6,7 @@ export function Footer() {
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', marginTop: '4px' }}>High Standards. Genuine Care. Results that compound.</p>
       </div>
       <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-        {['#about', '#work', '#session', '#chat'].map(href => (
+        {['#about', '#work', '#chat'].map(href => (
           <a key={href} href={href} style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-dim)', textDecoration: 'none' }}>
             {href.replace('#', '')}
           </a>

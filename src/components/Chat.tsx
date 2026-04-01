@@ -253,8 +253,8 @@ export function Chat() {
             borderTop: '1px solid rgba(26,25,23,0.08)',
           }}>
             <a
-              href="#session"
-              onClick={(e) => { e.preventDefault(); document.getElementById('session')?.scrollIntoView({ behavior: 'smooth' }) }}
+              href="#work"
+              onClick={(e) => { e.preventDefault(); document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' }) }}
               style={{
                 display: 'inline-block',
                 border: '1px solid rgba(26,25,23,0.15)',
