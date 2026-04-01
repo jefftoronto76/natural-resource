@@ -69,7 +69,6 @@ export function Chat() {
   useEffect(() => {
     if (isExpanded) {
       document.body.style.overflow = 'hidden'
-      textareaRef.current?.focus()
 
       if (!hasGreeted) {
         sendGreeting()
@@ -435,7 +434,25 @@ export function Chat() {
               display: 'flex',
               flexDirection: 'column',
               gap: '24px',
+              flex: 1,
             }}>
+              {messages.length === 0 && (
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <span style={{
+                    fontFamily: 'Playfair Display, serif',
+                    fontSize: 'clamp(48px, 6vw, 80px)',
+                    fontWeight: 400,
+                    color: '#1a1917',
+                  }}>
+                    Hello.
+                  </span>
+                </div>
+              )}
               {messages.map((msg) => {
                 if (msg.role === 'assistant' && !msg.content) return null
                 return (
@@ -549,7 +566,7 @@ export function Chat() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKey}
-                placeholder="Ask about Jeff's experience, approach, or expertise..."
+                placeholder=""
                 rows={1}
                 style={{
                   flex: 1,
