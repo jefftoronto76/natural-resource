@@ -76,7 +76,7 @@ const STATS_CARDS: StatsCard[] = [
     tagline: "Stalled Product → Stable Business",
     metric: "9×",
     metricLabel: "ARR Growth",
-    outcome: "GM-level ownership across P&L, product, sales, and demand generation.",
+    outcome: "Full P&L ownership across product, revenue, and operations. Turned a promising product into a real business.",
     story: "Recruited by the Founder to operationalize the business, establish P&L discipline, and build the leadership and commercial foundation for scale.",
     details: [
       "High-potential product with strong market fit but limited commercial structure and no integrated product-to-revenue operating model.",
@@ -215,7 +215,7 @@ export function TestimonialCarousel() {
 
           {/* Expandable section */}
           <div style={{
-            maxHeight: isExpanded ? ((activeIndex === 0 || activeIndex === 1 || activeIndex === 2) ? '2000px' : '800px') : '0',
+            maxHeight: isExpanded ? ((activeIndex === 0 || activeIndex === 1 || activeIndex === 2 || activeIndex === 3) ? '2000px' : '800px') : '0',
             opacity: isExpanded ? 1 : 0,
             overflow: 'hidden',
             transition: 'max-height 0.3s ease, opacity 0.3s ease',
@@ -525,6 +525,109 @@ export function TestimonialCarousel() {
                       { bold: 'Built commercial operating structure.', text: 'Introduced hiring plans, performance management, forecasting, and growth investment discipline.' },
                       { bold: 'Connected customer insights directly to product and GTM decisions.', text: 'Partnered with the CEO to close the loop between customer feedback, product direction, and go-to-market execution.' },
                       { bold: 'Developed team capability while delivering results.', text: 'Grew individual contributors through operator-coach leadership while hitting revenue outcomes.' },
+                    ].map((item, idx) => (
+                      <li key={idx} style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '16px',
+                        lineHeight: 1.7,
+                        paddingLeft: '20px',
+                        position: 'relative',
+                        marginBottom: idx < 5 ? '16px' : '0',
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          left: 0,
+                          color: '#2d6a4f',
+                          fontWeight: 600,
+                        }}>·</span>
+                        <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{item.bold}</span>
+                        <br />
+                        <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : activeIndex === 3 ? (
+                <>
+                  {/* Meal Garden custom expanded content */}
+
+                  {/* Quote block */}
+                  <div style={{
+                    borderLeft: '2px solid #2d6a4f',
+                    paddingLeft: '16px',
+                    marginBottom: '24px',
+                  }}>
+                    <p style={{
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '16px',
+                      lineHeight: 1.7,
+                      color: 'var(--color-text-primary)',
+                      fontStyle: 'italic',
+                      margin: 0,
+                    }}>
+                      "Jeff gave me the confidence to get out there and make it happen — whether that meant making a phone call, trying an out-of-the-box idea, or asking for help."
+                    </p>
+                    <p style={{
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '14px',
+                      color: 'var(--color-text-muted)',
+                      margin: '8px 0 0 0',
+                    }}>
+                      — Kiki, Demand Generation Lead, Meal Garden
+                    </p>
+                  </div>
+
+                  {/* What Got Me There */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginBottom: '12px',
+                  }}>
+                    What Got Me There
+                  </div>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                    Recruited by the Founder to operationalize the business, introduce P&L discipline, and build the leadership and commercial foundation required to turn early traction into a sustainable company.
+                  </p>
+
+                  {/* The Business */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginTop: '24px',
+                    marginBottom: '12px',
+                  }}>
+                    The Business
+                  </div>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                    Consumer and B2B SaaS platform helping individuals, dietitians, and food businesses manage nutrition and meal planning. Early product-market fit but a small, high-churn user base, no operating infrastructure, commercial discipline, or path to sustainable unit economics.
+                  </p>
+
+                  {/* Impact */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginTop: '24px',
+                    marginBottom: '12px',
+                  }}>
+                    Impact
+                  </div>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {[
+                      { bold: 'Held full P&L accountability while growing ARR 9×.', text: 'Introduced financial discipline, budget ownership, and performance cadence across revenue, product, and operations.' },
+                      { bold: 'Closed enterprise and institutional partnerships.', text: 'Signed HEB (one of the largest grocery chains in the US), Nutrigenomix, and Metabolic Balance — adding white-label and teams channels that expanded deal size and annual contract value.' },
+                      { bold: 'Built demand generation from scratch.', text: 'Hired and structured a team to drive awareness and trials, growing web traffic by triple digits.' },
+                      { bold: 'Expanded into new revenue channels.', text: 'Added teams, education, and platform partner motions — increasing deal size and shifting the base toward annual agreements.' },
+                      { bold: 'Spearheaded core product enhancements.', text: 'Drove delivery of payments, mobile, meal plan auto-generation, and enhanced food data — closing critical gaps for enterprise and practitioner use cases.' },
+                      { bold: 'Sustained strong conversion performance.', text: 'Maintained >18% trial-to-conversion through improved qualification, onboarding, and customer success.' },
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
