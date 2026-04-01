@@ -267,16 +267,16 @@ export function TestimonialCarousel() {
                   }}>
                     What Got Me There
                   </div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     My commercial training ground.
                   </p>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     Started part-time in Special Projects, supporting the executive team, reporting to the VP of Business Development (co-founder).
                   </p>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     Built early CRM and pipeline discipline, supported executive decisions, and saw firsthand how Constellation operators run software businesses.
                   </p>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     This is where I learned that great companies are built on discipline, focus, and consistent execution over time.
                   </p>
 
@@ -292,10 +292,10 @@ export function TestimonialCarousel() {
                   }}>
                     The Business
                   </div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     Mission-critical system-of-record technology supporting public transportation agencies across North America, spanning onboard systems, wireless infrastructure, hardware, and software.
                   </p>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Long sales cycles, complex stakeholders, and high switching costs, where costs, trust, execution, and consistency determine who wins.
                   </p>
 
@@ -322,7 +322,7 @@ export function TestimonialCarousel() {
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
-                        fontSize: '16px',
+                        fontSize: '14px',
                         lineHeight: 1.7,
                         paddingLeft: '20px',
                         position: 'relative',
@@ -382,7 +382,7 @@ export function TestimonialCarousel() {
                   }}>
                     What Got Me There
                   </div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Joined during Infor's transition from legacy ERP provider to cloud platform, helping expand CloudSuite adoption into both enterprise and mid-market organizations while building credibility in a highly structured Tier-1 sales environment.
                   </p>
 
@@ -398,7 +398,7 @@ export function TestimonialCarousel() {
                   }}>
                     The Business
                   </div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Global vertical software provider transitioning to a cloud-first strategy. Led CloudSuite HCM growth in Canada, helping introduce Talent Science as a strategic differentiator in complex enterprise sales.
                   </p>
 
@@ -425,7 +425,7 @@ export function TestimonialCarousel() {
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
-                        fontSize: '16px',
+                        fontSize: '14px',
                         lineHeight: 1.7,
                         paddingLeft: '20px',
                         position: 'relative',
@@ -485,7 +485,7 @@ export function TestimonialCarousel() {
                   }}>
                     What Got Me There
                   </div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Recruited by the CEO to rebuild revenue, increase deal size, and expand growth channels. Owned hiring, revenue structure, and growth investment decisions.
                   </p>
 
@@ -501,7 +501,7 @@ export function TestimonialCarousel() {
                   }}>
                     The Business
                   </div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Product-led SaaS company providing social listening and analytics tools. Strong self-serve adoption but limited enterprise motion, fragmented demand generation, and no structured revenue architecture.
                   </p>
 
@@ -528,7 +528,7 @@ export function TestimonialCarousel() {
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
-                        fontSize: '16px',
+                        fontSize: '14px',
                         lineHeight: 1.7,
                         paddingLeft: '20px',
                         position: 'relative',
@@ -588,7 +588,7 @@ export function TestimonialCarousel() {
                   }}>
                     What Got Me There
                   </div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Recruited by the Founder to operationalize the business, introduce P&L discipline, and build the leadership and commercial foundation required to turn early traction into a sustainable company.
                   </p>
 
@@ -604,7 +604,7 @@ export function TestimonialCarousel() {
                   }}>
                     The Business
                   </div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Consumer and B2B SaaS platform helping individuals, dietitians, and food businesses manage nutrition and meal planning. Early product-market fit but a small, high-churn user base, no operating infrastructure, commercial discipline, or path to sustainable unit economics.
                   </p>
 
@@ -631,7 +631,7 @@ export function TestimonialCarousel() {
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
-                        fontSize: '16px',
+                        fontSize: '14px',
                         lineHeight: 1.7,
                         paddingLeft: '20px',
                         position: 'relative',
