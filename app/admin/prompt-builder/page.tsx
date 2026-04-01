@@ -9,6 +9,7 @@ import { Button } from '@/components/admin/primitives/Button';
 import { Card } from '@/components/admin/primitives/Card';
 import { Text } from '@/components/admin/primitives/Text';
 import { tokens } from '@/components/admin/theme/tokens';
+import { PromptBuilderChat } from '@/components/admin/PromptBuilderChat';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -600,6 +601,23 @@ function PromptBuilder() {
     setAddMode(null);
   }
 
+  function addBlockAnywhere(topicId: string, name: string, content: string) {
+    if (!name.trim() || !content.trim()) return;
+    setData(d => {
+      const newData = { ...d };
+      for (const key of ['guardrails', 'knowledge', 'prompts'] as const) {
+        const idx = d[key].topics.findIndex((t: any) => t.id === topicId);
+        if (idx !== -1) {
+          const newTopics = [...d[key].topics];
+          newTopics[idx] = { ...newTopics[idx], blocks: [...newTopics[idx].blocks, { id: uid(), name: name.trim(), type: 'text', content: content.trim() }] };
+          newData[key] = { ...d[key], topics: newTopics };
+          break;
+        }
+      }
+      return newData;
+    });
+  }
+
   async function addUrlBlock(tid: string, url: string) {
     const topic = topics.find((t: any) => t.id === tid);
     if (!topic) return;
@@ -695,6 +713,7 @@ Be concise and direct. Professional tone.`;
   }
 
   return (
+    <>
     <div className="relative flex h-full overflow-hidden">
 
       {/* ── Desktop layout (md+) ────────────────────────────────────────────── */}
@@ -1015,5 +1034,7 @@ Be concise and direct. Professional tone.`;
       </div>
 
     </div>
+    <PromptBuilderChat data={data} onAddBlock={addBlockAnywhere} />
+    </>
   );
 }
