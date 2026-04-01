@@ -25,6 +25,7 @@ export function Chat() {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (isExpanded) {
@@ -49,16 +50,22 @@ export function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // On mobile keyboard open, scroll message list to bottom
+  // On mobile keyboard open, resize overlay to match the actual visible area
   useEffect(() => {
     if (!isExpanded) return
     const vv = window.visualViewport
     if (!vv) return
-    const onResize = () => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const onViewportChange = () => {
+      if (!overlayRef.current) return
+      overlayRef.current.style.top = `${vv.offsetTop}px`
+      overlayRef.current.style.height = `${vv.height}px`
     }
-    vv.addEventListener('resize', onResize)
-    return () => vv.removeEventListener('resize', onResize)
+    vv.addEventListener('resize', onViewportChange)
+    vv.addEventListener('scroll', onViewportChange)
+    return () => {
+      vv.removeEventListener('resize', onViewportChange)
+      vv.removeEventListener('scroll', onViewportChange)
+    }
   }, [isExpanded])
 
   useEffect(() => {
@@ -276,7 +283,7 @@ export function Chat() {
 
       {/* Full-viewport overlay — rendered on top, never replaces the section */}
       {isExpanded && (
-        <div style={{
+        <div ref={overlayRef} style={{
           position: 'fixed',
           top: 0,
           left: 0,
