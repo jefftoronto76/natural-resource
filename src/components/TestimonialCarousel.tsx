@@ -39,7 +39,7 @@ const STATS_CARDS: StatsCard[] = [
     year: "2015",
     tagline: "Legacy Vendor → Viable Cloud Partner",
     metric: "$1.7M",
-    outcome: "Closed the largest HCM CloudSuite deal in Company history.",
+    outcome: "Turned a small payroll opportunity into the largest CloudSuite HCM transformation deal in company history.",
     story: "Joined during Infor's push to expand cloud adoption and modernize its legacy ERP customer base.",
     details: [
       "Tier-1 enterprise software environment selling complex HCM transformation deals with long sales cycles, formal procurement, and executive stakeholders.",
@@ -215,7 +215,7 @@ export function TestimonialCarousel() {
 
           {/* Expandable section */}
           <div style={{
-            maxHeight: isExpanded ? (activeIndex === 0 ? '2000px' : '800px') : '0',
+            maxHeight: isExpanded ? ((activeIndex === 0 || activeIndex === 1) ? '2000px' : '800px') : '0',
             opacity: isExpanded ? 1 : 0,
             overflow: 'hidden',
             transition: 'max-height 0.3s ease, opacity 0.3s ease',
@@ -319,6 +319,109 @@ export function TestimonialCarousel() {
                       { bold: 'Built repeatable commercial systems.', text: 'Implemented sales playbooks, onboarding programs, forecasting discipline, and win/loss processes.' },
                       { bold: 'Operator and performer.', text: 'Consistently delivered as top individual contributor, top territory leader, top team leader, largest deals, and strongest quarters across roles.' },
                       { bold: 'Built trusted enterprise relationships.', text: 'Developed executive-level customer relationships that positioned Trapeze as a long-term strategic partner for more than 70 of the top 200 key accounts.' },
+                    ].map((item, idx) => (
+                      <li key={idx} style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '16px',
+                        lineHeight: 1.7,
+                        paddingLeft: '20px',
+                        position: 'relative',
+                        marginBottom: idx < 5 ? '16px' : '0',
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          left: 0,
+                          color: '#2d6a4f',
+                          fontWeight: 600,
+                        }}>·</span>
+                        <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{item.bold}</span>
+                        <br />
+                        <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : activeIndex === 1 ? (
+                <>
+                  {/* Infor custom expanded content */}
+
+                  {/* Quote block */}
+                  <div style={{
+                    borderLeft: '2px solid #2d6a4f',
+                    paddingLeft: '16px',
+                    marginBottom: '24px',
+                  }}>
+                    <p style={{
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '16px',
+                      lineHeight: 1.7,
+                      color: 'var(--color-text-primary)',
+                      fontStyle: 'italic',
+                      margin: 0,
+                    }}>
+                      "Despite early doubts, Jeff stayed with the opportunity, expanded the scope, and ultimately won a $1.75M CloudSuite deal in a highly competitive process. Real conviction and persistence."
+                    </p>
+                    <p style={{
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '14px',
+                      color: 'var(--color-text-muted)',
+                      margin: '8px 0 0 0',
+                    }}>
+                      — John Parsons, RVP Sales, Infor
+                    </p>
+                  </div>
+
+                  {/* What Got Me There */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginBottom: '12px',
+                  }}>
+                    What Got Me There
+                  </div>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                    Joined during Infor's transition from legacy ERP provider to cloud platform, helping expand CloudSuite adoption into both enterprise and mid-market organizations while building credibility in a highly structured Tier-1 sales environment.
+                  </p>
+
+                  {/* Market Context */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginTop: '24px',
+                    marginBottom: '12px',
+                  }}>
+                    Market Context
+                  </div>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                    Global vertical software provider transitioning to a cloud-first strategy. Led CloudSuite HCM growth in Canada, helping introduce Talent Science as a strategic differentiator in complex enterprise sales.
+                  </p>
+
+                  {/* Impact */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginTop: '24px',
+                    marginBottom: '12px',
+                  }}>
+                    Impact
+                  </div>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {[
+                      { bold: 'Expanded cloud adoption into new customer segments.', text: 'Helped drive CloudSuite adoption in the 1,000–5,000 employee segment while also competing successfully in large enterprise opportunities.' },
+                      { bold: 'Closed the largest CloudSuite HCM deal in company history.', text: 'Led a complex ~10,000 employee transformation involving core HCM, Payroll, WFM, Talent Science, and Learning.' },
+                      { bold: 'Reshaped and expanded a strategic opportunity.', text: 'Transformed what began as a narrow payroll evaluation into a full platform transformation by building executive alignment and expanding scope.' },
+                      { bold: 'Won in a highly competitive environment.', text: 'Successfully positioned Infor against strong competition including Ceridian through differentiated value articulation and executive engagement.' },
+                      { bold: 'Built enterprise credibility quickly.', text: 'Developed a $2M+ qualified pipeline within 18 months in a new Tier-1 environment.' },
+                      { bold: 'Demonstrated disciplined deal leadership.', text: 'Known internally for persistence, preparation, and the ability to navigate complex stakeholder environments.' },
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
