@@ -23,9 +23,12 @@ export function Chat() {
   } = useSageStore()
 
   const [input, setInput] = useState('')
+  const [isError, setIsError] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
+  const retryMsgsRef = useRef<typeof messages>([])
+  const retrySessionIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (isExpanded) {
@@ -47,8 +50,9 @@ export function Chat() {
   const messageListRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    if (!isExpanded) return
+    messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
+  }, [messages, isExpanded])
 
   // On mobile keyboard open, resize overlay to match the actual visible area
   useEffect(() => {
@@ -97,6 +101,7 @@ export function Chat() {
     const text = input.trim()
     if (!text || isStreaming) return
 
+    setIsError(false)
     const userMsg = { role: 'user' as const, content: text }
     // Capture messages before the state update — addMessage is async/batched
     // and the closure `messages` won't include the just-added message.
@@ -123,16 +128,53 @@ export function Chat() {
       }
     }
 
+    retryMsgsRef.current = msgsToSend
+    retrySessionIdRef.current = activeSessionId
+
     try {
       await streamSageResponse(msgsToSend, (chunk: string) => {
         updateLastMessage(chunk)
       })
     } catch (error) {
-      updateLastMessage('I encountered an issue. Please try again.')
+      updateLastMessage('')
+      setIsError(true)
+      setStreaming(false)
+      return
     }
     setStreaming(false)
 
     // Persist the completed conversation after each reply
+    if (activeSessionId) {
+      const { messages: finalMessages, visitorName } = useSageStore.getState()
+      fetch(`/api/sessions/${activeSessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: finalMessages, visitorName }),
+      })
+        .then((r) => r.json().then((d) => console.log('[Chat] PATCH /api/sessions status:', r.status, '| response:', JSON.stringify(d))))
+        .catch((err) => console.error('[Chat] PATCH /api/sessions failed:', err))
+    }
+  }
+
+  const retryLastSend = async () => {
+    if (isStreaming) return
+    setIsError(false)
+    setStreaming(true)
+    updateLastMessage('')
+
+    try {
+      await streamSageResponse(retryMsgsRef.current, (chunk: string) => {
+        updateLastMessage(chunk)
+      })
+    } catch (error) {
+      updateLastMessage('')
+      setIsError(true)
+      setStreaming(false)
+      return
+    }
+    setStreaming(false)
+
+    const activeSessionId = retrySessionIdRef.current
     if (activeSessionId) {
       const { messages: finalMessages, visitorName } = useSageStore.getState()
       fetch(`/api/sessions/${activeSessionId}`, {
@@ -358,30 +400,69 @@ export function Chat() {
               flexDirection: 'column',
               gap: '24px',
             }}>
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                  }}
-                >
+              {messages.map((msg) => {
+                if (msg.role === 'assistant' && !msg.content && !isStreaming) return null
+                return (
+                  <div
+                    key={msg.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                    }}
+                  >
+                    <div style={{
+                      maxWidth: '70%',
+                      padding: '16px',
+                      background: msg.role === 'user' ? '#2d6a4f' : 'white',
+                      color: msg.role === 'user' ? 'white' : 'var(--color-text-primary)',
+                      border: msg.role === 'user' ? 'none' : '1px solid rgba(26,25,23,0.08)',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      lineHeight: 1.7,
+                      fontFamily: 'var(--font-body)',
+                      whiteSpace: 'pre-wrap',
+                    }}>
+                      {msg.content}
+                    </div>
+                  </div>
+                )
+              })}
+              {isError && !isStreaming && (
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <div style={{
                     maxWidth: '70%',
                     padding: '16px',
-                    background: msg.role === 'user' ? '#2d6a4f' : 'white',
-                    color: msg.role === 'user' ? 'white' : 'var(--color-text-primary)',
-                    border: msg.role === 'user' ? 'none' : '1px solid rgba(26,25,23,0.08)',
+                    background: 'white',
+                    color: 'var(--color-text-primary)',
+                    border: '1px solid rgba(26,25,23,0.08)',
                     borderRadius: '8px',
                     fontSize: '16px',
                     lineHeight: 1.7,
                     fontFamily: 'var(--font-body)',
-                    whiteSpace: 'pre-wrap',
                   }}>
-                    {msg.content}
+                    Something went wrong. Please try again.
+                    <button
+                      onClick={retryLastSend}
+                      style={{
+                        display: 'block',
+                        marginTop: '12px',
+                        background: 'transparent',
+                        border: '1px solid rgba(26,25,23,0.15)',
+                        borderRadius: '6px',
+                        padding: '8px 16px',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '11px',
+                        letterSpacing: '0.12em',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        color: 'var(--color-text-muted)',
+                      }}
+                    >
+                      Retry
+                    </button>
                   </div>
                 </div>
-              ))}
+              )}
               {isStreaming && messages[messages.length - 1]?.content === '' && (
                 <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <div style={{
