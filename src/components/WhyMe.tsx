@@ -76,10 +76,6 @@ export function WhyMe() {
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Formal coach training that shows up in how I work — and in dedicated 1-on-1 coaching when that's what's needed.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Outcomes over activity.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>We focus on what actually moves performance forward.</p>
-              </div>
-              <div style={{ marginBottom: '24px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>I think at the ownership level.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Most of my career has been at the founder and GM level. That's the lens I bring to every engagement.</p>
               </div>
@@ -89,15 +85,11 @@ export function WhyMe() {
               </div>
               <div style={{ marginBottom: '24px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Capability over dependency.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>The goal is stronger leaders and stronger organizations.</p>
-              </div>
-              <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Confront the brutal facts.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Reality is what it is. Progress requires honest conversations — delivered in a way people can actually use.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>I build stronger individuals. Stronger individuals build stronger organizations.</p>
               </div>
               <div>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Continuous learner. Active feedback seeker.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Better judgment compounds. I constantly refine how I think, decide, and operate.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Transparency builds trust.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Progress requires honest conversations — delivered in a way people can actually use.</p>
               </div>
             </div>
 
