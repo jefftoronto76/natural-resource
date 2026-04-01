@@ -60,6 +60,7 @@ export function Chat() {
 
   const [input, setInput] = useState('')
   const [isError, setIsError] = useState(false)
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
@@ -98,6 +99,7 @@ export function Chat() {
       if (!overlayRef.current) return
       overlayRef.current.style.top = `${vv.offsetTop}px`
       overlayRef.current.style.height = `${vv.height}px`
+      setKeyboardOpen(vv.height < window.screen.height * 0.75)
     }
     vv.addEventListener('resize', onViewportChange)
     vv.addEventListener('scroll', onViewportChange)
@@ -371,6 +373,7 @@ export function Chat() {
           flexDirection: 'column',
           background: '#f9f8f5',
           animation: 'expandChat 0.3s ease-out',
+          transition: 'height 0.3s ease, top 0.3s ease',
         }}>
           <header style={{
             background: 'white',
@@ -607,6 +610,17 @@ export function Chat() {
                 →
               </button>
             </div>
+            <p style={{
+              textAlign: 'center',
+              fontFamily: 'DM Sans, sans-serif',
+              fontSize: '11px',
+              color: 'rgba(26,25,23,0.4)',
+              marginTop: '8px',
+              opacity: keyboardOpen ? 0 : 1,
+              transition: 'opacity 0.3s ease',
+            }}>
+              Sage knows Jeff's background and will give you a straight answer.
+            </p>
           </div>
         </div>
       )}
