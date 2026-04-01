@@ -99,10 +99,10 @@ export function Work() {
       </div>
 
       {/* Two Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24" style={{ alignItems: 'stretch' }}>
         {/* Column 1 - 1-on-1 Coaching */}
-        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)' }}>
-          <div className="space-y-8">
+        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)', display: 'flex', flexDirection: 'column' }}>
+          <div className="space-y-8" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Number */}
           <div
             className="text-xs tracking-widest text-gray-300"
@@ -241,7 +241,7 @@ export function Work() {
             <button
               onClick={() => setOpenCalendar('card1')}
               style={{
-                marginTop: '24px',
+                marginTop: 'auto',
                 width: '100%',
                 padding: '16px 32px',
                 background: 'rgba(26,25,23,0.9)',
@@ -296,8 +296,8 @@ export function Work() {
         </div>
 
         {/* Column 2 - Embedded Execution */}
-        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)' }}>
-          <div className="space-y-8">
+        <div className="border rounded-lg p-8" style={{ borderColor: 'rgba(26,25,23,0.12)', display: 'flex', flexDirection: 'column' }}>
+          <div className="space-y-8" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Number */}
           <div
             className="text-xs tracking-widest text-gray-300"
@@ -430,7 +430,7 @@ export function Work() {
             <button
               onClick={() => setOpenCalendar('card2')}
               style={{
-                marginTop: '24px',
+                marginTop: 'auto',
                 width: '100%',
                 padding: '16px 32px',
                 background: 'rgba(26,25,23,0.9)',
