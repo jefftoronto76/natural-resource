@@ -396,7 +396,7 @@ export function TestimonialCarousel() {
                     marginTop: '24px',
                     marginBottom: '12px',
                   }}>
-                    Market Context
+                    The Business
                   </div>
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Global vertical software provider transitioning to a cloud-first strategy. Led CloudSuite HCM growth in Canada, helping introduce Talent Science as a strategic differentiator in complex enterprise sales.
@@ -420,8 +420,8 @@ export function TestimonialCarousel() {
                       { bold: 'Closed the largest CloudSuite HCM deal in company history.', text: 'Led a complex ~10,000 employee transformation involving core HCM, Payroll, WFM, Talent Science, and Learning.' },
                       { bold: 'Reshaped and expanded a strategic opportunity.', text: 'Transformed what began as a narrow payroll evaluation into a full platform transformation by building executive alignment and expanding scope.' },
                       { bold: 'Won in a highly competitive environment.', text: 'Successfully positioned Infor against strong competition including Ceridian through differentiated value articulation and executive engagement.' },
-                      { bold: 'Built enterprise credibility quickly.', text: 'Developed a $2M+ qualified pipeline within 18 months in a new Tier-1 environment.' },
-                      { bold: 'Demonstrated disciplined deal leadership.', text: 'Known internally for persistence, preparation, and the ability to navigate complex stakeholder environments.' },
+                      { bold: 'Beat Dayforce in a head-to-head enterprise evaluation.', text: 'Successfully positioned Infor against Dayforce through differentiated value articulation and executive engagement.' },
+                      { bold: 'Known for persistence and preparation.', text: 'Known internally for the ability to stay with difficult opportunities and navigate complex stakeholder environments.' },
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
