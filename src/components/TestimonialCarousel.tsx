@@ -57,7 +57,7 @@ const STATS_CARDS: StatsCard[] = [
     tagline: "Self Service → PLG, Inbound & Enterprise",
     metric: "3×",
     metricLabel: "Deal Size",
-    outcome: "Rebuilt the revenue team around deal qualification, annual contracts and demand gen.",
+    outcome: "Built a multi-motion revenue engine spanning PLG, inbound, and enterprise while rebuilding the commercial foundation.",
     story: "Recruited by the CEO to rebuild revenue, grow deal size, and expand growth channels; owned hiring and growth spend.",
     details: [
       "Product-led SaaS company with strong self-serve adoption but limited enterprise motion and no structured demand generation.",
@@ -215,7 +215,7 @@ export function TestimonialCarousel() {
 
           {/* Expandable section */}
           <div style={{
-            maxHeight: isExpanded ? ((activeIndex === 0 || activeIndex === 1) ? '2000px' : '800px') : '0',
+            maxHeight: isExpanded ? ((activeIndex === 0 || activeIndex === 1 || activeIndex === 2) ? '2000px' : '800px') : '0',
             opacity: isExpanded ? 1 : 0,
             overflow: 'hidden',
             transition: 'max-height 0.3s ease, opacity 0.3s ease',
@@ -422,6 +422,109 @@ export function TestimonialCarousel() {
                       { bold: 'Won in a highly competitive environment.', text: 'Successfully positioned Infor against strong competition including Ceridian through differentiated value articulation and executive engagement.' },
                       { bold: 'Beat Dayforce in a head-to-head enterprise evaluation.', text: 'Successfully positioned Infor against Dayforce through differentiated value articulation and executive engagement.' },
                       { bold: 'Known for persistence and preparation.', text: 'Known internally for the ability to stay with difficult opportunities and navigate complex stakeholder environments.' },
+                    ].map((item, idx) => (
+                      <li key={idx} style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '16px',
+                        lineHeight: 1.7,
+                        paddingLeft: '20px',
+                        position: 'relative',
+                        marginBottom: idx < 5 ? '16px' : '0',
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          left: 0,
+                          color: '#2d6a4f',
+                          fontWeight: 600,
+                        }}>·</span>
+                        <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{item.bold}</span>
+                        <br />
+                        <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : activeIndex === 2 ? (
+                <>
+                  {/* Keyhole custom expanded content */}
+
+                  {/* Quote block */}
+                  <div style={{
+                    borderLeft: '2px solid #2d6a4f',
+                    paddingLeft: '16px',
+                    marginBottom: '24px',
+                  }}>
+                    <p style={{
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '16px',
+                      lineHeight: 1.7,
+                      color: 'var(--color-text-primary)',
+                      fontStyle: 'italic',
+                      margin: 0,
+                    }}>
+                      "Your question-based coaching had a huge impact on helping me think more creatively in the face of problems that seem unapproachable."
+                    </p>
+                    <p style={{
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '14px',
+                      color: 'var(--color-text-muted)',
+                      margin: '8px 0 0 0',
+                    }}>
+                      — Iara Rios, Manager, Content Marketing, Keyhole
+                    </p>
+                  </div>
+
+                  {/* What Got Me There */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginBottom: '12px',
+                  }}>
+                    What Got Me There
+                  </div>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                    Recruited by the CEO to rebuild revenue, increase deal size, and expand growth channels. Owned hiring, revenue structure, and growth investment decisions.
+                  </p>
+
+                  {/* The Business */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginTop: '24px',
+                    marginBottom: '12px',
+                  }}>
+                    The Business
+                  </div>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                    Product-led SaaS company providing social listening and analytics tools. Strong self-serve adoption but limited enterprise motion, fragmented demand generation, and no structured revenue architecture.
+                  </p>
+
+                  {/* Impact */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginTop: '24px',
+                    marginBottom: '12px',
+                  }}>
+                    Impact
+                  </div>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {[
+                      { bold: 'Built a multi-motion revenue engine.', text: 'Added inbound, enterprise, and structured demand generation to complement PLG growth.' },
+                      { bold: 'Tripled average deal size.', text: 'Introduced qualification discipline, annual contracts, and enterprise sales structure.' },
+                      { bold: 'Expanded revenue ownership beyond sales.', text: 'Added customer success, demand generation, and pipeline development capabilities.' },
+                      { bold: 'Built commercial operating structure.', text: 'Introduced hiring plans, performance management, forecasting, and growth investment discipline.' },
+                      { bold: 'Connected customer insights directly to product and GTM decisions.', text: 'Partnered with the CEO to close the loop between customer feedback, product direction, and go-to-market execution.' },
+                      { bold: 'Developed team capability while delivering results.', text: 'Grew individual contributors through operator-coach leadership while hitting revenue outcomes.' },
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
