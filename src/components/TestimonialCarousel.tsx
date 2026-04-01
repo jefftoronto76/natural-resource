@@ -215,7 +215,7 @@ export function TestimonialCarousel() {
 
           {/* Expandable section */}
           <div style={{
-            maxHeight: isExpanded ? '800px' : '0',
+            maxHeight: isExpanded ? (activeIndex === 0 ? '2000px' : '800px') : '0',
             opacity: isExpanded ? 1 : 0,
             overflow: 'hidden',
             transition: 'max-height 0.3s ease, opacity 0.3s ease',
@@ -225,7 +225,123 @@ export function TestimonialCarousel() {
               paddingTop: '24px',
               paddingBottom: '24px'
             }}>
-              {currentCard.quote ? (
+              {activeIndex === 0 ? (
+                <>
+                  {/* Trapeze custom expanded content */}
+
+                  {/* Quote block */}
+                  <div style={{
+                    borderLeft: '2px solid #2d6a4f',
+                    paddingLeft: '16px',
+                    marginBottom: '24px',
+                  }}>
+                    <p style={{
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '16px',
+                      lineHeight: 1.7,
+                      color: 'var(--color-text-primary)',
+                      fontStyle: 'italic',
+                      margin: 0,
+                    }}>
+                      "He has proven repeatedly that he can perform in the most trying situations."
+                    </p>
+                    <p style={{
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: '14px',
+                      color: 'var(--color-text-muted)',
+                      marginTop: '8px',
+                      margin: '8px 0 0 0',
+                    }}>
+                      — Rick Bacchus, President, Trapeze Group North America
+                    </p>
+                  </div>
+
+                  {/* What Got Me There */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginBottom: '12px',
+                  }}>
+                    What Got Me There
+                  </div>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
+                    My commercial training ground.
+                  </p>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
+                    Started part-time in Special Projects, supporting the executive team, reporting to the VP of Business Development (co-founder).
+                  </p>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
+                    Built early CRM and pipeline discipline, supported executive decisions, and saw firsthand how Constellation operators run software businesses.
+                  </p>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                    This is where I learned that great companies are built on discipline, focus, and consistent execution over time.
+                  </p>
+
+                  {/* The Business */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginTop: '24px',
+                    marginBottom: '12px',
+                  }}>
+                    The Business
+                  </div>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
+                    Mission-critical system-of-record technology supporting public transportation agencies across North America, spanning onboard systems, wireless infrastructure, hardware, and software.
+                  </p>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                    Long sales cycles, complex stakeholders, and high switching costs, where costs, trust, execution, and consistency determine who wins.
+                  </p>
+
+                  {/* Impact */}
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace',
+                    fontSize: '11px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-muted)',
+                    marginTop: '24px',
+                    marginBottom: '12px',
+                  }}>
+                    Impact
+                  </div>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {[
+                      { bold: 'Scaled multiple revenue segments.', text: 'Led growth across small sector, SMB, enterprise, and partner channels.' },
+                      { bold: 'Commercial leadership through acquisition integration.', text: 'Integrated acquired businesses across sales structure, territories, and customer relationships while protecting pipeline and revenue continuity.' },
+                      { bold: 'Protected revenue during organizational change.', text: 'Ensured deals progressed and customers remained stable through ownership and structural transitions.' },
+                      { bold: 'Built repeatable commercial systems.', text: 'Implemented sales playbooks, onboarding programs, forecasting discipline, and win/loss processes.' },
+                      { bold: 'Operator and performer.', text: 'Consistently delivered as top individual contributor, top territory leader, top team leader, largest deals, and strongest quarters across roles.' },
+                      { bold: 'Built trusted enterprise relationships.', text: 'Developed executive-level customer relationships that positioned Trapeze as a long-term strategic partner for more than 70 of the top 200 key accounts.' },
+                    ].map((item, idx) => (
+                      <li key={idx} style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '16px',
+                        lineHeight: 1.7,
+                        paddingLeft: '20px',
+                        position: 'relative',
+                        marginBottom: idx < 5 ? '16px' : '0',
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          left: 0,
+                          color: '#2d6a4f',
+                          fontWeight: 600,
+                        }}>·</span>
+                        <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{item.bold}</span>
+                        <br />
+                        <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : currentCard.quote ? (
                 <>
                   {/* WHAT GOT ME THERE section */}
                   <div style={{ marginBottom: '24px' }}>
