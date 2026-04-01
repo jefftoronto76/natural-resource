@@ -50,7 +50,7 @@ export function Work() {
   }
 
   return (
-    <section id="work" className="w-full px-8 py-32 max-w-7xl mx-auto">
+    <section id="work" className="w-full px-8 py-16 max-w-7xl mx-auto">
       {/* Section Label */}
       <p style={{
         fontFamily: 'var(--font-mono)',
@@ -122,9 +122,9 @@ export function Work() {
           </h3>
 
           {/* Description */}
-          <div className="max-w-md space-y-2">
+          <div className="max-w-md">
             <p
-              className="text-base leading-relaxed text-gray-600"
+              className="text-base leading-relaxed text-gray-600 mb-4"
               style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
             >
               Structured thinking work, not just conversations.
@@ -317,9 +317,9 @@ export function Work() {
           </h3>
 
           {/* Description */}
-          <div className="max-w-md space-y-2">
+          <div className="max-w-md">
             <p
-              className="text-base leading-relaxed text-gray-600"
+              className="text-base leading-relaxed text-gray-600 mb-4"
               style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
             >
               For organizations that want to grow without the drama.

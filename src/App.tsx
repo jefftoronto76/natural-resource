@@ -16,7 +16,7 @@ export default function App() {
         <Problem />
         <WhyMe />
         <Work />
-        {/* <Session /> */}
+        <Session />
         <Chat />
       </main>
       <Footer />

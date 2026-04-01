@@ -16,7 +16,7 @@ export function WhyMe() {
   const ref = useReveal()
   const carouselRef = useReveal()
 
-  const sectionPad = 'clamp(64px, 8vw, 96px) clamp(24px, 5vw, 48px)'
+  const sectionPad = '64px clamp(24px, 5vw, 48px)'
   const labelStyle: React.CSSProperties = {
     fontFamily: 'var(--font-mono)', fontSize: '11px',
     letterSpacing: '0.22em', textTransform: 'uppercase',
@@ -57,23 +57,23 @@ export function WhyMe() {
               }}>
                 We'll start with <em style={{ fontStyle: 'italic' }}>questions.</em>
               </h2>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>This will pressure-test your instincts to confirm the right move.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, marginBottom: '16px' }}>This will pressure-test your instincts to confirm the right move.</p>
               </div>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I'm a player-coach.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>I'm a player-coach.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>I operate at the decision level and get on the field when execution is the lever.</p>
               </div>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Most of my career, I've worked directly with founders and GMs.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Most of my career, I've worked directly with founders and GMs.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>I understand how to prioritize, think, and execute — not just advise.</p>
               </div>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>I deliver results with people, not through them.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>I deliver results with people, not through them.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Because growth only sticks when your team knows how to carry it forward.</p>
               </div>
               <div>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '4px' }}>Continuous learner. Active feedback seeker.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Continuous learner. Active feedback seeker.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>I stay sharp by constantly refining how I think and execute.</p>
               </div>
             </div>
