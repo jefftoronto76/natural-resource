@@ -66,6 +66,7 @@ const inputTokens = {
 
 export default function PromptBuilderPage() {
   const [showForm, setShowForm] = useState(false)
+  const [showDiscardModal, setShowDiscardModal] = useState(false)
   const [blocks, setBlocks] = useState<Block[]>([])
 
   // Form state
@@ -94,6 +95,29 @@ export default function PromptBuilderPage() {
     setFile(null)
   }
 
+  function formHasData(): boolean {
+    if (type !== 'guardrail') return true
+    if (topic !== DEFAULT_TOPICS.guardrail[0]) return true
+    if (content.trim().length > 0) return true
+    if (file !== null) return true
+    return false
+  }
+
+  function handleCancel() {
+    if (formHasData()) {
+      setShowDiscardModal(true)
+    } else {
+      resetForm()
+      setShowForm(false)
+    }
+  }
+
+  function confirmDiscard() {
+    setShowDiscardModal(false)
+    resetForm()
+    setShowForm(false)
+  }
+
   function handleTypeChange(newType: BlockType) {
     setType(newType)
     const topics = [...DEFAULT_TOPICS[newType], ...customTopics[newType]]
@@ -109,6 +133,11 @@ export default function PromptBuilderPage() {
       setNewTopicMode(false)
       setTopic(value)
     }
+  }
+
+  function cancelNewTopic() {
+    setNewTopicMode(false)
+    setNewTopicName('')
   }
 
   function confirmNewTopic() {
@@ -154,6 +183,23 @@ export default function PromptBuilderPage() {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
+      {/* Discard confirmation modal */}
+      {showDiscardModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <Card variant="outlined" className="flex w-full max-w-sm flex-col gap-4">
+            <Text variant="label">You have unsaved changes. Are you sure you want to cancel?</Text>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setShowDiscardModal(false)}>
+                Keep editing
+              </Button>
+              <Button variant="danger" size="sm" onClick={confirmDiscard}>
+                Discard and cancel
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
         <Text variant="title">Prompt Builder</Text>
@@ -161,8 +207,11 @@ export default function PromptBuilderPage() {
           variant={showForm ? 'ghost' : 'primary'}
           size="sm"
           onClick={() => {
-            if (showForm) resetForm()
-            setShowForm(!showForm)
+            if (showForm) {
+              handleCancel()
+            } else {
+              setShowForm(true)
+            }
           }}
         >
           {showForm ? 'Cancel' : 'Create new block'}
@@ -218,6 +267,9 @@ export default function PromptBuilderPage() {
                   />
                   <Button size="sm" variant="primary" onClick={confirmNewTopic}>
                     Add
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={cancelNewTopic}>
+                    Cancel
                   </Button>
                 </div>
               )}
