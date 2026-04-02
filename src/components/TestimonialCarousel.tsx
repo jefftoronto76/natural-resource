@@ -886,11 +886,16 @@ export function TestimonialCarousel() {
           onClick={(e) => {
             e.preventDefault()
             const isCollapsing = expandedCards.has(activeIndex)
+            const buttonY = e.currentTarget.getBoundingClientRect().top
             toggleExpanded(activeIndex)
             requestAnimationFrame(() => {
               toggleButtonRef.current?.focus()
-              if (isCollapsing) {
-                cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+              if (isCollapsing && toggleButtonRef.current) {
+                const newButtonY = toggleButtonRef.current.getBoundingClientRect().top
+                const delta = newButtonY - buttonY
+                if (Math.abs(delta) > 1) {
+                  window.scrollBy({ top: delta, behavior: 'instant' })
+                }
               }
             })
           }}
