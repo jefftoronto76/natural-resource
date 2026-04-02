@@ -3,8 +3,8 @@ import { getAdminClient } from './supabase-admin'
 
 /**
  * Ensures the current Clerk user has a corresponding row in the Supabase
- * `users` table.  Uses upsert (on conflict do nothing) so it's safe to
- * call on every admin page load.
+ * `users` table.  Upserts on email conflict, updating clerk_id and name
+ * if they've changed.  Safe to call on every admin page load.
  *
  * Returns the Supabase UUID for the user, or null if no Clerk session.
  */
@@ -16,14 +16,15 @@ export async function syncUser(): Promise<string | null> {
   if (!email) return null
 
   const name = [clerk.firstName, clerk.lastName].filter(Boolean).join(' ')
+  const clerkId = clerk.id
 
   const supabase = getAdminClient()
 
   const { data, error } = await supabase
     .from('users')
     .upsert(
-      { email, name },
-      { onConflict: 'email', ignoreDuplicates: true }
+      { email, name, clerk_id: clerkId },
+      { onConflict: 'email' }
     )
     .select('id')
     .single()
