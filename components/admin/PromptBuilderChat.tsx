@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react'
 import { tokens } from '@/components/admin/theme/tokens'
+import { readDataStream } from '@/lib/stream'
 
 const L = tokens.themes.light
 
@@ -60,27 +61,7 @@ async function streamPromptChat(
   })
   if (!response.ok) throw new Error(`API error: ${response.status}`)
 
-  const reader = response.body?.getReader()
-  if (!reader) throw new Error('No response body')
-
-  const decoder = new TextDecoder()
-  let accumulated = ''
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    const text = decoder.decode(value, { stream: true })
-    for (const line of text.split('\n')) {
-      const match = line.match(/^0:"(.*)"$/)
-      if (match) {
-        try {
-          const delta = JSON.parse(`"${match[1]}"`)
-          accumulated += delta
-          onChunk(accumulated)
-        } catch {}
-      }
-    }
-  }
+  await readDataStream(response, onChunk)
 }
 
 function parseAction(text: string): { displayText: string; action: PendingBlock | null } {
