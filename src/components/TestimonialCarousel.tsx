@@ -109,6 +109,7 @@ export function TestimonialCarousel() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
   const toggleButtonRef = useRef<HTMLButtonElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev === 0 ? CARDS.length - 1 : prev - 1))
@@ -136,7 +137,7 @@ export function TestimonialCarousel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-      <div style={{
+      <div ref={cardRef} style={{
         background: 'var(--color-bg)',
         border: '1px solid rgba(26,25,23,0.12)',
         borderRadius: '16px',
@@ -884,9 +885,13 @@ export function TestimonialCarousel() {
           ref={toggleButtonRef}
           onClick={(e) => {
             e.preventDefault()
+            const isCollapsing = expandedCards.has(activeIndex)
             toggleExpanded(activeIndex)
             requestAnimationFrame(() => {
               toggleButtonRef.current?.focus()
+              if (isCollapsing) {
+                cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+              }
             })
           }}
           style={{
