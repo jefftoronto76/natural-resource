@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface IntroCard {
   type: 'intro'
@@ -425,7 +426,7 @@ export function TestimonialCarousel() {
       </div>
 
       {/* Modal overlay */}
-      {modalIndex !== null && modalCard && (
+      {modalIndex !== null && modalCard && createPortal(
         <div
           onClick={closeModal}
           style={{
@@ -1091,7 +1092,8 @@ export function TestimonialCarousel() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <div style={{
