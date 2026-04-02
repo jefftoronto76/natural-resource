@@ -5,6 +5,8 @@ import { AppLayout } from '@/components/admin/layout/AppLayout';
 import { Sidebar } from '@/components/admin/layout/Sidebar';
 import { MainPanel } from '@/components/admin/layout/MainPanel';
 import { AdminSidebarNav } from '@/components/admin/navigation/AdminSidebarNav';
+import { AdminUserProvider } from '@/context/admin-user';
+import { syncUser } from '@/lib/sync-user';
 
 const wordmark = (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -28,25 +30,29 @@ const wordmark = (
   </div>
 );
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const supabaseUserId = await syncUser()
+
   return (
-    <AppLayout
-      sidebar={
-        <div className="hidden md:flex h-full shrink-0">
-          <Sidebar
-            header={wordmark}
-            footer={<UserButton />}
-          >
-            <Suspense>
-              <AdminSidebarNav />
-            </Suspense>
-          </Sidebar>
-        </div>
-      }
-    >
-      <MainPanel>
-        {children}
-      </MainPanel>
-    </AppLayout>
+    <AdminUserProvider supabaseUserId={supabaseUserId}>
+      <AppLayout
+        sidebar={
+          <div className="hidden md:flex h-full shrink-0">
+            <Sidebar
+              header={wordmark}
+              footer={<UserButton />}
+            >
+              <Suspense>
+                <AdminSidebarNav />
+              </Suspense>
+            </Sidebar>
+          </div>
+        }
+      >
+        <MainPanel>
+          {children}
+        </MainPanel>
+      </AppLayout>
+    </AdminUserProvider>
   );
 }
