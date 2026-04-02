@@ -24,7 +24,7 @@ export async function syncUser(): Promise<string | null> {
     .from('users')
     .upsert(
       { email, name, clerk_id: clerkId },
-      { onConflict: 'email' }
+      { onConflict: 'clerk_id' }
     )
     .select('id')
     .single()
