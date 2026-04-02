@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 import { Badge } from '@/components/admin/primitives/Badge'
 import { Button } from '@/components/admin/primitives/Button'
@@ -8,11 +8,22 @@ import { Card } from '@/components/admin/primitives/Card'
 import { Text } from '@/components/admin/primitives/Text'
 import { tokens } from '@/components/admin/theme/tokens'
 import { useAdminUserId } from '@/context/admin-user'
+import { readDataStream } from '@/lib/stream'
 
 // ─── Types & constants ───────────────────────────────────────────────────────
 
 type BlockType = 'guardrail' | 'knowledge' | 'prompt'
 type ContentMode = 'upload' | 'link' | 'create'
+
+interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+interface DraftBlock {
+  title: string
+  content: string
+}
 
 const TYPES: { value: BlockType; label: string }[] = [
   { value: 'guardrail', label: 'Guardrail' },
@@ -35,9 +46,8 @@ const TYPE_BADGE_VARIANT: Record<BlockType, 'default' | 'success' | 'warning'> =
 interface Block {
   type: BlockType
   topic: string
-  contentMode: ContentMode
+  title: string
   content: string
-  fileName?: string
 }
 
 // ─── Shared styles (token-based, used on native elements) ────────────────────
@@ -84,33 +94,53 @@ export default function PromptBuilderPage() {
   })
   const [newTopicMode, setNewTopicMode] = useState(false)
   const [newTopicName, setNewTopicName] = useState('')
+  const [blockName, setBlockName] = useState('')
   const [contentMode, setContentMode] = useState<ContentMode>('create')
   const [content, setContent] = useState('')
   const [file, setFile] = useState<File | null>(null)
 
+  // Chat state
+  const [chatMode, setChatMode] = useState(false)
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
+  const [draftBlock, setDraftBlock] = useState<DraftBlock | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
   const allTopics = [...DEFAULT_TOPICS[type], ...customTopics[type]]
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatMessages, chatLoading])
 
   function resetForm() {
     setType('guardrail')
     setTopic(DEFAULT_TOPICS.guardrail[0])
     setNewTopicMode(false)
     setNewTopicName('')
+    setBlockName('')
     setContentMode('create')
     setContent('')
     setFile(null)
     setContentId(null)
+    setChatMode(false)
+    setChatMessages([])
+    setChatInput('')
+    setChatLoading(false)
+    setDraftBlock(null)
   }
 
   function formHasData(): boolean {
     if (type !== 'guardrail') return true
     if (topic !== DEFAULT_TOPICS.guardrail[0]) return true
+    if (blockName.trim().length > 0) return true
     if (content.trim().length > 0) return true
     if (file !== null) return true
     return false
   }
 
   function handleCancel() {
-    if (formHasData()) {
+    if (chatMode || formHasData()) {
       setShowDiscardModal(true)
     } else {
       resetForm()
@@ -158,9 +188,62 @@ export default function PromptBuilderPage() {
     setNewTopicName('')
   }
 
+  function parseDoneJson(text: string): { displayText: string; draft: DraftBlock | null } {
+    const match = text.match(/\n?\{[\s\S]*?"done"\s*:\s*true[\s\S]*?\}\s*$/)
+    if (!match) return { displayText: text, draft: null }
+    try {
+      const parsed = JSON.parse(match[0].trim())
+      if (parsed.done && parsed.title && parsed.content) {
+        return {
+          displayText: text.slice(0, text.length - match[0].length).trim(),
+          draft: { title: parsed.title, content: parsed.content },
+        }
+      }
+    } catch { /* not valid JSON yet */ }
+    return { displayText: text, draft: null }
+  }
+
+  async function sendChatMessage(messages: ChatMessage[]) {
+    setChatLoading(true)
+    setChatMessages([...messages, { role: 'assistant', content: '' }])
+
+    try {
+      const contentType = contentMode === 'upload' ? 'upload' : contentMode === 'link' ? 'url' : 'text'
+      const raw = contentMode === 'upload' ? file?.name ?? '' : content
+
+      const response = await fetch('/api/admin/blocks/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type,
+          topic,
+          content_type: contentType,
+          content: raw,
+          messages,
+        }),
+      })
+
+      if (!response.ok) throw new Error(`API error: ${response.status}`)
+
+      const finalText = await readDataStream(response, (accumulated) => {
+        const { displayText } = parseDoneJson(accumulated)
+        setChatMessages([...messages, { role: 'assistant', content: displayText || accumulated }])
+      })
+
+      const { displayText, draft } = parseDoneJson(finalText)
+      setChatMessages([...messages, { role: 'assistant', content: displayText || finalText }])
+      if (draft) setDraftBlock(draft)
+    } catch (err) {
+      console.error('[chat] request failed:', err)
+      setChatMessages(messages)
+    } finally {
+      setChatLoading(false)
+    }
+  }
+
   async function handleCreate() {
     const raw = contentMode === 'upload' ? file?.name ?? '' : content
-    if (!raw.trim() || !ownerId) return
+    if (!raw.trim() || !ownerId || !blockName.trim()) return
 
     setIsSubmitting(true)
 
@@ -186,15 +269,41 @@ export default function PromptBuilderPage() {
       const record = await res.json()
       setContentId(record.id)
 
-      console.log('Content saved, id:', record.id)
-
-      // TODO: next step — open chat interface using this content record
+      // Transition to chat
+      setChatMode(true)
+      const initialMessage: ChatMessage = {
+        role: 'user',
+        content: `Here's my raw content for a "${blockName}" block:\n\n${raw}`,
+      }
+      await sendChatMessage([initialMessage])
     } catch (err) {
       console.error('[handleCreate] request failed:', err)
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  async function handleChatSend() {
+    const text = chatInput.trim()
+    if (!text || chatLoading) return
+    setChatInput('')
+    setDraftBlock(null)
+    const updated = [...chatMessages, { role: 'user' as const, content: text }]
+    await sendChatMessage(updated)
+  }
+
+  function handleSaveBlock() {
+    if (!draftBlock) return
+    setBlocks(prev => [
+      ...prev,
+      { type, topic, title: draftBlock.title, content: draftBlock.content },
+    ])
+    console.log('Block saved:', { type, topic, contentId, ...draftBlock })
+    resetForm()
+    setShowForm(false)
+  }
+
+  // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
@@ -235,7 +344,7 @@ export default function PromptBuilderPage() {
 
       <div className="flex flex-col gap-4 p-4 sm:p-6">
         {/* Create block form */}
-        {showForm && (
+        {showForm && !chatMode && (
           <Card variant="outlined" className="flex flex-col gap-5">
             <Text variant="label">New block</Text>
 
@@ -294,6 +403,18 @@ export default function PromptBuilderPage() {
               </Text>
             </div>
 
+            {/* Block name */}
+            <div className="flex flex-col gap-1.5">
+              <Text variant="muted">Block name</Text>
+              <input
+                value={blockName}
+                onChange={e => setBlockName(e.target.value)}
+                placeholder="e.g. Off-limit topics, Career summary..."
+                className="h-9 w-full rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-[length:var(--input-size)] text-[var(--input-text)] placeholder:text-[var(--input-muted)] outline-none"
+                style={inputTokens}
+              />
+            </div>
+
             {/* Content mode */}
             <div className="flex flex-col gap-2">
               <Text variant="muted">Content</Text>
@@ -346,9 +467,101 @@ export default function PromptBuilderPage() {
             </div>
 
             {/* Submit */}
-            <Button variant="primary" size="md" onClick={handleCreate} disabled={isSubmitting || !ownerId}>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleCreate}
+              disabled={isSubmitting || !ownerId || !blockName.trim() || !(content.trim() || file)}
+            >
               {isSubmitting ? 'Saving...' : 'Create Block'}
             </Button>
+          </Card>
+        )}
+
+        {/* Chat interface */}
+        {showForm && chatMode && (
+          <Card variant="outlined" className="flex flex-col gap-0 p-0">
+            {/* Chat header */}
+            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+              <div>
+                <Text variant="label">Refining block</Text>
+                <Text variant="muted" className="text-xs">
+                  {TYPES.find(t => t.value === type)?.label} &middot; {topic} &middot; {blockName}
+                </Text>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleCancel}>
+                Cancel
+              </Button>
+            </div>
+
+            {/* Messages */}
+            <div className="flex max-h-96 flex-col gap-3 overflow-y-auto p-4">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  {msg.content ? (
+                    <div
+                      className={`max-w-[85%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm leading-relaxed sm:max-w-[75%] ${
+                        msg.role === 'user'
+                          ? 'bg-gray-700 text-white'
+                          : 'bg-gray-100 text-gray-900'
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  ) : chatLoading ? (
+                    <div className="rounded-xl bg-gray-100 px-3 py-2 text-sm text-gray-400">
+                      Thinking...
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+
+              {/* Draft block card */}
+              {draftBlock && (
+                <Card variant="outlined" className="flex flex-col gap-3">
+                  <Text variant="muted" className="text-xs font-semibold uppercase tracking-wider">
+                    Block ready
+                  </Text>
+                  <Text variant="label">{draftBlock.title}</Text>
+                  <Text variant="muted" className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {draftBlock.content}
+                  </Text>
+                  <div className="flex gap-2">
+                    <Button variant="primary" size="sm" onClick={handleSaveBlock}>
+                      Save block
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setDraftBlock(null)}>
+                      Keep refining
+                    </Button>
+                  </div>
+                </Card>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Chat input */}
+            {!draftBlock && (
+              <div className="flex gap-2 border-t border-gray-200 px-4 py-3">
+                <input
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChatSend() } }}
+                  placeholder="Type your reply..."
+                  disabled={chatLoading}
+                  className="h-9 min-w-0 flex-1 rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-[length:var(--input-size)] text-[var(--input-text)] placeholder:text-[var(--input-muted)] outline-none disabled:opacity-50"
+                  style={inputTokens}
+                />
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleChatSend}
+                  disabled={chatLoading || !chatInput.trim()}
+                >
+                  Send
+                </Button>
+              </div>
+            )}
           </Card>
         )}
 
@@ -368,9 +581,7 @@ export default function PromptBuilderPage() {
                   <Text variant="muted" className="shrink-0">{block.topic}</Text>
                 </div>
                 <Text variant="label" className="min-w-0 truncate sm:flex-1">
-                  {block.contentMode === 'upload'
-                    ? block.fileName ?? 'Uploaded file'
-                    : block.content.slice(0, 80) || 'Empty block'}
+                  {block.title}
                 </Text>
               </Card>
             ))}
