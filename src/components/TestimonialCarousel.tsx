@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 interface StatsCard {
   logo: string
@@ -94,6 +94,7 @@ const STATS_CARDS: StatsCard[] = [
 export function TestimonialCarousel() {
   const [activeIndex, setActiveIndex] = useState(3)
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
+  const toggleButtonRef = useRef<HTMLButtonElement>(null)
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev === 0 ? STATS_CARDS.length - 1 : prev - 1))
@@ -408,7 +409,14 @@ export function TestimonialCarousel() {
 
         {/* See More toggle */}
         <button
-          onClick={() => toggleExpanded(activeIndex)}
+          ref={toggleButtonRef}
+          onClick={(e) => {
+            e.preventDefault()
+            toggleExpanded(activeIndex)
+            requestAnimationFrame(() => {
+              toggleButtonRef.current?.focus()
+            })
+          }}
           style={{
             marginTop: isExpanded ? '16px' : '0',
             background: 'transparent',
