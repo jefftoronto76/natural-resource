@@ -71,7 +71,7 @@ const CARDS: CarouselCard[] = [
     tagline: "Self Service → Multi-Motion Revenue",
     metric: "3×",
     metricLabel: "Deal Size",
-    outcome: "Rebuilt the commercial foundation and tripled average deal size.",
+    outcome: "Transitioned the revenue model from PLG to inbound and enterprise.",
     story: "Recruited by the CEO to rebuild revenue, grow deal size, and expand growth channels; owned hiring and growth spend.",
     details: [
       "Product-led SaaS company with strong self-serve adoption but limited enterprise motion and no structured demand generation.",
