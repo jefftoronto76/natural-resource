@@ -53,7 +53,7 @@ const CARDS: CarouselCard[] = [
     year: "2015",
     tagline: "Legacy Vendor → Viable Cloud Partner",
     metric: "$1.7M",
-    outcome: "Turned a small payroll opportunity into the largest CloudSuite HCM transformation deal in company history.",
+    outcome: "Built a $2.5M enterprise pipeline and closed a landmark CloudSuite HCM project.",
     story: "Joined during Infor's push to expand cloud adoption and modernize its legacy ERP customer base.",
     details: [
       "Tier-1 enterprise software environment selling complex HCM transformation deals with long sales cycles, formal procurement, and executive stakeholders.",
@@ -71,7 +71,7 @@ const CARDS: CarouselCard[] = [
     tagline: "Self Service → Multi-Motion Revenue",
     metric: "3×",
     metricLabel: "Deal Size",
-    outcome: "Built a multi-motion revenue engine spanning PLG, inbound, and enterprise while rebuilding the commercial foundation.",
+    outcome: "Rebuilt the commercial foundation and tripled average deal size.",
     story: "Recruited by the CEO to rebuild revenue, grow deal size, and expand growth channels; owned hiring and growth spend.",
     details: [
       "Product-led SaaS company with strong self-serve adoption but limited enterprise motion and no structured demand generation.",
