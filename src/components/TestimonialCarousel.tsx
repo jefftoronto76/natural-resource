@@ -87,7 +87,7 @@ const CARDS: CarouselCard[] = [
   {
     logo: "/logos/MealGarden.svg",
     year: "2019",
-    tagline: "Stalled Product → Stable Business",
+    tagline: "Stalled Product → Real Business",
     metric: "9×",
     metricLabel: "ARR Growth",
     outcome: "Full P&L ownership across product, revenue, and operations. Turned a promising product into a real business.",
@@ -673,7 +673,7 @@ export function TestimonialCarousel() {
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {[
                       { bold: 'Held full P&L accountability while growing ARR 9×.', text: 'Introduced financial discipline, budget ownership, and performance cadence across revenue, product, and operations.' },
-                      { bold: 'Closed enterprise and institutional partnerships.', text: 'Signed HEB (one of the largest grocery chains in the US), Nutrigenomix, and Metabolic Balance — adding white-label and teams channels that expanded deal size and annual contract value.' },
+                      { bold: 'Built enterprise and institutional partnerships.', text: 'Signed HEB (one of the largest grocery chains in the US), Nutrigenomix, and Metabolic Balance as white-label and teams channel partners.' },
                       { bold: 'Built demand generation from scratch.', text: 'Hired and structured a team to drive awareness and trials, growing web traffic by triple digits.' },
                       { bold: 'Expanded into new revenue channels.', text: 'Added teams, education, and platform partner motions — increasing deal size and shifting the base toward annual agreements.' },
                       { bold: 'Spearheaded core product enhancements.', text: 'Drove delivery of payments, mobile, meal plan auto-generation, and enhanced food data — closing critical gaps for enterprise and practitioner use cases.' },
