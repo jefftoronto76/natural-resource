@@ -109,7 +109,6 @@ export function TestimonialCarousel() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
   const toggleButtonRef = useRef<HTMLButtonElement>(null)
-  const cardRef = useRef<HTMLDivElement>(null)
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev === 0 ? CARDS.length - 1 : prev - 1))
@@ -137,7 +136,7 @@ export function TestimonialCarousel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-      <div ref={cardRef} style={{
+      <div style={{
         background: 'var(--color-bg)',
         border: '1px solid rgba(26,25,23,0.12)',
         borderRadius: '16px',
@@ -270,7 +269,7 @@ export function TestimonialCarousel() {
             maxHeight: isExpanded ? '2000px' : '0',
             opacity: isExpanded ? 1 : 0,
             overflow: 'hidden',
-            transition: 'max-height 0.3s ease, opacity 0.3s ease',
+            transition: isExpanded ? 'max-height 0.3s ease, opacity 0.3s ease' : 'none',
           }}>
             <div style={{
               borderTop: '1px solid rgba(26,25,23,0.08)',
@@ -885,18 +884,9 @@ export function TestimonialCarousel() {
           ref={toggleButtonRef}
           onClick={(e) => {
             e.preventDefault()
-            const isCollapsing = expandedCards.has(activeIndex)
-            const buttonY = e.currentTarget.getBoundingClientRect().top
             toggleExpanded(activeIndex)
             requestAnimationFrame(() => {
               toggleButtonRef.current?.focus()
-              if (isCollapsing && toggleButtonRef.current) {
-                const newButtonY = toggleButtonRef.current.getBoundingClientRect().top
-                const delta = newButtonY - buttonY
-                if (Math.abs(delta) > 1) {
-                  window.scrollBy({ top: delta, behavior: 'instant' })
-                }
-              }
             })
           }}
           style={{
