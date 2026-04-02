@@ -44,6 +44,7 @@ const TYPE_BADGE_VARIANT: Record<BlockType, 'default' | 'success' | 'warning'> =
 }
 
 interface Block {
+  id?: string
   type: BlockType
   topic: string
   title: string
@@ -105,7 +106,12 @@ export default function PromptBuilderPage() {
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
   const [draftBlock, setDraftBlock] = useState<DraftBlock | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Edit state
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editContent, setEditContent] = useState('')
 
   const allTopics = [...DEFAULT_TOPICS[type], ...customTopics[type]]
 
@@ -292,15 +298,62 @@ export default function PromptBuilderPage() {
     await sendChatMessage(updated)
   }
 
-  function handleSaveBlock() {
-    if (!draftBlock) return
-    setBlocks(prev => [
-      ...prev,
-      { type, topic, title: draftBlock.title, content: draftBlock.content },
-    ])
-    console.log('Block saved:', { type, topic, contentId, ...draftBlock })
-    resetForm()
-    setShowForm(false)
+  async function handleSaveBlock() {
+    if (!draftBlock || !ownerId || !contentId) return
+
+    setIsSaving(true)
+
+    try {
+      const res = await fetch('/api/admin/blocks/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type,
+          topic_id: topic,
+          title: draftBlock.title,
+          body: draftBlock.content,
+          source_id: contentId,
+          owner_id: ownerId,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        console.error('[handleSaveBlock] save failed:', err)
+        return
+      }
+
+      const saved = await res.json()
+      setBlocks(prev => [
+        ...prev,
+        { id: saved.id, type, topic, title: saved.title, content: saved.body },
+      ])
+      resetForm()
+      setShowForm(false)
+    } catch (err) {
+      console.error('[handleSaveBlock] request failed:', err)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  function startEdit(index: number) {
+    setEditingIndex(index)
+    setEditContent(blocks[index].content)
+  }
+
+  function cancelEdit() {
+    setEditingIndex(null)
+    setEditContent('')
+  }
+
+  function saveEdit(index: number) {
+    const block = blocks[index]
+    const updated = { ...block, content: editContent }
+    console.log('Block update:', { id: block.id, title: block.title, body: editContent })
+    setBlocks(prev => prev.map((b, i) => i === index ? updated : b))
+    setEditingIndex(null)
+    setEditContent('')
   }
 
   // ─── Render ──────────────────────────────────────────────────────────────────
@@ -527,10 +580,10 @@ export default function PromptBuilderPage() {
                     {draftBlock.content}
                   </Text>
                   <div className="flex gap-2">
-                    <Button variant="primary" size="sm" onClick={handleSaveBlock}>
-                      Save block
+                    <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
+                      {isSaving ? 'Saving...' : 'Save block'}
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setDraftBlock(null)}>
+                    <Button variant="ghost" size="sm" onClick={() => setDraftBlock(null)} disabled={isSaving}>
                       Keep refining
                     </Button>
                   </div>
@@ -573,16 +626,42 @@ export default function PromptBuilderPage() {
         ) : (
           <div className="flex flex-col gap-2">
             {blocks.map((block, i) => (
-              <Card key={i} variant="outlined" className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                <div className="flex items-center gap-2">
-                  <Badge variant={TYPE_BADGE_VARIANT[block.type]} size="sm">
-                    {block.type}
-                  </Badge>
-                  <Text variant="muted" className="shrink-0">{block.topic}</Text>
+              <Card key={i} variant="outlined" className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                  <div className="flex items-center gap-2">
+                    <Badge variant={TYPE_BADGE_VARIANT[block.type]} size="sm">
+                      {block.type}
+                    </Badge>
+                    <Text variant="muted" className="shrink-0">{block.topic}</Text>
+                  </div>
+                  <Text variant="label" className="min-w-0 truncate sm:flex-1">
+                    {block.title}
+                  </Text>
+                  {editingIndex !== i && (
+                    <Button variant="ghost" size="sm" onClick={() => startEdit(i)} className="shrink-0">
+                      Edit
+                    </Button>
+                  )}
                 </div>
-                <Text variant="label" className="min-w-0 truncate sm:flex-1">
-                  {block.title}
-                </Text>
+                {editingIndex === i && (
+                  <div className="flex flex-col gap-2 border-t border-gray-200 pt-2">
+                    <textarea
+                      value={editContent}
+                      onChange={e => setEditContent(e.target.value)}
+                      rows={4}
+                      className="w-full resize-y rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 font-mono text-[length:var(--input-size)] text-[var(--input-text)] leading-relaxed placeholder:text-[var(--input-muted)] outline-none"
+                      style={inputTokens}
+                    />
+                    <div className="flex gap-2">
+                      <Button variant="primary" size="sm" onClick={() => saveEdit(i)}>
+                        Save
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={cancelEdit}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </Card>
             ))}
           </div>
