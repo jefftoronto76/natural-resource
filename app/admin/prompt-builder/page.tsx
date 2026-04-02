@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 import { Badge } from '@/components/admin/primitives/Badge'
 import { Button } from '@/components/admin/primitives/Button'
@@ -14,6 +14,12 @@ import { readDataStream } from '@/lib/stream'
 
 type BlockType = 'guardrail' | 'knowledge' | 'prompt'
 type ContentMode = 'upload' | 'link' | 'create'
+
+interface Topic {
+  id: string
+  name: string
+  type: string
+}
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -31,12 +37,6 @@ const TYPES: { value: BlockType; label: string }[] = [
   { value: 'prompt', label: 'Prompt' },
 ]
 
-const DEFAULT_TOPICS: Record<BlockType, string[]> = {
-  guardrail: ['Do Not Engage', 'Hard Limits'],
-  knowledge: ['Background', 'Services & Pricing'],
-  prompt: ['Identity & Voice', 'Conversation'],
-}
-
 const TYPE_BADGE_VARIANT: Record<BlockType, 'default' | 'success' | 'warning'> = {
   guardrail: 'warning',
   knowledge: 'success',
@@ -46,7 +46,8 @@ const TYPE_BADGE_VARIANT: Record<BlockType, 'default' | 'success' | 'warning'> =
 interface Block {
   id?: string
   type: BlockType
-  topic: string
+  topicId: string
+  topicName: string
   title: string
   content: string
 }
@@ -85,16 +86,16 @@ export default function PromptBuilderPage() {
   const [contentId, setContentId] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Topics from Supabase
+  const [allTopics, setAllTopics] = useState<Topic[]>([])
+  const [topicsLoading, setTopicsLoading] = useState(true)
+
   // Form state
   const [type, setType] = useState<BlockType>('guardrail')
-  const [topic, setTopic] = useState(DEFAULT_TOPICS.guardrail[0])
-  const [customTopics, setCustomTopics] = useState<Record<BlockType, string[]>>({
-    guardrail: [],
-    knowledge: [],
-    prompt: [],
-  })
+  const [topicId, setTopicId] = useState<string>('')
   const [newTopicMode, setNewTopicMode] = useState(false)
   const [newTopicName, setNewTopicName] = useState('')
+  const [isCreatingTopic, setIsCreatingTopic] = useState(false)
   const [blockName, setBlockName] = useState('')
   const [contentMode, setContentMode] = useState<ContentMode>('create')
   const [content, setContent] = useState('')
@@ -113,7 +114,34 @@ export default function PromptBuilderPage() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editContent, setEditContent] = useState('')
 
-  const allTopics = [...DEFAULT_TOPICS[type], ...customTopics[type]]
+  // Derived: topics filtered by current type
+  const filteredTopics = allTopics.filter(t => t.type === type)
+
+  // Selected topic object (for display name)
+  const selectedTopic = allTopics.find(t => t.id === topicId)
+
+  // Fetch topics on mount
+  const fetchTopics = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/topics')
+      if (!res.ok) return
+      const data: Topic[] = await res.json()
+      setAllTopics(data)
+    } catch (err) {
+      console.error('[fetchTopics] failed:', err)
+    } finally {
+      setTopicsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchTopics() }, [fetchTopics])
+
+  // When type changes or topics load, auto-select first topic for that type
+  useEffect(() => {
+    if (filteredTopics.length > 0 && !filteredTopics.find(t => t.id === topicId)) {
+      setTopicId(filteredTopics[0].id)
+    }
+  }, [type, filteredTopics, topicId])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -121,7 +149,7 @@ export default function PromptBuilderPage() {
 
   function resetForm() {
     setType('guardrail')
-    setTopic(DEFAULT_TOPICS.guardrail[0])
+    setTopicId('')
     setNewTopicMode(false)
     setNewTopicName('')
     setBlockName('')
@@ -138,7 +166,6 @@ export default function PromptBuilderPage() {
 
   function formHasData(): boolean {
     if (type !== 'guardrail') return true
-    if (topic !== DEFAULT_TOPICS.guardrail[0]) return true
     if (blockName.trim().length > 0) return true
     if (content.trim().length > 0) return true
     if (file !== null) return true
@@ -162,9 +189,8 @@ export default function PromptBuilderPage() {
 
   function handleTypeChange(newType: BlockType) {
     setType(newType)
-    const topics = [...DEFAULT_TOPICS[newType], ...customTopics[newType]]
-    setTopic(topics[0] ?? '')
     setNewTopicMode(false)
+    // topicId will be auto-selected by the useEffect above
   }
 
   function handleTopicChange(value: string) {
@@ -173,7 +199,7 @@ export default function PromptBuilderPage() {
       setNewTopicName('')
     } else {
       setNewTopicMode(false)
-      setTopic(value)
+      setTopicId(value)
     }
   }
 
@@ -182,16 +208,35 @@ export default function PromptBuilderPage() {
     setNewTopicName('')
   }
 
-  function confirmNewTopic() {
+  async function confirmNewTopic() {
     const name = newTopicName.trim()
     if (!name) return
-    setCustomTopics(prev => ({
-      ...prev,
-      [type]: [...prev[type], name],
-    }))
-    setTopic(name)
-    setNewTopicMode(false)
-    setNewTopicName('')
+
+    setIsCreatingTopic(true)
+
+    try {
+      const res = await fetch('/api/admin/topics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, type }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        console.error('[confirmNewTopic] insert failed:', err)
+        return
+      }
+
+      const newTopic: Topic = await res.json()
+      setAllTopics(prev => [...prev, newTopic])
+      setTopicId(newTopic.id)
+      setNewTopicMode(false)
+      setNewTopicName('')
+    } catch (err) {
+      console.error('[confirmNewTopic] request failed:', err)
+    } finally {
+      setIsCreatingTopic(false)
+    }
   }
 
   function parseDoneJson(text: string): { displayText: string; draft: DraftBlock | null } {
@@ -216,13 +261,14 @@ export default function PromptBuilderPage() {
     try {
       const contentType = contentMode === 'upload' ? 'upload' : contentMode === 'link' ? 'url' : 'text'
       const raw = contentMode === 'upload' ? file?.name ?? '' : content
+      const topicName = selectedTopic?.name ?? ''
 
       const response = await fetch('/api/admin/blocks/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type,
-          topic,
+          topic: topicName,
           content_type: contentType,
           content: raw,
           messages,
@@ -249,18 +295,19 @@ export default function PromptBuilderPage() {
 
   async function handleCreate() {
     const raw = contentMode === 'upload' ? file?.name ?? '' : content
-    if (!raw.trim() || !ownerId || !blockName.trim()) return
+    if (!raw.trim() || !ownerId || !blockName.trim() || !topicId) return
 
     setIsSubmitting(true)
 
     try {
+      const topicName = selectedTopic?.name ?? ''
       const res = await fetch('/api/admin/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
           owner_id: ownerId,
-          name: topic,
+          name: topicName,
           type: contentMode === 'upload' ? 'upload' : contentMode === 'link' ? 'url' : 'text',
           raw,
         }),
@@ -299,7 +346,7 @@ export default function PromptBuilderPage() {
   }
 
   async function handleSaveBlock() {
-    if (!draftBlock || !ownerId || !contentId) return
+    if (!draftBlock || !ownerId || !contentId || !topicId) return
 
     setIsSaving(true)
 
@@ -309,7 +356,7 @@ export default function PromptBuilderPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type,
-          topic_id: topic,
+          topic_id: topicId,
           title: draftBlock.title,
           body: draftBlock.content,
           source_id: contentId,
@@ -324,9 +371,10 @@ export default function PromptBuilderPage() {
       }
 
       const saved = await res.json()
+      const topicName = selectedTopic?.name ?? ''
       setBlocks(prev => [
         ...prev,
-        { id: saved.id, type, topic, title: saved.title, content: saved.body },
+        { id: saved.id, type, topicId, topicName, title: saved.title, content: saved.body },
       ])
       resetForm()
       setShowForm(false)
@@ -419,17 +467,21 @@ export default function PromptBuilderPage() {
             {/* Topic */}
             <div className="flex flex-col gap-1.5">
               <Text variant="muted">Topic</Text>
-              <select
-                value={newTopicMode ? '__new__' : topic}
-                onChange={e => handleTopicChange(e.target.value)}
-                className="h-9 w-full rounded-[var(--select-radius)] border border-[var(--select-border)] bg-[var(--select-bg)] px-3 text-[length:var(--select-size)] text-[var(--select-text)] outline-none"
-                style={selectTokens}
-              >
-                {allTopics.map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-                <option value="__new__">New topic...</option>
-              </select>
+              {topicsLoading ? (
+                <Text variant="muted" className="text-xs">Loading topics...</Text>
+              ) : (
+                <select
+                  value={newTopicMode ? '__new__' : topicId}
+                  onChange={e => handleTopicChange(e.target.value)}
+                  className="h-9 w-full rounded-[var(--select-radius)] border border-[var(--select-border)] bg-[var(--select-bg)] px-3 text-[length:var(--select-size)] text-[var(--select-text)] outline-none"
+                  style={selectTokens}
+                >
+                  {filteredTopics.map(t => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                  <option value="__new__">New topic...</option>
+                </select>
+              )}
 
               {newTopicMode && (
                 <div className="flex gap-2">
@@ -442,10 +494,10 @@ export default function PromptBuilderPage() {
                     className="h-9 min-w-0 flex-1 rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-[length:var(--input-size)] text-[var(--input-text)] placeholder:text-[var(--input-muted)] outline-none"
                     style={inputTokens}
                   />
-                  <Button size="sm" variant="primary" onClick={confirmNewTopic}>
-                    Add
+                  <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
+                    {isCreatingTopic ? '...' : 'Add'}
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={cancelNewTopic}>
+                  <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
                     Cancel
                   </Button>
                 </div>
@@ -524,7 +576,7 @@ export default function PromptBuilderPage() {
               variant="primary"
               size="md"
               onClick={handleCreate}
-              disabled={isSubmitting || !ownerId || !blockName.trim() || !(content.trim() || file)}
+              disabled={isSubmitting || !ownerId || !blockName.trim() || !topicId || !(content.trim() || file)}
             >
               {isSubmitting ? 'Saving...' : 'Create Block'}
             </Button>
@@ -539,7 +591,7 @@ export default function PromptBuilderPage() {
               <div>
                 <Text variant="label">Refining block</Text>
                 <Text variant="muted" className="text-xs">
-                  {TYPES.find(t => t.value === type)?.label} &middot; {topic} &middot; {blockName}
+                  {TYPES.find(t => t.value === type)?.label} &middot; {selectedTopic?.name ?? ''} &middot; {blockName}
                 </Text>
               </div>
               <Button variant="ghost" size="sm" onClick={handleCancel}>
@@ -632,7 +684,7 @@ export default function PromptBuilderPage() {
                     <Badge variant={TYPE_BADGE_VARIANT[block.type]} size="sm">
                       {block.type}
                     </Badge>
-                    <Text variant="muted" className="shrink-0">{block.topic}</Text>
+                    <Text variant="muted" className="shrink-0">{block.topicName}</Text>
                   </div>
                   <Text variant="label" className="min-w-0 truncate sm:flex-1">
                     {block.title}
