@@ -7,6 +7,7 @@ import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
 import { Text } from '@/components/admin/primitives/Text'
 import { tokens } from '@/components/admin/theme/tokens'
+import { useAdminUserId } from '@/context/admin-user'
 
 // ─── Types & constants ───────────────────────────────────────────────────────
 
@@ -65,9 +66,13 @@ const inputTokens = {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function PromptBuilderPage() {
+  const ownerId = useAdminUserId()
+
   const [showForm, setShowForm] = useState(false)
   const [showDiscardModal, setShowDiscardModal] = useState(false)
   const [blocks, setBlocks] = useState<Block[]>([])
+  const [contentId, setContentId] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Form state
   const [type, setType] = useState<BlockType>('guardrail')
@@ -93,6 +98,7 @@ export default function PromptBuilderPage() {
     setContentMode('create')
     setContent('')
     setFile(null)
+    setContentId(null)
   }
 
   function formHasData(): boolean {
@@ -152,33 +158,42 @@ export default function PromptBuilderPage() {
     setNewTopicName('')
   }
 
-  function handleCreate() {
-    const value =
-      contentMode === 'upload'
-        ? file?.name ?? ''
-        : content
+  async function handleCreate() {
+    const raw = contentMode === 'upload' ? file?.name ?? '' : content
+    if (!raw.trim() || !ownerId) return
 
-    console.log({
-      type,
-      topic,
-      contentMode,
-      content: value,
-      fileName: contentMode === 'upload' ? file?.name : undefined,
-    })
+    setIsSubmitting(true)
 
-    setBlocks(prev => [
-      ...prev,
-      {
-        type,
-        topic,
-        contentMode,
-        content: value,
-        fileName: contentMode === 'upload' ? file?.name : undefined,
-      },
-    ])
+    try {
+      const res = await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
+          owner_id: ownerId,
+          name: topic,
+          type: contentMode === 'upload' ? 'upload' : contentMode === 'link' ? 'url' : 'text',
+          raw,
+        }),
+      })
 
-    resetForm()
-    setShowForm(false)
+      if (!res.ok) {
+        const err = await res.json()
+        console.error('[handleCreate] content insert failed:', err)
+        return
+      }
+
+      const record = await res.json()
+      setContentId(record.id)
+
+      console.log('Content saved, id:', record.id)
+
+      // TODO: next step — open chat interface using this content record
+    } catch (err) {
+      console.error('[handleCreate] request failed:', err)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -331,8 +346,8 @@ export default function PromptBuilderPage() {
             </div>
 
             {/* Submit */}
-            <Button variant="primary" size="md" onClick={handleCreate}>
-              Create Block
+            <Button variant="primary" size="md" onClick={handleCreate} disabled={isSubmitting || !ownerId}>
+              {isSubmitting ? 'Saving...' : 'Create Block'}
             </Button>
           </Card>
         )}
