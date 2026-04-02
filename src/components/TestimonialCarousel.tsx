@@ -249,8 +249,8 @@ export function TestimonialCarousel() {
             {/* Logo */}
             <div style={{ marginBottom: '20px' }}>
               {Array.isArray((currentCard as EducationCard).logo) ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  {((currentCard as EducationCard).logo as string[]).map((src, i) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'nowrap', overflow: 'hidden' }}>
+                  {((currentCard as EducationCard).logo as string[]).map((src, i, arr) => (
                     <img
                       key={i}
                       src={src}
@@ -259,6 +259,8 @@ export function TestimonialCarousel() {
                         height: '32px',
                         width: 'auto',
                         display: 'block',
+                        flexShrink: 1,
+                        ...(i === arr.length - 1 ? { maxWidth: '100px' } : {}),
                       }}
                     />
                   ))}
