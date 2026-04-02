@@ -185,7 +185,7 @@ export default function PromptBuilderPage() {
     <div className="flex h-full flex-col overflow-y-auto">
       {/* Discard confirmation modal */}
       {showDiscardModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <Card variant="outlined" className="flex w-full max-w-sm flex-col gap-4">
             <Text variant="label">You have unsaved changes. Are you sure you want to cancel?</Text>
             <div className="flex justify-end gap-2">
@@ -201,7 +201,7 @@ export default function PromptBuilderPage() {
       )}
 
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
         <Text variant="title">Prompt Builder</Text>
         <Button
           variant={showForm ? 'ghost' : 'primary'}
@@ -218,7 +218,7 @@ export default function PromptBuilderPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-col gap-4 p-4 sm:p-6">
         {/* Create block form */}
         {showForm && (
           <Card variant="outlined" className="flex flex-col gap-5">
@@ -282,7 +282,7 @@ export default function PromptBuilderPage() {
             {/* Content mode */}
             <div className="flex flex-col gap-2">
               <Text variant="muted">Content</Text>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {(['upload', 'link', 'create'] as const).map(mode => (
                   <Button
                     key={mode}
@@ -345,12 +345,14 @@ export default function PromptBuilderPage() {
         ) : (
           <div className="flex flex-col gap-2">
             {blocks.map((block, i) => (
-              <Card key={i} variant="outlined" className="flex items-center gap-3">
-                <Badge variant={TYPE_BADGE_VARIANT[block.type]} size="sm">
-                  {block.type}
-                </Badge>
-                <Text variant="muted" className="shrink-0">{block.topic}</Text>
-                <Text variant="label" className="min-w-0 flex-1 truncate">
+              <Card key={i} variant="outlined" className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                <div className="flex items-center gap-2">
+                  <Badge variant={TYPE_BADGE_VARIANT[block.type]} size="sm">
+                    {block.type}
+                  </Badge>
+                  <Text variant="muted" className="shrink-0">{block.topic}</Text>
+                </div>
+                <Text variant="label" className="min-w-0 truncate sm:flex-1">
                   {block.contentMode === 'upload'
                     ? block.fileName ?? 'Uploaded file'
                     : block.content.slice(0, 80) || 'Empty block'}
