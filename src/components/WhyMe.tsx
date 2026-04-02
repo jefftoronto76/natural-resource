@@ -72,20 +72,20 @@ export function WhyMe() {
                 <span style={{ flex: 1, height: '1px', background: 'rgba(26,25,23,0.1)', display: 'block' }} />
               </p>
               <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>I am an operator who coaches.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Formal coach training that shows up in how I work — and in dedicated 1-on-1 coaching when that's what's needed.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Operator who coaches.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Formal coach training that shows up in the work — and in dedicated 1-on-1 coaching when that's what's needed.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>I think at the ownership level.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Most of my career has been at the founder and GM level. That's the lens I bring to every engagement.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Ownership-level thinking.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Most of this career has been at the founder and GM level. That's the lens every engagement gets.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>See the system, not just the symptoms.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>I look for the few constraints actually shaping performance, not the noise around them.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Systems over symptoms.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Cut through the noise. Find the few things actually shaping performance and fix those.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Capability over dependency.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>I build stronger individuals. Stronger individuals build stronger organizations.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>Stronger individuals build stronger organizations.</p>
               </div>
               <div>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Transparency builds trust.</p>
