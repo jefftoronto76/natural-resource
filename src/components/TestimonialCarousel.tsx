@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface IntroCard {
   type: 'intro'
@@ -145,8 +145,9 @@ const CARDS: CarouselCard[] = [
 
 export function TestimonialCarousel() {
   const [activeIndex, setActiveIndex] = useState(0)
-  const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
-  const toggleButtonRef = useRef<HTMLButtonElement>(null)
+  const [modalIndex, setModalIndex] = useState<number | null>(null)
+  const [modalVisible, setModalVisible] = useState(false)
+  const modalContentRef = useRef<HTMLDivElement>(null)
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev === 0 ? CARDS.length - 1 : prev - 1))
@@ -156,23 +157,30 @@ export function TestimonialCarousel() {
     setActiveIndex((prev) => (prev === CARDS.length - 1 ? 0 : prev + 1))
   }
 
-  const toggleExpanded = (index: number) => {
-    setExpandedCards(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(index)) {
-        newSet.delete(index)
-      } else {
-        newSet.add(index)
-      }
-      return newSet
-    })
+  const openModal = (index: number) => {
+    setModalIndex(index)
+    requestAnimationFrame(() => setModalVisible(true))
   }
+
+  const closeModal = () => {
+    setModalVisible(false)
+    setTimeout(() => setModalIndex(null), 200)
+  }
+
+  useEffect(() => {
+    if (modalIndex !== null) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [modalIndex])
 
   const currentCard = CARDS[activeIndex]
   const isIntro = currentCard.type === 'intro'
   const isEducation = currentCard.type === 'education'
   const isCompany = !isIntro && !isEducation
-  const isExpanded = expandedCards.has(activeIndex)
+  const modalCard = modalIndex !== null ? CARDS[modalIndex] as StatsCard : null
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
@@ -373,19 +381,116 @@ export function TestimonialCarousel() {
             {(currentCard as StatsCard).outcome}
           </p>
 
-          {/* Expandable section */}
-          <div style={{
-            maxHeight: isExpanded ? '2000px' : '0',
-            opacity: isExpanded ? 1 : 0,
-            overflow: 'hidden',
-            transition: isExpanded ? 'max-height 0.3s ease, opacity 0.3s ease' : 'none',
-          }}>
+        </div>}
+
+        {/* See More button - company cards only */}
+        {isCompany && <button
+          onClick={() => openModal(activeIndex)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--color-accent)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 0',
+            transition: 'opacity 0.2s ease',
+            alignSelf: 'flex-start'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = '0.7'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = '1'
+          }}
+        >
+          See more
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4 6L8 10L12 6" />
+          </svg>
+        </button>}
+      </div>
+
+      {/* Modal overlay */}
+      {modalIndex !== null && modalCard && (
+        <div
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            opacity: modalVisible ? 1 : 0,
+            transition: 'opacity 0.2s ease',
+            padding: '20px',
+          }}
+        >
+          <div
+            ref={modalContentRef}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#fff',
+              borderRadius: '16px',
+              maxWidth: '640px',
+              width: '100%',
+              maxHeight: '80vh',
+              overflow: 'auto',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
+              padding: 'clamp(24px, 4vw, 40px)',
+              position: 'relative',
+            }}
+          >
+            {/* Modal header */}
             <div style={{
-              borderTop: '1px solid rgba(26,25,23,0.08)',
-              paddingTop: '24px',
-              paddingBottom: '24px'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '24px',
             }}>
-              {activeIndex === 1 ? (
+              <img
+                src={modalCard.logo}
+                alt="Company logo"
+                style={{ height: '40px', width: 'auto' }}
+              />
+              <button
+                onClick={closeModal}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  color: 'rgba(26,25,23,0.5)',
+                }}
+                aria-label="Close modal"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal content */}
+            <div style={{ borderTop: '1px solid rgba(26,25,23,0.08)', paddingTop: '24px' }}>
+              {modalIndex === 1 ? (
                 <>
                   {/* Trapeze custom expanded content */}
 
@@ -501,7 +606,7 @@ export function TestimonialCarousel() {
                     ))}
                   </ul>
                 </>
-              ) : activeIndex === 2 ? (
+              ) : modalIndex === 4 ? (
                 <>
                   {/* Infor custom expanded content */}
 
@@ -601,7 +706,7 @@ export function TestimonialCarousel() {
                     ))}
                   </ul>
                 </>
-              ) : activeIndex === 3 ? (
+              ) : modalIndex === 6 ? (
                 <>
                   {/* Keyhole custom expanded content */}
 
@@ -704,7 +809,7 @@ export function TestimonialCarousel() {
                     ))}
                   </ul>
                 </>
-              ) : activeIndex === 4 ? (
+              ) : modalIndex === 7 ? (
                 <>
                   {/* Meal Garden custom expanded content */}
 
@@ -807,7 +912,7 @@ export function TestimonialCarousel() {
                     ))}
                   </ul>
                 </>
-              ) : currentCard.quote ? (
+              ) : modalCard.quote ? (
                 <>
                   {/* WHAT GOT ME THERE section */}
                   <div style={{ marginBottom: '24px' }}>
@@ -830,7 +935,7 @@ export function TestimonialCarousel() {
                       fontWeight: 400,
                       margin: 0
                     }}>
-                      {currentCard.story}
+                      {modalCard.story}
                     </p>
                   </div>
 
@@ -855,7 +960,7 @@ export function TestimonialCarousel() {
                       fontWeight: 400,
                       margin: 0
                     }}>
-                      {currentCard.details[0]}
+                      {modalCard.details[0]}
                     </p>
                   </div>
 
@@ -880,7 +985,7 @@ export function TestimonialCarousel() {
                       flexDirection: 'column',
                       gap: '8px'
                     }}>
-                      {currentCard.details.slice(1).map((detail, idx) => (
+                      {modalCard.details.slice(1).map((detail, idx) => (
                         <li key={idx} style={{
                           fontFamily: 'var(--font-sans)',
                           fontSize: '14px',
@@ -927,7 +1032,7 @@ export function TestimonialCarousel() {
                         fontStyle: 'italic',
                         margin: 0
                       }}>
-                        {currentCard.quote}
+                        {modalCard.quote}
                       </p>
                     </div>
                     <div style={{
@@ -938,7 +1043,7 @@ export function TestimonialCarousel() {
                       textTransform: 'uppercase',
                       paddingLeft: '16px'
                     }}>
-                      {currentCard.quoteAuthor}
+                      {modalCard.quoteAuthor}
                     </div>
                   </div>
                 </>
@@ -952,7 +1057,7 @@ export function TestimonialCarousel() {
                     fontWeight: 400,
                     marginBottom: '20px'
                   }}>
-                    {currentCard.story}
+                    {modalCard.story}
                   </p>
 
                   <ul style={{
@@ -963,7 +1068,7 @@ export function TestimonialCarousel() {
                     flexDirection: 'column',
                     gap: '12px'
                   }}>
-                    {currentCard.details.map((detail, idx) => (
+                    {modalCard.details.map((detail, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'var(--font-sans)',
                         fontSize: '14px',
@@ -986,60 +1091,8 @@ export function TestimonialCarousel() {
               )}
             </div>
           </div>
-        </div>}
-
-        {/* See More toggle - company cards only */}
-        {isCompany && <button
-          ref={toggleButtonRef}
-          onClick={(e) => {
-            e.preventDefault()
-            toggleExpanded(activeIndex)
-            requestAnimationFrame(() => {
-              toggleButtonRef.current?.focus()
-            })
-          }}
-          style={{
-            marginTop: isExpanded ? '16px' : '0',
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--color-accent)',
-            fontFamily: 'var(--font-sans)',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 0',
-            transition: 'opacity 0.2s ease',
-            alignSelf: 'flex-start'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '0.7'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '1'
-          }}
-        >
-          {isExpanded ? 'See less' : 'See more'}
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{
-              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s ease'
-            }}
-          >
-            <path d="M4 6L8 10L12 6" />
-          </svg>
-        </button>}
-      </div>
+        </div>
+      )}
 
       <div style={{
         display: 'flex',
