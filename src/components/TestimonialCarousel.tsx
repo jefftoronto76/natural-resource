@@ -68,7 +68,7 @@ const CARDS: CarouselCard[] = [
   {
     logo: "/logos/Keyhole.svg",
     year: "2017",
-    tagline: "Self Service → PLG, Inbound & Enterprise",
+    tagline: "Self Service → Multi-Motion Revenue",
     metric: "3×",
     metricLabel: "Deal Size",
     outcome: "Built a multi-motion revenue engine spanning PLG, inbound, and enterprise while rebuilding the commercial foundation.",
