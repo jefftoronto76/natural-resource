@@ -466,12 +466,9 @@ export function TestimonialCarousel() {
                   </div>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {[
+                      { bold: 'Built a $2.5M+ qualified pipeline in under 18 months.', text: 'Established and developed relationships with key enterprise accounts across Canada, engaging in multiple competitive RFP processes.' },
                       { bold: 'Expanded cloud adoption into new customer segments.', text: 'Helped drive CloudSuite adoption in the 1,000–5,000 employee segment while also competing successfully in large enterprise opportunities.' },
-                      { bold: 'Closed the largest CloudSuite HCM deal in company history.', text: 'Led a complex ~10,000 employee transformation involving core HCM, Payroll, WFM, Talent Science, and Learning.' },
-                      { bold: 'Reshaped and expanded a strategic opportunity.', text: 'Transformed what began as a narrow payroll evaluation into a full platform transformation by building executive alignment and expanding scope.' },
-                      { bold: 'Won in a highly competitive environment.', text: 'Successfully positioned Infor against strong competition including Ceridian through differentiated value articulation and executive engagement.' },
-                      { bold: 'Beat Dayforce in a head-to-head enterprise evaluation.', text: 'Successfully positioned Infor against Dayforce through differentiated value articulation and executive engagement.' },
-                      { bold: 'Known for persistence and preparation.', text: 'Known internally for the ability to stay with difficult opportunities and navigate complex stakeholder environments.' },
+                      { bold: 'Closed the largest CloudSuite HCM deal in company history.', text: 'Transformed a narrow payroll evaluation into a full platform transformation — ~10,000 employees across HCM, Payroll, WFM, Talent Science, and Learning. Beat Dayforce in a head-to-head evaluation through persistence, preparation, and differentiated positioning.' },
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
@@ -479,7 +476,7 @@ export function TestimonialCarousel() {
                         lineHeight: 1.7,
                         paddingLeft: '20px',
                         position: 'relative',
-                        marginBottom: idx < 5 ? '16px' : '0',
+                        marginBottom: idx < 2 ? '16px' : '0',
                       }}>
                         <span style={{
                           position: 'absolute',
@@ -672,7 +669,7 @@ export function TestimonialCarousel() {
                   </div>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {[
-                      { bold: 'Held full P&L accountability while growing ARR 9×.', text: 'Introduced financial discipline, budget ownership, and performance cadence across revenue, product, and operations.' },
+                      { bold: 'Built the operating infrastructure from the ground up.', text: 'Introduced financial discipline, budget ownership, and performance cadence across revenue, product, and operations.' },
                       { bold: 'Built enterprise and institutional partnerships.', text: 'Signed HEB (one of the largest grocery chains in the US), Nutrigenomix, and Metabolic Balance as white-label and teams channel partners.' },
                       { bold: 'Built demand generation from scratch.', text: 'Hired and structured a team to drive awareness and trials, growing web traffic by triple digits.' },
                       { bold: 'Expanded into new revenue channels.', text: 'Added teams, education, and platform partner motions — increasing deal size and shifting the base toward annual agreements.' },
