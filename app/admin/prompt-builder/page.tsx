@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import ReactMarkdown from 'react-markdown'
 
 import { Badge } from '@/components/admin/primitives/Badge'
 import { Button } from '@/components/admin/primitives/Button'
@@ -73,6 +74,12 @@ const inputTokens = {
   '--input-font': tokens.typography.role.body.md.fontFamily,
   '--input-size': tokens.typography.role.body.md.fontSize,
   '--input-radius': tokens.radius.md,
+} as React.CSSProperties
+
+const accentButtonStyle = {
+  '--button-bg': 'var(--color-accent)',
+  '--button-bg-hover': 'var(--color-accent-hover)',
+  '--button-border': 'var(--color-accent)',
 } as React.CSSProperties
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -431,6 +438,7 @@ export default function PromptBuilderPage() {
         <Button
           variant={showForm ? 'ghost' : 'primary'}
           size="sm"
+          style={showForm ? undefined : accentButtonStyle}
           onClick={() => {
             if (showForm) {
               handleCancel()
@@ -494,7 +502,7 @@ export default function PromptBuilderPage() {
                     className="h-9 min-w-0 flex-1 rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-[length:var(--input-size)] text-[var(--input-text)] placeholder:text-[var(--input-muted)] outline-none"
                     style={inputTokens}
                   />
-                  <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
+                  <Button size="sm" variant="primary" style={accentButtonStyle} onClick={confirmNewTopic} disabled={isCreatingTopic}>
                     {isCreatingTopic ? '...' : 'Add'}
                   </Button>
                   <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
@@ -529,6 +537,7 @@ export default function PromptBuilderPage() {
                     key={mode}
                     variant={contentMode === mode ? 'primary' : 'ghost'}
                     size="sm"
+                    style={contentMode === mode ? accentButtonStyle : undefined}
                     onClick={() => {
                       setContentMode(mode)
                       setContent('')
@@ -575,6 +584,7 @@ export default function PromptBuilderPage() {
             <Button
               variant="primary"
               size="md"
+              style={accentButtonStyle}
               onClick={handleCreate}
               disabled={isSubmitting || !ownerId || !blockName.trim() || !topicId || !(content.trim() || file)}
             >
@@ -605,13 +615,17 @@ export default function PromptBuilderPage() {
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.content ? (
                     <div
-                      className={`max-w-[85%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm leading-relaxed sm:max-w-[75%] ${
+                      className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed sm:max-w-[75%] ${
                         msg.role === 'user'
-                          ? 'bg-gray-700 text-white'
-                          : 'bg-gray-100 text-gray-900'
+                          ? 'whitespace-pre-wrap bg-gray-700 text-white'
+                          : 'bg-gray-100 text-gray-900 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1'
                       }`}
                     >
-                      {msg.content}
+                      {msg.role === 'assistant' ? (
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      ) : (
+                        msg.content
+                      )}
                     </div>
                   ) : chatLoading ? (
                     <div className="rounded-xl bg-gray-100 px-3 py-2 text-sm text-gray-400">
@@ -632,7 +646,7 @@ export default function PromptBuilderPage() {
                     {draftBlock.content}
                   </Text>
                   <div className="flex gap-2">
-                    <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
+                    <Button variant="primary" size="sm" style={accentButtonStyle} onClick={handleSaveBlock} disabled={isSaving}>
                       {isSaving ? 'Saving...' : 'Save block'}
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => setDraftBlock(null)} disabled={isSaving}>
@@ -660,6 +674,7 @@ export default function PromptBuilderPage() {
                 <Button
                   variant="primary"
                   size="sm"
+                  style={accentButtonStyle}
                   onClick={handleChatSend}
                   disabled={chatLoading || !chatInput.trim()}
                 >
@@ -705,7 +720,7 @@ export default function PromptBuilderPage() {
                       style={inputTokens}
                     />
                     <div className="flex gap-2">
-                      <Button variant="primary" size="sm" onClick={() => saveEdit(i)}>
+                      <Button variant="primary" size="sm" style={accentButtonStyle} onClick={() => saveEdit(i)}>
                         Save
                       </Button>
                       <Button variant="ghost" size="sm" onClick={cancelEdit}>
