@@ -22,7 +22,16 @@ interface StatsCard {
   quoteAuthor?: string
 }
 
-type CarouselCard = IntroCard | StatsCard
+interface EducationCard {
+  type: 'education'
+  logo: string | string[]
+  year: string
+  program: string
+  focus: string
+  coursework?: string
+}
+
+type CarouselCard = IntroCard | StatsCard | EducationCard
 
 const CARDS: CarouselCard[] = [
   {
@@ -49,6 +58,20 @@ const CARDS: CarouselCard[] = [
     quoteAuthor: "Rick Bacchus, President, Trapeze Group North America"
   },
   {
+    type: 'education',
+    logo: '/logos/York_University_Logo.svg',
+    year: '2011',
+    program: 'Certificate in Executive Sales Leadership',
+    focus: 'Executive training in sales strategy, team leadership, and executive presence. Built the foundation for leading performance-driven revenue organizations.',
+  },
+  {
+    type: 'education',
+    logo: '/logos/royalroads_Logo.svg',
+    year: '2014',
+    program: 'Graduate Certificate in Executive Coaching',
+    focus: 'ICF-certified executive coaching training focused on leadership judgment, team effectiveness, and developing accountable, high-trust organizations.',
+  },
+  {
     logo: "/logos/Infor.svg",
     year: "2015",
     tagline: "Legacy Vendor → Viable Cloud Partner",
@@ -64,6 +87,13 @@ const CARDS: CarouselCard[] = [
     ],
     quote: "Dog with a bone. Awesome.",
     quoteAuthor: "John Parsons, Infor — on closing the largest CloudSuite HCM deal in company history"
+  },
+  {
+    type: 'education',
+    logo: '/logos/JohnHopkins_Logo.svg',
+    year: '2017',
+    program: 'Executive Data Science Specialization',
+    focus: 'Executive training in data-driven leadership, analytics strategy, and using metrics to improve decision quality and operational execution.',
   },
   {
     logo: "/logos/Keyhole.svg",
@@ -102,6 +132,14 @@ const CARDS: CarouselCard[] = [
     ],
     quote: "Jeff has been instrumental in moving Meal Garden forward.",
     quoteAuthor: "Vlad Chernenko, Founder, Meal Garden"
+  },
+  {
+    type: 'education',
+    logo: ['/logos/DesginLab_Logo.svg', '/logos/IDF_Logo.svg', '/logos/deeplearningai.svg'],
+    year: '2023–2025',
+    program: 'Product, UX & Applied AI',
+    focus: 'Continuous education across UX foundations, design thinking, technical product management, SaaS product development, structured decision-making, and applied AI. Focused on strengthening modern product judgment and AI fluency.',
+    coursework: 'UX Foundations · Design Thinking · Technical Product Management · AI for Everyone · Building SaaS Products with AI · Structured Decision Making',
   }
 ]
 
@@ -132,6 +170,8 @@ export function TestimonialCarousel() {
 
   const currentCard = CARDS[activeIndex]
   const isIntro = currentCard.type === 'intro'
+  const isEducation = currentCard.type === 'education'
+  const isCompany = !isIntro && !isEducation
   const isExpanded = expandedCards.has(activeIndex)
 
   return (
@@ -148,7 +188,7 @@ export function TestimonialCarousel() {
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
         position: 'relative',
       }}>
-        {/* Year stamp - company cards only */}
+        {/* Year stamp - company and education cards */}
         {!isIntro && (
           <div style={{
             position: 'absolute',
@@ -159,7 +199,7 @@ export function TestimonialCarousel() {
             color: 'rgba(26,25,23,0.25)',
             letterSpacing: '0.15em',
           }}>
-            {(currentCard as StatsCard).year}
+            {(currentCard as StatsCard | EducationCard).year}
           </div>
         )}
 
@@ -194,8 +234,77 @@ export function TestimonialCarousel() {
           </div>
         )}
 
+        {/* Education card content */}
+        {isEducation && (
+          <div>
+            {/* Logo */}
+            <div style={{ marginBottom: '20px' }}>
+              {Array.isArray((currentCard as EducationCard).logo) ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {((currentCard as EducationCard).logo as string[]).map((src, i) => (
+                    <img
+                      key={i}
+                      src={src}
+                      alt="Institution logo"
+                      style={{
+                        height: '32px',
+                        width: 'auto',
+                        display: 'block',
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <img
+                  src={(currentCard as EducationCard).logo as string}
+                  alt="Institution logo"
+                  style={{
+                    height: '40px',
+                    width: 'auto',
+                    display: 'block',
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Program name */}
+            <p style={{
+              fontFamily: 'DM Mono, monospace',
+              fontSize: '14px',
+              color: '#2d6a4f',
+              marginBottom: '16px',
+            }}>
+              {(currentCard as EducationCard).program}
+            </p>
+
+            {/* Focus description */}
+            <p style={{
+              fontFamily: 'DM Sans, sans-serif',
+              fontSize: '16px',
+              color: 'var(--color-text-primary)',
+              lineHeight: 1.7,
+              marginBottom: '16px',
+            }}>
+              {(currentCard as EducationCard).focus}
+            </p>
+
+            {/* Coursework line */}
+            {(currentCard as EducationCard).coursework && (
+              <p style={{
+                fontFamily: 'DM Mono, monospace',
+                fontSize: '11px',
+                color: 'rgba(26,25,23,0.5)',
+                lineHeight: 1.7,
+                margin: 0,
+              }}>
+                {(currentCard as EducationCard).coursework}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Company card content */}
-        {!isIntro && <div>
+        {isCompany && <div>
           {/* Logo - left aligned */}
           <div style={{ marginBottom: '20px' }}>
             <img
@@ -880,7 +989,7 @@ export function TestimonialCarousel() {
         </div>}
 
         {/* See More toggle - company cards only */}
-        {!isIntro && <button
+        {isCompany && <button
           ref={toggleButtonRef}
           onClick={(e) => {
             e.preventDefault()
