@@ -77,7 +77,7 @@ export function WhyMe() {
               </div>
               <div style={{ marginBottom: '24px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Ownership-level thinking.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Most of this career has been at the founder and GM level. That's the lens every engagement gets.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>When most of your career is spent reporting to the people who built the business, you see things the way they do.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Systems over symptoms.</p>
