@@ -594,7 +594,7 @@ export function TestimonialCarousel() {
                     ))}
                   </ul>
                 </>
-              ) : activeIndex === 3 ? (
+              ) : activeIndex === 4 ? (
                 <>
                   {/* Meal Garden custom expanded content */}
 
