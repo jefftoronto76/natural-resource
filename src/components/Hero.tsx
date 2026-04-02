@@ -13,7 +13,7 @@ export function Hero() {
         borderBottom: '1px solid rgba(26,25,23,0.08)',
         background: 'var(--color-bg)',
       }}>
-        <div style={{ maxWidth: '860px' }}>
+        <div style={{ maxWidth: '920px' }}>
           <p style={{
             fontFamily: 'var(--font-mono)', fontSize: '13.2px',
             letterSpacing: '0.22em', textTransform: 'uppercase',
