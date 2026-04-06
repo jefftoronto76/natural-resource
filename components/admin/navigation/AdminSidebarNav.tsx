@@ -17,13 +17,14 @@ const CANVAS_ITEMS = [
 
 const navLinkStyle = (isActive: boolean) => ({
   borderRadius: 'var(--mantine-radius-sm)',
-  '--nl-color': isActive
+  // Default text color for all states (inactive inherits this)
+  color: isActive
     ? 'var(--mantine-color-white)'
-    : 'var(--mantine-color-gray-5)',
-  '--nl-bg': isActive
-    ? 'var(--mantine-color-green-filled)'
-    : 'transparent',
-  '--nl-hover': 'rgba(255,255,255,0.06)',
+    : 'var(--mantine-color-gray-4)',
+  // Active-state variables (only apply when [data-active])
+  '--nl-color': 'var(--mantine-color-white)',
+  '--nl-bg': 'var(--mantine-color-green-filled)',
+  '--nl-hover': 'var(--mantine-color-green-filled-hover)',
 } as React.CSSProperties);
 
 export function AdminSidebarNav() {
