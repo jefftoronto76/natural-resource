@@ -1,9 +1,8 @@
+'use client';
+
+import { Button, Group, Paper, Stack, Text } from '@mantine/core';
 import { type CSSProperties } from 'react';
 
-import { Button } from '../primitives/Button';
-import { Card } from '../primitives/Card';
-import { Text } from '../primitives/Text';
-import { tokens } from '../theme/tokens';
 import { StatusBadge, type Status } from './StatusBadge';
 import { Tag } from './Tag';
 
@@ -18,12 +17,6 @@ export interface PromptCardProps {
   style?: CSSProperties;
 }
 
-const baseStyle: CSSProperties = {
-  '--prompt-card-gap': tokens.spacing.stack.sm,
-  '--prompt-card-tags-gap': tokens.spacing.gap.xs,
-  '--prompt-card-actions-gap': tokens.spacing.gap.sm
-} as CSSProperties;
-
 export function PromptCard({
   title,
   description,
@@ -32,54 +25,56 @@ export function PromptCard({
   onEdit,
   onDelete,
   className,
-  style
+  style,
 }: PromptCardProps) {
   const hasActions = onEdit != null || onDelete != null;
   const hasTags = tags != null && tags.length > 0;
 
   return (
-    <Card
-      variant="outlined"
-      className={['flex flex-col gap-[var(--prompt-card-gap)]', className]
-        .filter(Boolean)
-        .join(' ')}
-      style={{ ...baseStyle, ...style }}
+    <Paper
+      withBorder
+      p="lg"
+      radius="md"
+      className={className}
+      style={style}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between gap-[var(--prompt-card-actions-gap)]">
-        <Text variant="title">{title}</Text>
-        {status != null && <StatusBadge status={status} />}
-      </div>
+      <Stack gap="sm">
+        {/* Header */}
+        <Group justify="space-between" gap="sm">
+          <Text size="lg" fw={600} lh={1.2}>{title}</Text>
+          {status != null && <StatusBadge status={status} />}
+        </Group>
 
-      {/* Description */}
-      {description != null && (
-        <Text variant="muted">{description}</Text>
-      )}
+        {/* Description */}
+        {description != null && (
+          <Text size="sm" c="dimmed">{description}</Text>
+        )}
 
-      {/* Tags */}
-      {hasTags && (
-        <div className="flex flex-wrap gap-[var(--prompt-card-tags-gap)]">
-          {tags!.map(tag => (
-            <Tag key={tag} label={tag} />
-          ))}
-        </div>
-      )}
+        {/* Tags */}
+        {hasTags && (
+          <Group gap="xs">
+            {tags!.map(tag => (
+              <Tag key={tag} label={tag} />
+            ))}
+          </Group>
+        )}
 
-      {/* Actions */}
-      {hasActions && (
-        <div className="flex justify-end gap-[var(--prompt-card-actions-gap)]">
-          {onEdit != null && (
-            <Button variant="ghost" size="sm" onClick={onEdit}>
-              Edit
-            </Button>
-          )}
-          {onDelete != null && (
-            <Button variant="danger" size="sm" onClick={onDelete}>
-              Delete
-            </Button>
-          )}
-        </div>
-      )}
-    </Card>
+        {/* Actions */}
+        {hasActions && (
+          <Group justify="flex-end" gap="sm">
+            {onEdit != null && (
+              <Button variant="subtle" size="sm" onClick={onEdit}>
+                Edit
+              </Button>
+            )}
+            {onDelete != null && (
+              <Button variant="filled" color="red" size="sm" onClick={onDelete}>
+                Delete
+              </Button>
+            )}
+          </Group>
+        )}
+      </Stack>
+    </Paper>
   );
 }

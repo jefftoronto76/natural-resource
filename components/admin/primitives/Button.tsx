@@ -12,6 +12,8 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  color?: string;
+  leftSection?: React.ReactNode;
 }
 
 const variantMap: Record<ButtonVariant, { variant: MantineButtonProps['variant']; color?: string }> = {
@@ -22,7 +24,7 @@ const variantMap: Record<ButtonVariant, { variant: MantineButtonProps['variant']
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', type = 'button', ...props },
+  { variant = 'primary', size = 'md', color, type = 'button', leftSection, ...props },
   ref
 ) {
   const mapped = variantMap[variant];
@@ -31,9 +33,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <MantineButton
       ref={ref}
       variant={mapped.variant}
-      color={mapped.color}
+      color={color ?? mapped.color}
       size={size}
       type={type}
+      leftSection={leftSection}
       {...props}
     />
   );

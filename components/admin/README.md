@@ -99,11 +99,12 @@ Own structure and scroll only. Slot/children-based. No domain knowledge.
 | Phase | Description | Status |
 |---|---|---|
 | Phase 0 | Architecture rules locked | Complete |
-| Phase 1 | Token foundation at `/components/admin/theme/` | Complete |
-| Phase 2 | Primitives at `/components/admin/primitives/` | Complete |
-| Phase 3 | Composite components at `/components/admin/content/` and `/components/admin/navigation/` | Complete |
-| Phase 4 | Layout shells at `/components/admin/layout/` | Complete |
-| Phase 5 | App integration | Next |
+| Phase 1 | Mantine v7 installed, theme bridge at `mantine-theme.ts` | Complete |
+| Phase 2 | Primitives replaced with Mantine wrappers | Complete |
+| Phase 3a | Composites replaced with Mantine components | Complete |
+| Phase 3b | Navigation components (SidebarItem, SidebarSection, AdminSidebarNav) | Next |
+| Phase 3c | Layout shells (AppLayout, Sidebar, MainPanel, SectionContainer) | Pending |
+| Phase 4 | Remove legacy tokens.ts once all consumers migrated | Pending |
 
 ---
 

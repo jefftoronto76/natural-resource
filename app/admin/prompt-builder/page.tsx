@@ -76,11 +76,9 @@ const inputTokens = {
   '--input-radius': tokens.radius.md,
 } as React.CSSProperties
 
-const accentButtonStyle = {
-  '--button-bg': 'var(--color-accent)',
-  '--button-bg-hover': 'var(--color-accent-hover)',
-  '--button-border': 'var(--color-accent)',
-} as React.CSSProperties
+// Mantine filled buttons use the theme's primary green (#2d6a4f) by default.
+// No additional style override needed — accentButtonStyle was a bridge for the
+// old hand-rolled Button's CSS variable API, now dead.
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -438,7 +436,6 @@ export default function PromptBuilderPage() {
         <Button
           variant={showForm ? 'ghost' : 'primary'}
           size="sm"
-          style={showForm ? undefined : accentButtonStyle}
           onClick={() => {
             if (showForm) {
               handleCancel()
@@ -502,7 +499,7 @@ export default function PromptBuilderPage() {
                     className="h-9 min-w-0 flex-1 rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-[length:var(--input-size)] text-[var(--input-text)] placeholder:text-[var(--input-muted)] outline-none"
                     style={inputTokens}
                   />
-                  <Button size="sm" variant="primary" style={accentButtonStyle} onClick={confirmNewTopic} disabled={isCreatingTopic}>
+                  <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
                     {isCreatingTopic ? '...' : 'Add'}
                   </Button>
                   <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
@@ -536,8 +533,8 @@ export default function PromptBuilderPage() {
                   <Button
                     key={mode}
                     variant={contentMode === mode ? 'primary' : 'ghost'}
+                    color={contentMode === mode ? undefined : 'gray'}
                     size="sm"
-                    style={contentMode === mode ? accentButtonStyle : undefined}
                     onClick={() => {
                       setContentMode(mode)
                       setContent('')
@@ -584,8 +581,7 @@ export default function PromptBuilderPage() {
             <Button
               variant="primary"
               size="md"
-              style={accentButtonStyle}
-              onClick={handleCreate}
+                           onClick={handleCreate}
               disabled={isSubmitting || !ownerId || !blockName.trim() || !topicId || !(content.trim() || file)}
             >
               {isSubmitting ? 'Saving...' : 'Create Block'}
@@ -646,7 +642,7 @@ export default function PromptBuilderPage() {
                     {draftBlock.content}
                   </Text>
                   <div className="flex gap-2">
-                    <Button variant="primary" size="sm" style={accentButtonStyle} onClick={handleSaveBlock} disabled={isSaving}>
+                    <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
                       {isSaving ? 'Saving...' : 'Save block'}
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => setDraftBlock(null)} disabled={isSaving}>
@@ -674,8 +670,7 @@ export default function PromptBuilderPage() {
                 <Button
                   variant="primary"
                   size="sm"
-                  style={accentButtonStyle}
-                  onClick={handleChatSend}
+                                   onClick={handleChatSend}
                   disabled={chatLoading || !chatInput.trim()}
                 >
                   Send
@@ -720,7 +715,7 @@ export default function PromptBuilderPage() {
                       style={inputTokens}
                     />
                     <div className="flex gap-2">
-                      <Button variant="primary" size="sm" style={accentButtonStyle} onClick={() => saveEdit(i)}>
+                      <Button variant="primary" size="sm" onClick={() => saveEdit(i)}>
                         Save
                       </Button>
                       <Button variant="ghost" size="sm" onClick={cancelEdit}>

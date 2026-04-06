@@ -1,42 +1,38 @@
-import { type CSSProperties } from 'react';
+'use client';
 
-import { Badge, type BadgeProps } from '../primitives/Badge';
+import { Badge } from '@mantine/core';
+import { type CSSProperties } from 'react';
 
 export type Status = 'active' | 'inactive' | 'draft' | 'pending' | 'error';
 
 export interface StatusBadgeProps {
   status: Status;
   label?: string;
-  size?: BadgeProps['size'];
+  size?: 'sm' | 'md';
   className?: string;
   style?: CSSProperties;
 }
 
-const statusVariant: Record<Status, BadgeProps['variant']> = {
-  active: 'success',
-  inactive: 'default',
-  draft: 'default',
-  pending: 'warning',
-  error: 'danger'
-};
-
-const statusLabel: Record<Status, string> = {
-  active: 'Active',
-  inactive: 'Inactive',
-  draft: 'Draft',
-  pending: 'Pending',
-  error: 'Error'
+const statusConfig: Record<Status, { color: string; label: string }> = {
+  active: { color: 'green', label: 'Active' },
+  inactive: { color: 'gray', label: 'Inactive' },
+  draft: { color: 'gray', label: 'Draft' },
+  pending: { color: 'yellow', label: 'Pending' },
+  error: { color: 'red', label: 'Error' },
 };
 
 export function StatusBadge({ status, label, size = 'md', className, style }: StatusBadgeProps) {
+  const config = statusConfig[status];
+
   return (
     <Badge
-      variant={statusVariant[status]}
+      variant="light"
+      color={config.color}
       size={size}
       className={className}
       style={style}
     >
-      {label ?? statusLabel[status]}
+      {label ?? config.label}
     </Badge>
   );
 }
