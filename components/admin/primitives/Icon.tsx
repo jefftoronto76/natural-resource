@@ -1,6 +1,6 @@
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+'use client';
 
-import { tokens, type ThemeStyle } from '../theme/tokens';
+import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 
 type IconSize = 'sm' | 'md' | 'lg';
 type IconVariant = 'default' | 'muted';
@@ -12,20 +12,15 @@ export interface IconProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
 }
 
-const sizeStyles: Record<IconSize, ThemeStyle> = {
-  sm: { '--icon-size': tokens.spacing.inline.md },
-  md: { '--icon-size': tokens.spacing.inline.lg },
-  lg: { '--icon-size': tokens.spacing.inset.lg }
+const sizeMap: Record<IconSize, string> = {
+  sm: 'var(--mantine-spacing-md)',
+  md: 'var(--mantine-spacing-lg)',
+  lg: 'var(--mantine-spacing-xl)',
 };
 
-const variantStyles: Record<IconVariant, ThemeStyle> = {
-  default: { '--icon-color': tokens.themes.light.color.icon.primary },
-  muted: { '--icon-color': tokens.themes.light.color.icon.muted }
-};
-
-const baseStyle: ThemeStyle = {
-  '--icon-transition-duration': tokens.themes.light.state.hover.duration,
-  '--icon-transition-easing': tokens.themes.light.state.hover.easing
+const variantColorMap: Record<IconVariant, string> = {
+  default: 'var(--mantine-color-dark-6)',
+  muted: 'var(--mantine-color-gray-5)',
 };
 
 export const Icon = forwardRef<HTMLSpanElement, IconProps>(function Icon(
@@ -33,22 +28,28 @@ export const Icon = forwardRef<HTMLSpanElement, IconProps>(function Icon(
   ref
 ) {
   const ariaProps = label
-    ? { role: 'img', 'aria-label': label }
+    ? { role: 'img' as const, 'aria-label': label }
     : { 'aria-hidden': true as const };
+
+  const iconSize = sizeMap[size];
 
   return (
     <span
       ref={ref}
       className={[
         'inline-flex shrink-0 items-center justify-center',
-        'h-[var(--icon-size)] w-[var(--icon-size)] text-[var(--icon-color)]',
-        'transition-colors duration-[var(--icon-transition-duration)] ease-[var(--icon-transition-easing)]',
         '[&>svg]:h-full [&>svg]:w-full [&>svg]:fill-current [&>svg]:stroke-current',
-        className
+        className,
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{ ...baseStyle, ...sizeStyles[size], ...variantStyles[variant], ...style }}
+      style={{
+        width: iconSize,
+        height: iconSize,
+        color: variantColorMap[variant],
+        transition: 'color 120ms ease',
+        ...style,
+      }}
       {...ariaProps}
       {...props}
     >

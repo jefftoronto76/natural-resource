@@ -1,6 +1,7 @@
-import { forwardRef, type HTMLAttributes } from 'react';
+'use client';
 
-import { tokens, type ThemeStyle } from '../theme/tokens';
+import { Paper, type PaperProps } from '@mantine/core';
+import { forwardRef, type HTMLAttributes } from 'react';
 
 type CardVariant = 'default' | 'outlined' | 'interactive';
 
@@ -8,47 +9,44 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant;
 }
 
-const variantStyles: Record<CardVariant, ThemeStyle> = {
+const variantMap: Record<CardVariant, Partial<PaperProps>> = {
   default: {
-    '--card-surface': tokens.themes.light.color.surface.panel,
-    '--card-border': 'transparent'
+    shadow: 'xs',
+    withBorder: false,
   },
   outlined: {
-    '--card-surface': tokens.themes.light.color.surface.canvas,
-    '--card-border': tokens.themes.light.color.border.subtle
+    shadow: undefined,
+    withBorder: true,
   },
   interactive: {
-    '--card-surface': tokens.themes.light.color.surface.canvas,
-    '--card-border': tokens.themes.light.color.border.subtle,
-    '--card-hover-surface': tokens.themes.light.state.hover.surface,
-    '--card-hover-border': tokens.themes.light.state.hover.border
-  }
-};
-
-const baseStyle: ThemeStyle = {
-  '--card-radius': tokens.radius.lg,
-  '--card-padding': tokens.spacing.inset.lg,
-  '--card-transition-duration': tokens.themes.light.state.hover.duration,
-  '--card-transition-easing': tokens.themes.light.state.hover.easing
+    shadow: undefined,
+    withBorder: true,
+  },
 };
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
-  { variant = 'default', className, style, ...props },
+  { variant = 'default', className, style, children, ...props },
   ref
 ) {
+  const mapped = variantMap[variant];
+
   return (
-    <div
+    <Paper
       ref={ref}
+      p="lg"
+      radius="md"
+      withBorder={mapped.withBorder}
+      shadow={mapped.shadow}
       className={[
-        'rounded-[var(--card-radius)] border border-[var(--card-border)] bg-[var(--card-surface)] p-[var(--card-padding)]',
-        'transition-colors duration-[var(--card-transition-duration)] ease-[var(--card-transition-easing)]',
-        variant === 'interactive' ? 'hover:border-[var(--card-hover-border)] hover:bg-[var(--card-hover-surface)]' : '',
-        className
+        variant === 'interactive' ? 'transition-shadow hover:shadow-sm' : '',
+        className,
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{ ...baseStyle, ...variantStyles[variant], ...style }}
+      style={style}
       {...props}
-    />
+    >
+      {children}
+    </Paper>
   );
 });

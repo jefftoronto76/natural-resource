@@ -1,6 +1,10 @@
-import { forwardRef, type HTMLAttributes } from 'react';
+'use client';
 
-import { tokens, type ThemeStyle } from '../theme/tokens';
+import {
+  Text as MantineText,
+  type TextProps as MantineTextProps,
+} from '@mantine/core';
+import { forwardRef, type HTMLAttributes } from 'react';
 
 type TextVariant = 'body' | 'label' | 'title' | 'muted';
 
@@ -8,51 +12,42 @@ export interface TextProps extends HTMLAttributes<HTMLParagraphElement> {
   variant?: TextVariant;
 }
 
-const variantStyles: Record<TextVariant, ThemeStyle> = {
+const variantMap: Record<TextVariant, Partial<MantineTextProps>> = {
   body: {
-    '--text-color': tokens.themes.light.color.text.primary,
-    fontFamily: tokens.typography.role.body.md.fontFamily,
-    fontSize: tokens.typography.role.body.md.fontSize,
-    lineHeight: String(tokens.typography.role.body.md.lineHeight),
-    fontWeight: tokens.typography.role.body.md.fontWeight,
-    letterSpacing: tokens.typography.role.body.md.letterSpacing
+    size: 'md',
   },
   label: {
-    '--text-color': tokens.themes.light.color.text.primary,
-    fontFamily: tokens.typography.role.label.md.fontFamily,
-    fontSize: tokens.typography.role.label.md.fontSize,
-    lineHeight: String(tokens.typography.role.label.md.lineHeight),
-    fontWeight: tokens.typography.role.label.md.fontWeight,
-    letterSpacing: tokens.typography.role.label.md.letterSpacing
+    size: 'sm',
+    fw: 500,
+    lh: 1.2,
   },
   title: {
-    '--text-color': tokens.themes.light.color.text.primary,
-    fontFamily: tokens.typography.role.title.md.fontFamily,
-    fontSize: tokens.typography.role.title.md.fontSize,
-    lineHeight: String(tokens.typography.role.title.md.lineHeight),
-    fontWeight: tokens.typography.role.title.md.fontWeight,
-    letterSpacing: tokens.typography.role.title.md.letterSpacing
+    size: 'lg',
+    fw: 600,
+    lh: 1.2,
   },
   muted: {
-    '--text-color': tokens.themes.light.color.text.muted,
-    fontFamily: tokens.typography.role.body.sm.fontFamily,
-    fontSize: tokens.typography.role.body.sm.fontSize,
-    lineHeight: String(tokens.typography.role.body.sm.lineHeight),
-    fontWeight: tokens.typography.role.body.sm.fontWeight,
-    letterSpacing: tokens.typography.role.body.sm.letterSpacing
-  }
+    size: 'sm',
+    c: 'dimmed',
+  },
 };
 
 export const Text = forwardRef<HTMLParagraphElement, TextProps>(function Text(
-  { variant = 'body', className, style, ...props },
+  { variant = 'body', className, style, children, ...props },
   ref
 ) {
+  const mapped = variantMap[variant];
+
   return (
-    <p
+    <MantineText
       ref={ref}
-      className={['m-0 text-[var(--text-color)]', className].filter(Boolean).join(' ')}
-      style={{ ...variantStyles[variant], ...style }}
+      component="p"
+      className={className}
+      style={{ margin: 0, ...style }}
+      {...mapped}
       {...props}
-    />
+    >
+      {children}
+    </MantineText>
   );
 });
