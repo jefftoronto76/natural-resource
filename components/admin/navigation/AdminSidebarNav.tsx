@@ -1,14 +1,12 @@
 'use client';
 
+import { NavLink, Stack } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { SidebarSection } from './SidebarSection';
-import { SidebarItem } from './SidebarItem';
-
 const NAV_ITEMS = [
-  { label: 'Sessions',        href: '/admin' },
-  { label: 'Prompt',          href: '/admin/prompt' },
-  { label: 'Prompt Builder',  href: '/admin/prompt-builder' },
+  { label: 'Sessions',       href: '/admin' },
+  { label: 'Prompt',         href: '/admin/prompt' },
+  { label: 'Prompt Builder', href: '/admin/prompt-builder' },
 ] as const;
 
 const CANVAS_ITEMS = [
@@ -16,6 +14,17 @@ const CANVAS_ITEMS = [
   { label: 'Knowledge',  key: 'knowledge' },
   { label: 'Prompts',    key: 'prompts' },
 ] as const;
+
+const navLinkStyle = (isActive: boolean) => ({
+  borderRadius: 'var(--mantine-radius-sm)',
+  '--nl-color': isActive
+    ? 'var(--mantine-color-white)'
+    : 'var(--mantine-color-gray-5)',
+  '--nl-bg': isActive
+    ? 'var(--mantine-color-green-filled)'
+    : 'transparent',
+  '--nl-hover': 'rgba(255,255,255,0.06)',
+} as React.CSSProperties);
 
 export function AdminSidebarNav() {
   const pathname = usePathname();
@@ -26,28 +35,34 @@ export function AdminSidebarNav() {
   const activeCanvas = searchParams.get('canvas') ?? 'prompts';
 
   return (
-    <SidebarSection>
+    <Stack gap="xs" component="section" aria-label="Admin navigation">
       {NAV_ITEMS.map(({ label, href }) => (
         <div key={href}>
-          <SidebarItem
+          <NavLink
             label={label}
-            isActive={pathname === href}
+            active={pathname === href}
             onClick={() => router.push(href)}
+            variant="subtle"
+            aria-current={pathname === href ? 'page' : undefined}
+            style={navLinkStyle(pathname === href)}
           />
           {href === '/admin/prompt-builder' && isPromptBuilder && (
-            <div style={{ paddingLeft: '12px', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <Stack gap={2} ml="md" mt={2}>
               {CANVAS_ITEMS.map(({ label: subLabel, key }) => (
-                <SidebarItem
+                <NavLink
                   key={key}
                   label={subLabel}
-                  isActive={activeCanvas === key}
+                  active={activeCanvas === key}
                   onClick={() => router.push(`/admin/prompt-builder?canvas=${key}`)}
+                  variant="subtle"
+                  aria-current={activeCanvas === key ? 'page' : undefined}
+                  style={navLinkStyle(activeCanvas === key)}
                 />
               ))}
-            </div>
+            </Stack>
           )}
         </div>
       ))}
-    </SidebarSection>
+    </Stack>
   );
 }

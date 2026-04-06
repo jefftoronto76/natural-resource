@@ -1,43 +1,35 @@
-import { type CSSProperties, type HTMLAttributes, type ReactNode } from 'react';
+'use client';
 
-import { Text } from '../primitives/Text';
-import { tokens } from '../theme/tokens';
+import { Stack, Text } from '@mantine/core';
+import { type ReactNode } from 'react';
 
-export interface SidebarSectionProps extends HTMLAttributes<HTMLElement> {
+export interface SidebarSectionProps {
   label?: string;
   children: ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
 }
-
-const baseStyle: CSSProperties = {
-  '--sidebar-section-gap': tokens.spacing.gap.xs,
-  '--sidebar-section-label-gap': tokens.spacing.stack.xs
-} as CSSProperties;
 
 export function SidebarSection({
   label,
   children,
   className,
   style,
-  ...props
 }: SidebarSectionProps) {
   return (
-    <section
+    <Stack
+      component="section"
+      gap="xs"
       aria-label={label}
-      className={['flex flex-col gap-[var(--sidebar-section-gap)]', className]
-        .filter(Boolean)
-        .join(' ')}
-      style={{ ...baseStyle, ...style }}
-      {...props}
+      className={className}
+      style={style}
     >
       {label != null && (
-        <Text
-          variant="muted"
-          style={{ marginBottom: 'var(--sidebar-section-label-gap)' }}
-        >
+        <Text size="xs" c="dimmed" fw={500} mb={2}>
           {label}
         </Text>
       )}
       {children}
-    </section>
+    </Stack>
   );
 }

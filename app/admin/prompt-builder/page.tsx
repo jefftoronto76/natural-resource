@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
+import { Tooltip } from '@mantine/core'
 import { Badge } from '@/components/admin/primitives/Badge'
 import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
@@ -578,14 +579,25 @@ export default function PromptBuilderPage() {
             </div>
 
             {/* Submit */}
-            <Button
-              variant="primary"
-              size="md"
-                           onClick={handleCreate}
-              disabled={isSubmitting || !ownerId || !blockName.trim() || !topicId || !(content.trim() || file)}
-            >
-              {isSubmitting ? 'Saving...' : 'Create Block'}
-            </Button>
+            {(() => {
+              const isDisabled = isSubmitting || !ownerId || !blockName.trim() || !topicId || !(content.trim() || file)
+              const btn = (
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={handleCreate}
+                  disabled={isDisabled}
+                  style={isDisabled ? { cursor: 'not-allowed' } : undefined}
+                >
+                  {isSubmitting ? 'Saving...' : 'Create Block'}
+                </Button>
+              )
+              return isDisabled ? (
+                <Tooltip label="Block name and content are required" position="bottom">
+                  <span>{btn}</span>
+                </Tooltip>
+              ) : btn
+            })()}
           </Card>
         )}
 
