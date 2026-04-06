@@ -1,6 +1,10 @@
 import { Suspense } from 'react';
 import { UserButton } from '@clerk/nextjs';
+import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 
+import '@mantine/core/styles.css';
+
+import { adminTheme } from '@/components/admin/theme/mantine-theme';
 import { AppLayout } from '@/components/admin/layout/AppLayout';
 import { Sidebar } from '@/components/admin/layout/Sidebar';
 import { MainPanel } from '@/components/admin/layout/MainPanel';
@@ -35,24 +39,27 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <AdminUserProvider supabaseUserId={supabaseUserId}>
-      <AppLayout
-        sidebar={
-          <div className="hidden md:flex h-full shrink-0">
-            <Sidebar
-              header={wordmark}
-              footer={<UserButton />}
-            >
-              <Suspense>
-                <AdminSidebarNav />
-              </Suspense>
-            </Sidebar>
-          </div>
-        }
-      >
-        <MainPanel>
-          {children}
-        </MainPanel>
-      </AppLayout>
+      <MantineProvider theme={adminTheme}>
+        <ColorSchemeScript defaultColorScheme="light" />
+        <AppLayout
+          sidebar={
+            <div className="hidden md:flex h-full shrink-0">
+              <Sidebar
+                header={wordmark}
+                footer={<UserButton />}
+              >
+                <Suspense>
+                  <AdminSidebarNav />
+                </Suspense>
+              </Sidebar>
+            </div>
+          }
+        >
+          <MainPanel>
+            {children}
+          </MainPanel>
+        </AppLayout>
+      </MantineProvider>
     </AdminUserProvider>
   );
 }
