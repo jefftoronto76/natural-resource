@@ -52,7 +52,7 @@ export function Hero() {
               fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
               padding: '16px 32px', textDecoration: 'none',
               cursor: 'pointer',
-            }}>Book a Session — $250</a>
+            }}>Book a Session</a>
             <a href="#chat" onClick={(e) => { e.preventDefault(); expand() }} style={{
               display: 'inline-block', background: 'transparent',
               color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)',

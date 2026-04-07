@@ -354,7 +354,7 @@ export function Chat() {
                 cursor: 'pointer',
               }}
             >
-              Book the $250 Session
+              Book a Session
             </a>
           </div>
         </div>

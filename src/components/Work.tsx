@@ -141,18 +141,6 @@ export function Work() {
             >
               A clear process to get you unstuck and moving forward.
             </p>
-            <p
-              className="text-lg"
-              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, color: '#2d6a4f', marginTop: '16px' }}
-            >
-              $250 per session
-            </p>
-            <p
-              className="text-base"
-              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400, color: '#2d6a4f' }}
-            >
-              No commitment required.
-            </p>
           </div>
 
           {/* List */}
@@ -335,12 +323,6 @@ export function Work() {
               style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}
             >
               I build systems that stop problems from happening.
-            </p>
-            <p
-              className="text-lg"
-              style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, color: '#2d6a4f', marginTop: '16px' }}
-            >
-              $250 to start the conversation.
             </p>
           </div>
 
