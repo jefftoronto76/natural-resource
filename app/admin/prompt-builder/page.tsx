@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Collapse, ActionIcon, Group } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon } from '@mantine/core'
 import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
 import { Text } from '@/components/admin/primitives/Text'
@@ -273,11 +273,50 @@ export default function PromptBuilderPage() {
 
   const hasMessages = chatMessages.length > 0
 
-  /* Shared composer bar — rendered in both empty and active layouts */
-  const composerBar = (
-    <div className={hasMessages ? '' : 'w-full max-w-[600px]'}>
-      <Group gap="xs" align="flex-end" wrap="nowrap">
-        {/* Upload button */}
+  /* Shared composer container — bordered box with textarea + button row */
+  const composerContainer = (
+    <div
+      className={hasMessages ? 'w-full' : 'w-full max-w-[65%] max-sm:max-w-full'}
+      style={{
+        border: '1px solid var(--mantine-color-gray-3)',
+        borderRadius: 'var(--mantine-radius-md)',
+        boxShadow: hasMessages ? undefined : '0 2px 8px rgba(0,0,0,0.04)',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Textarea — unstyled, no border */}
+      <Textarea
+        value={chatInput}
+        onChange={e => setChatInput(e.currentTarget.value)}
+        placeholder={isAtLimit ? 'Exchange limit reached' : 'What would you like to add to your prompt?'}
+        autosize
+        minRows={hasMessages ? 1 : 2}
+        maxRows={4}
+        disabled={isAtLimit}
+        variant="unstyled"
+        styles={{
+          input: {
+            padding: hasMessages ? '12px 16px' : '16px 20px',
+            fontSize: '16px',
+            lineHeight: 1.5,
+          },
+        }}
+        onKeyDown={e => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            handleSend()
+          }
+        }}
+      />
+
+      {/* Button row — inside container */}
+      <div
+        className="flex items-center justify-between"
+        style={{
+          padding: hasMessages ? '4px 8px 8px' : '8px 12px 12px',
+        }}
+      >
+        {/* Left: upload */}
         <ActionIcon
           variant="subtle"
           color="gray"
@@ -302,32 +341,7 @@ export default function PromptBuilderPage() {
           style={{ display: 'none' }}
         />
 
-        {/* Textarea */}
-        <Textarea
-          value={chatInput}
-          onChange={e => setChatInput(e.currentTarget.value)}
-          placeholder={isAtLimit ? 'Exchange limit reached' : 'Type or paste content...'}
-          autosize
-          minRows={1}
-          maxRows={4}
-          className="flex-1"
-          disabled={isAtLimit}
-          styles={!hasMessages ? {
-            input: {
-              borderRadius: 'var(--mantine-radius-md)',
-              padding: '14px 16px',
-              fontSize: '16px',
-            },
-          } : undefined}
-          onKeyDown={e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              handleSend()
-            }
-          }}
-        />
-
-        {/* Send button */}
+        {/* Right: send */}
         <ActionIcon
           variant="filled"
           size="lg"
@@ -339,11 +353,11 @@ export default function PromptBuilderPage() {
             <path d="M3 8h10M9 4l4 4-4 4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </ActionIcon>
-      </Group>
+      </div>
 
       {/* File attachment indicator */}
       {file && (
-        <Group gap="xs" mt="xs">
+        <div className="flex items-center gap-2 px-3 pb-2" style={{ marginTop: '-4px' }}>
           <Text variant="muted" className="text-xs">
             📎 {file.name}
           </Text>
@@ -356,14 +370,14 @@ export default function PromptBuilderPage() {
           >
             ✕
           </ActionIcon>
-        </Group>
+        </div>
       )}
     </div>
   )
 
   /* Shared metadata trigger + collapsible fields */
   const metadataSection = (
-    <div className={hasMessages ? '' : 'w-full max-w-[600px]'}>
+    <div className={hasMessages ? '' : 'w-full max-w-[65%] max-sm:max-w-full'}>
       <button
         type="button"
         onClick={() => setMetadataOpen(o => !o)}
@@ -470,27 +484,34 @@ export default function PromptBuilderPage() {
         <Text variant="title">Composer</Text>
       </div>
 
-      {/* ── Empty state: prompt + composer centered in canvas ── */}
+      {/* ── Empty state: golden ratio positioning ── */}
       {!hasMessages && (
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-4 sm:px-6">
+        <div className="flex min-h-0 flex-1 flex-col items-center px-4 sm:px-6">
+          {/* Top spacer — 38% of available height (golden ratio) */}
+          <div style={{ flex: '0 0 38%' }} />
+
           <p
             className="select-none text-center"
             style={{
-              fontFamily: 'var(--mantine-font-family)',
-              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-              color: 'var(--mantine-color-gray-5)',
-              fontWeight: 400,
-              letterSpacing: '-0.01em',
-              maxWidth: '320px',
-              lineHeight: 1.5,
+              fontFamily: 'var(--mantine-font-family-headings)',
+              fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)',
+              color: 'var(--mantine-color-gray-6)',
+              fontWeight: 500,
+              letterSpacing: '-0.02em',
+              maxWidth: '400px',
+              lineHeight: 1.4,
+              marginBottom: '20px',
             }}
           >
             What would you like to add to your prompt?
           </p>
-          {composerBar}
-          <div className="mt-[-8px]">
+          {composerContainer}
+          <div className="mt-2">
             {metadataSection}
           </div>
+
+          {/* Bottom spacer — absorbs remaining space */}
+          <div style={{ flex: '1 1 0%' }} />
         </div>
       )}
 
@@ -596,7 +617,7 @@ export default function PromptBuilderPage() {
 
           {/* Composer — pinned at bottom */}
           <div className="shrink-0 border-t border-gray-200 px-4 py-3 sm:px-6">
-            {composerBar}
+            {composerContainer}
             <div className="mt-2">
               {metadataSection}
             </div>
