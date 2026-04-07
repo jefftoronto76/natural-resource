@@ -1,10 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react'
-import { tokens } from '@/components/admin/theme/tokens'
 import { readDataStream } from '@/lib/stream'
-
-const L = tokens.themes.light
 
 interface Message {
   role: 'user' | 'assistant'
@@ -169,7 +166,7 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
           left: 0,
           right: 0,
           zIndex: 40,
-          background: 'linear-gradient(90deg, #4f46e5, #7c3aed)',
+          background: 'var(--mantine-color-green-filled)',
           padding: '14px 24px',
           display: 'flex',
           alignItems: 'center',
@@ -182,7 +179,7 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
-        <span style={{ color: 'white', fontSize: '14px', fontWeight: 500, fontFamily: 'var(--font-sans)' }}>
+        <span style={{ color: 'var(--mantine-color-white)', fontSize: '14px', fontWeight: 500 }}>
           Need help? Chat with our AI assistant
         </span>
       </div>
@@ -213,9 +210,9 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
               width: '100%',
               maxWidth: '780px',
               height: '600px',
-              background: 'white',
-              borderRadius: '12px',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+              background: 'var(--mantine-color-white)',
+              borderRadius: 'var(--mantine-radius-lg)',
+              boxShadow: 'var(--mantine-shadow-xl)',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
@@ -224,17 +221,17 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
             {/* Header */}
             <div style={{
               padding: '20px 24px 18px',
-              borderBottom: `1px solid ${L.color.border.subtle}`,
+              borderBottom: '1px solid var(--mantine-color-gray-2)',
               display: 'flex',
               alignItems: 'flex-start',
               justifyContent: 'space-between',
               flexShrink: 0,
             }}>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '18px', color: L.color.text.primary, fontFamily: 'var(--font-sans)' }}>
+                <div style={{ fontWeight: 700, fontSize: '18px', color: 'var(--mantine-color-dark-9)' }}>
                   Chat Assistant
                 </div>
-                <div style={{ fontSize: '13px', color: L.color.text.muted, marginTop: '3px', fontFamily: 'var(--font-sans)' }}>
+                <div style={{ fontSize: '13px', color: 'var(--mantine-color-gray-5)', marginTop: '3px' }}>
                   Ask me anything about your prompts
                 </div>
               </div>
@@ -245,7 +242,7 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
                   border: 'none',
                   cursor: 'pointer',
                   padding: '2px 4px',
-                  color: L.color.text.muted,
+                  color: 'var(--mantine-color-gray-5)',
                   fontSize: '20px',
                   lineHeight: 1,
                   marginTop: '2px',
@@ -275,8 +272,8 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
                     {isEmptyAssistant && isStreaming ? (
                       // Typing indicator
                       <div style={{
-                        background: '#f3f4f6',
-                        borderRadius: '12px',
+                        background: 'var(--mantine-color-gray-1)',
+                        borderRadius: 'var(--mantine-radius-md)',
                         padding: '12px 16px',
                         display: 'flex',
                         gap: '5px',
@@ -285,7 +282,7 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
                         {[0, 1, 2].map(j => (
                           <div key={j} style={{
                             width: '6px', height: '6px', borderRadius: '50%',
-                            background: '#9ca3af',
+                            background: 'var(--mantine-color-gray-5)',
                             animation: `pbChatPulse 1.2s ease-in-out ${j * 0.2}s infinite`,
                           }} />
                         ))}
@@ -294,12 +291,11 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
                       <div style={{
                         maxWidth: '75%',
                         padding: '12px 16px',
-                        background: msg.role === 'user' ? '#374151' : '#f3f4f6',
-                        color: msg.role === 'user' ? 'white' : L.color.text.primary,
-                        borderRadius: '12px',
+                        background: msg.role === 'user' ? 'var(--mantine-color-dark-6)' : 'var(--mantine-color-gray-1)',
+                        color: msg.role === 'user' ? 'var(--mantine-color-white)' : 'var(--mantine-color-dark-9)',
+                        borderRadius: 'var(--mantine-radius-md)',
                         fontSize: '14px',
                         lineHeight: 1.65,
-                        fontFamily: 'var(--font-sans)',
                         whiteSpace: 'pre-wrap',
                       }}>
                         {msg.content}
@@ -312,27 +308,27 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
               {/* Pending block confirm card */}
               {pendingBlock && (
                 <div style={{
-                  border: `1px solid ${L.color.border.subtle}`,
-                  borderRadius: '10px',
+                  border: '1px solid var(--mantine-color-gray-2)',
+                  borderRadius: 'var(--mantine-radius-md)',
                   padding: '14px 16px',
-                  background: L.color.surface.canvas,
+                  background: 'var(--mantine-color-white)',
                   flexShrink: 0,
                 }}>
                   <div style={{
                     fontSize: '11px',
                     fontWeight: 600,
-                    color: L.color.text.muted,
+                    color: 'var(--mantine-color-gray-5)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.08em',
                     marginBottom: '8px',
-                    fontFamily: 'var(--font-mono)',
+                    fontFamily: 'var(--mantine-font-family-monospace)',
                   }}>
                     Suggested block → {pendingBlock.topicName}
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: L.color.text.primary, marginBottom: '4px', fontFamily: 'var(--font-sans)' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--mantine-color-dark-9)', marginBottom: '4px' }}>
                     {pendingBlock.name}
                   </div>
-                  <div style={{ fontSize: '13px', color: L.color.text.muted, lineHeight: 1.55, marginBottom: '12px', fontFamily: 'var(--font-sans)' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--mantine-color-gray-5)', lineHeight: 1.55, marginBottom: '12px' }}>
                     {pendingBlock.content}
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
@@ -340,14 +336,13 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
                       onClick={confirmAddBlock}
                       style={{
                         padding: '6px 14px',
-                        background: 'var(--color-accent)',
-                        color: 'white',
+                        background: 'var(--mantine-color-green-filled)',
+                        color: 'var(--mantine-color-white)',
                         border: 'none',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--mantine-radius-sm)',
                         fontSize: '12px',
                         fontWeight: 600,
                         cursor: 'pointer',
-                        fontFamily: 'var(--font-sans)',
                       }}
                     >
                       Add block
@@ -357,13 +352,12 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
                       style={{
                         padding: '6px 14px',
                         background: 'transparent',
-                        color: L.color.text.muted,
-                        border: `1px solid ${L.color.border.subtle}`,
-                        borderRadius: '6px',
+                        color: 'var(--mantine-color-gray-5)',
+                        border: '1px solid var(--mantine-color-gray-2)',
+                        borderRadius: 'var(--mantine-radius-sm)',
                         fontSize: '12px',
                         fontWeight: 500,
                         cursor: 'pointer',
-                        fontFamily: 'var(--font-sans)',
                       }}
                     >
                       Dismiss
@@ -373,7 +367,7 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
               )}
 
               {isError && (
-                <div style={{ fontSize: '13px', color: '#ef4444', fontFamily: 'var(--font-sans)' }}>
+                <div style={{ fontSize: '13px', color: 'var(--mantine-color-red-5)' }}>
                   Something went wrong. Please try again.
                 </div>
               )}
@@ -383,7 +377,7 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
 
             {/* Input bar */}
             <div style={{
-              borderTop: `1px solid ${L.color.border.subtle}`,
+              borderTop: '1px solid var(--mantine-color-gray-2)',
               padding: '14px 24px 16px',
               flexShrink: 0,
             }}>
@@ -396,13 +390,12 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
                   rows={1}
                   style={{
                     flex: 1,
-                    background: '#f3f4f6',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
+                    background: 'var(--mantine-color-gray-1)',
+                    border: '1px solid var(--mantine-color-gray-2)',
+                    borderRadius: 'var(--mantine-radius-md)',
                     padding: '10px 14px',
-                    fontFamily: 'var(--font-sans)',
                     fontSize: '14px',
-                    color: L.color.text.primary,
+                    color: 'var(--mantine-color-dark-9)',
                     resize: 'none',
                     outline: 'none',
                     lineHeight: 1.5,
@@ -416,9 +409,9 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
                   style={{
                     width: '38px',
                     height: '38px',
-                    background: isStreaming || !input.trim() ? '#d1d5db' : '#374151',
+                    background: isStreaming || !input.trim() ? 'var(--mantine-color-gray-3)' : 'var(--mantine-color-green-filled)',
                     border: 'none',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--mantine-radius-md)',
                     cursor: isStreaming || !input.trim() ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -434,7 +427,7 @@ export function PromptBuilderChat({ data, onAddBlock }: Props) {
                   </svg>
                 </button>
               </div>
-              <div style={{ marginTop: '8px', fontSize: '11px', color: L.color.text.muted, fontFamily: 'var(--font-sans)' }}>
+              <div style={{ marginTop: '8px', fontSize: '11px', color: 'var(--mantine-color-gray-5)' }}>
                 Press Enter to send, Shift+Enter for new line
               </div>
             </div>

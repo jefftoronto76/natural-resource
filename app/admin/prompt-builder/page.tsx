@@ -8,7 +8,6 @@ import { Badge } from '@/components/admin/primitives/Badge'
 import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
 import { Text } from '@/components/admin/primitives/Text'
-import { tokens } from '@/components/admin/theme/tokens'
 import { useAdminUserId } from '@/context/admin-user'
 import { readDataStream } from '@/lib/stream'
 
@@ -52,33 +51,6 @@ interface Block {
   title: string
   content: string
 }
-
-// ─── Shared styles (token-based, used on native elements) ────────────────────
-
-const L = tokens.themes.light
-
-const selectTokens = {
-  '--select-bg': L.color.surface.canvas,
-  '--select-border': L.color.border.subtle,
-  '--select-text': L.color.text.primary,
-  '--select-font': tokens.typography.role.body.md.fontFamily,
-  '--select-size': tokens.typography.role.body.md.fontSize,
-  '--select-radius': tokens.radius.md,
-} as React.CSSProperties
-
-const inputTokens = {
-  '--input-bg': L.color.surface.canvas,
-  '--input-border': L.color.border.subtle,
-  '--input-text': L.color.text.primary,
-  '--input-muted': L.color.text.muted,
-  '--input-font': tokens.typography.role.body.md.fontFamily,
-  '--input-size': tokens.typography.role.body.md.fontSize,
-  '--input-radius': tokens.radius.md,
-} as React.CSSProperties
-
-// Mantine filled buttons use the theme's primary green (#2d6a4f) by default.
-// No additional style override needed — accentButtonStyle was a bridge for the
-// old hand-rolled Button's CSS variable API, now dead.
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -689,14 +661,13 @@ export default function PromptBuilderPage() {
             {/* Chat input */}
             {!draftBlock && (
               <div className="flex gap-2 border-t border-gray-200 px-4 py-3">
-                <input
+                <TextInput
                   value={chatInput}
-                  onChange={e => setChatInput(e.target.value)}
+                  onChange={e => setChatInput(e.currentTarget.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChatSend() } }}
                   placeholder="Type your reply..."
                   disabled={chatLoading}
-                  className="h-9 min-w-0 flex-1 rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-[length:var(--input-size)] text-[var(--input-text)] placeholder:text-[var(--input-muted)] outline-none disabled:opacity-50"
-                  style={inputTokens}
+                  className="min-w-0 flex-1"
                 />
                 <Button
                   variant="primary"
@@ -738,12 +709,13 @@ export default function PromptBuilderPage() {
                 </div>
                 {editingIndex === i && (
                   <div className="flex flex-col gap-2 border-t border-gray-200 pt-2">
-                    <textarea
+                    <Textarea
                       value={editContent}
-                      onChange={e => setEditContent(e.target.value)}
+                      onChange={e => setEditContent(e.currentTarget.value)}
                       rows={4}
-                      className="w-full resize-y rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 font-mono text-[length:var(--input-size)] text-[var(--input-text)] leading-relaxed placeholder:text-[var(--input-muted)] outline-none"
-                      style={inputTokens}
+                      autosize
+                      minRows={4}
+                      styles={{ input: { fontFamily: 'var(--mantine-font-family-monospace)' } }}
                     />
                     <div className="flex gap-2">
                       <Button variant="primary" size="sm" onClick={() => saveEdit(i)}>
