@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Tooltip } from '@mantine/core'
+import { Tooltip, Select, TextInput } from '@mantine/core'
 import { Badge } from '@/components/admin/primitives/Badge'
 import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
@@ -97,7 +97,7 @@ export default function PromptBuilderPage() {
   const [topicsLoading, setTopicsLoading] = useState(true)
 
   // Form state
-  const [type, setType] = useState<BlockType>('guardrail')
+  const [type, setType] = useState<BlockType | ''>('')
   const [topicId, setTopicId] = useState<string>('')
   const [newTopicMode, setNewTopicMode] = useState(false)
   const [newTopicName, setNewTopicName] = useState('')
@@ -154,7 +154,7 @@ export default function PromptBuilderPage() {
   }, [chatMessages, chatLoading])
 
   function resetForm() {
-    setType('guardrail')
+    setType('')
     setTopicId('')
     setNewTopicMode(false)
     setNewTopicName('')
@@ -171,7 +171,7 @@ export default function PromptBuilderPage() {
   }
 
   function formHasData(): boolean {
-    if (type !== 'guardrail') return true
+    if (type !== '') return true
     if (blockName.trim().length > 0) return true
     if (content.trim().length > 0) return true
     if (file !== null) return true
@@ -193,19 +193,20 @@ export default function PromptBuilderPage() {
     setShowForm(false)
   }
 
-  function handleTypeChange(newType: BlockType) {
+  function handleTypeChange(value: string | null) {
+    const newType = (value ?? '') as BlockType | ''
     setType(newType)
+    setTopicId('')
     setNewTopicMode(false)
-    // topicId will be auto-selected by the useEffect above
   }
 
-  function handleTopicChange(value: string) {
+  function handleTopicChange(value: string | null) {
     if (value === '__new__') {
       setNewTopicMode(true)
       setNewTopicName('')
     } else {
       setNewTopicMode(false)
-      setTopicId(value)
+      setTopicId(value ?? '')
     }
   }
 
@@ -380,7 +381,7 @@ export default function PromptBuilderPage() {
       const topicName = selectedTopic?.name ?? ''
       setBlocks(prev => [
         ...prev,
-        { id: saved.id, type, topicId, topicName, title: saved.title, content: saved.body },
+        { id: saved.id, type: type as BlockType, topicId, topicName, title: saved.title, content: saved.body },
       ])
       resetForm()
       setShowForm(false)
@@ -456,75 +457,68 @@ export default function PromptBuilderPage() {
             <Text variant="label">New block</Text>
 
             {/* Type */}
-            <div className="flex flex-col gap-1.5">
-              <Text variant="muted">Type</Text>
-              <select
-                value={type}
-                onChange={e => handleTypeChange(e.target.value as BlockType)}
-                className="h-9 w-full rounded-[var(--select-radius)] border border-[var(--select-border)] bg-[var(--select-bg)] px-3 text-[length:var(--select-size)] text-[var(--select-text)] outline-none"
-                style={selectTokens}
-              >
-                {TYPES.map(t => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Type"
+              placeholder="Select a type..."
+              data={TYPES}
+              value={type || null}
+              onChange={handleTypeChange}
+              allowDeselect={false}
+            />
 
-            {/* Topic */}
-            <div className="flex flex-col gap-1.5">
-              <Text variant="muted">Topic</Text>
-              {topicsLoading ? (
-                <Text variant="muted" className="text-xs">Loading topics...</Text>
-              ) : (
-                <select
-                  value={newTopicMode ? '__new__' : topicId}
-                  onChange={e => handleTopicChange(e.target.value)}
-                  className="h-9 w-full rounded-[var(--select-radius)] border border-[var(--select-border)] bg-[var(--select-bg)] px-3 text-[length:var(--select-size)] text-[var(--select-text)] outline-none"
-                  style={selectTokens}
-                >
-                  {filteredTopics.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                  <option value="__new__">New topic...</option>
-                </select>
-              )}
-
-              {newTopicMode && (
-                <div className="flex gap-2">
-                  <input
-                    autoFocus
-                    value={newTopicName}
-                    onChange={e => setNewTopicName(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
-                    placeholder="Topic name..."
-                    className="h-9 min-w-0 flex-1 rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-[length:var(--input-size)] text-[var(--input-text)] placeholder:text-[var(--input-muted)] outline-none"
-                    style={inputTokens}
+            {/* Topic — hidden until Type is selected */}
+            {type && (
+              <div className="flex flex-col gap-1.5">
+                {topicsLoading ? (
+                  <Text variant="muted" className="text-xs">Loading topics...</Text>
+                ) : (
+                  <Select
+                    label="Topic"
+                    placeholder="Select a topic..."
+                    data={[
+                      ...filteredTopics.map(t => ({ value: t.id, label: t.name })),
+                      { value: '__new__', label: 'New topic...' },
+                    ]}
+                    value={newTopicMode ? '__new__' : (topicId || null)}
+                    onChange={handleTopicChange}
+                    allowDeselect={false}
                   />
-                  <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
-                    {isCreatingTopic ? '...' : 'Add'}
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
-                    Cancel
-                  </Button>
-                </div>
-              )}
+                )}
 
-              <Text variant="muted" className="text-xs">
-                AI will fill this in if you&apos;re not sure
-              </Text>
-            </div>
+                {newTopicMode && (
+                  <div className="flex gap-2">
+                    <TextInput
+                      autoFocus
+                      value={newTopicName}
+                      onChange={e => setNewTopicName(e.currentTarget.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
+                      placeholder="Topic name..."
+                      className="min-w-0 flex-1"
+                    />
+                    <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
+                      {isCreatingTopic ? '...' : 'Add'}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
+                      Cancel
+                    </Button>
+                  </div>
+                )}
 
-            {/* Block name */}
-            <div className="flex flex-col gap-1.5">
-              <Text variant="muted">Block name</Text>
-              <input
+                <Text variant="muted" className="text-xs">
+                  AI will fill this in if you&apos;re not sure
+                </Text>
+              </div>
+            )}
+
+            {/* Block name — hidden until Topic is selected */}
+            {topicId && (
+              <TextInput
+                label="Block name"
                 value={blockName}
-                onChange={e => setBlockName(e.target.value)}
+                onChange={e => setBlockName(e.currentTarget.value)}
                 placeholder="e.g. Off-limit topics, Career summary..."
-                className="h-9 w-full rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-[length:var(--input-size)] text-[var(--input-text)] placeholder:text-[var(--input-muted)] outline-none"
-                style={inputTokens}
               />
-            </div>
+            )}
 
             {/* Content mode */}
             <div className="flex flex-col gap-2">
