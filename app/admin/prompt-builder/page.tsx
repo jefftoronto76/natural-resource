@@ -77,6 +77,10 @@ export default function PromptBuilderPage() {
   const [content, setContent] = useState('')
   const [file, setFile] = useState<File | null>(null)
 
+  // Canvas empty-state visibility
+  const [composerFocused, setComposerFocused] = useState(false)
+  const showEmptyState = !composerFocused && !content.trim()
+
   // Chat state
   const [chatMode, setChatMode] = useState(false)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -420,14 +424,129 @@ export default function PromptBuilderPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-4 p-4 sm:p-6">
-        {/* Create block form — Accordion + Composer */}
+      <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 sm:p-6">
+        {/* ── Composer — always visible when form is open, positioned at top ── */}
         {showForm && !chatMode && (
-          <>
+          <div className="flex shrink-0 flex-col gap-2">
+            <Group gap="xs" align="flex-end" wrap="nowrap">
+              {/* Upload button */}
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="lg"
+                aria-label="Upload file"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 3v10M3 8h10" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </ActionIcon>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                onChange={e => {
+                  const f = e.target.files?.[0] ?? null
+                  setFile(f)
+                  e.target.value = ''
+                }}
+                style={{ display: 'none' }}
+              />
+
+              {/* Textarea */}
+              <Textarea
+                value={content}
+                onChange={e => setContent(e.currentTarget.value)}
+                onFocus={() => setComposerFocused(true)}
+                onBlur={() => setComposerFocused(false)}
+                placeholder="Type or paste content..."
+                autosize
+                minRows={1}
+                maxRows={8}
+                className="flex-1"
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey && blockName.trim() && (content.trim() || file)) {
+                    e.preventDefault()
+                    handleCreate()
+                  }
+                }}
+              />
+
+              {/* Send button */}
+              {(() => {
+                const isDisabled = isSubmitting || !ownerId || !blockName.trim() || !topicId || !(content.trim() || file)
+                const btn = (
+                  <ActionIcon
+                    variant="filled"
+                    size="lg"
+                    onClick={handleCreate}
+                    disabled={isDisabled}
+                    aria-label="Create block"
+                    style={isDisabled ? { cursor: 'not-allowed' } : undefined}
+                  >
+                    <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 8h10M9 4l4 4-4 4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </ActionIcon>
+                )
+                return isDisabled ? (
+                  <Tooltip label="Block name and content are required" position="top">
+                    <span>{btn}</span>
+                  </Tooltip>
+                ) : btn
+              })()}
+            </Group>
+
+            {/* File attachment indicator */}
+            {file && (
+              <Group gap="xs">
+                <Text variant="muted" className="text-xs">
+                  📎 {file.name}
+                </Text>
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  size="xs"
+                  onClick={() => setFile(null)}
+                  aria-label="Remove file"
+                >
+                  ✕
+                </ActionIcon>
+              </Group>
+            )}
+          </div>
+        )}
+
+        {/* ── Canvas area — between composer and accordion ── */}
+        {showForm && !chatMode && (
+          <div
+            className="flex min-h-[240px] flex-1 items-center justify-center rounded-lg sm:min-h-[320px]"
+            style={{ backgroundColor: 'var(--mantine-color-gray-0)' }}
+          >
+            {showEmptyState && (
+              <p
+                className="select-none text-center"
+                style={{
+                  fontFamily: 'var(--mantine-font-family)',
+                  fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+                  color: 'var(--mantine-color-gray-5)',
+                  fontWeight: 400,
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                Hello World
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ── Metadata accordion — below canvas ── */}
+        {showForm && !chatMode && (
           <MantineAccordion
             defaultValue={undefined}
             variant="contained"
             radius="md"
+            className="shrink-0"
           >
             <MantineAccordion.Item value="new-block">
               <MantineAccordion.Control>
@@ -502,96 +621,6 @@ export default function PromptBuilderPage() {
               </MantineAccordion.Panel>
             </MantineAccordion.Item>
           </MantineAccordion>
-
-          {/* Composer input — always visible when form is open */}
-          <div className="flex flex-col gap-2">
-            <Text variant="muted">Content</Text>
-            <Group gap="xs" align="flex-end" wrap="nowrap">
-              {/* Upload button */}
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                size="lg"
-                aria-label="Upload file"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 3v10M3 8h10" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </ActionIcon>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                onChange={e => {
-                  const f = e.target.files?.[0] ?? null
-                  setFile(f)
-                  e.target.value = ''
-                }}
-                style={{ display: 'none' }}
-              />
-
-              {/* Textarea */}
-              <Textarea
-                value={content}
-                onChange={e => setContent(e.currentTarget.value)}
-                placeholder="Type or paste content..."
-                autosize
-                minRows={1}
-                maxRows={8}
-                className="flex-1"
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey && blockName.trim() && (content.trim() || file)) {
-                    e.preventDefault()
-                    handleCreate()
-                  }
-                }}
-              />
-
-              {/* Send button */}
-              {(() => {
-                const isDisabled = isSubmitting || !ownerId || !blockName.trim() || !topicId || !(content.trim() || file)
-                const btn = (
-                  <ActionIcon
-                    variant="filled"
-                    size="lg"
-                    onClick={handleCreate}
-                    disabled={isDisabled}
-                    aria-label="Create block"
-                    style={isDisabled ? { cursor: 'not-allowed' } : undefined}
-                  >
-                    <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M3 8h10M9 4l4 4-4 4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </ActionIcon>
-                )
-                return isDisabled ? (
-                  <Tooltip label="Block name and content are required" position="top">
-                    <span>{btn}</span>
-                  </Tooltip>
-                ) : btn
-              })()}
-            </Group>
-
-            {/* File attachment indicator */}
-            {file && (
-              <Group gap="xs">
-                <Text variant="muted" className="text-xs">
-                  📎 {file.name}
-                </Text>
-                <ActionIcon
-                  variant="subtle"
-                  color="gray"
-                  size="xs"
-                  onClick={() => setFile(null)}
-                  aria-label="Remove file"
-                >
-                  ✕
-                </ActionIcon>
-              </Group>
-            )}
-          </div>
-          </>
         )}
 
         {/* Chat interface */}
@@ -674,7 +703,7 @@ export default function PromptBuilderPage() {
                 <Button
                   variant="primary"
                   size="sm"
-                                   onClick={handleChatSend}
+                  onClick={handleChatSend}
                   disabled={chatLoading || !chatInput.trim()}
                 >
                   Send
