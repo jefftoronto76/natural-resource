@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Accordion as MantineAccordion, ActionIcon, Group } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon, Group } from '@mantine/core'
 import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
 import { Text } from '@/components/admin/primitives/Text'
@@ -61,6 +61,7 @@ export default function PromptBuilderPage() {
   const [isCreatingTopic, setIsCreatingTopic] = useState(false)
   const [blockName, setBlockName] = useState('')
   const [file, setFile] = useState<File | null>(null)
+  const [metadataOpen, setMetadataOpen] = useState(false)
 
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -270,6 +271,198 @@ export default function PromptBuilderPage() {
       ? 'var(--mantine-color-yellow-6)'
       : 'var(--mantine-color-gray-5)'
 
+  const hasMessages = chatMessages.length > 0
+
+  /* Shared composer bar — rendered in both empty and active layouts */
+  const composerBar = (
+    <div className={hasMessages ? '' : 'w-full max-w-[600px]'}>
+      <Group gap="xs" align="flex-end" wrap="nowrap">
+        {/* Upload button */}
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="lg"
+          aria-label="Upload file"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isAtLimit}
+        >
+          <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 3v10M3 8h10" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </ActionIcon>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+          onChange={e => {
+            const f = e.target.files?.[0] ?? null
+            setFile(f)
+            e.target.value = ''
+          }}
+          style={{ display: 'none' }}
+        />
+
+        {/* Textarea */}
+        <Textarea
+          value={chatInput}
+          onChange={e => setChatInput(e.currentTarget.value)}
+          placeholder={isAtLimit ? 'Exchange limit reached' : 'Type or paste content...'}
+          autosize
+          minRows={1}
+          maxRows={4}
+          className="flex-1"
+          disabled={isAtLimit}
+          styles={!hasMessages ? {
+            input: {
+              borderRadius: 'var(--mantine-radius-md)',
+              padding: '14px 16px',
+              fontSize: '16px',
+            },
+          } : undefined}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              handleSend()
+            }
+          }}
+        />
+
+        {/* Send button */}
+        <ActionIcon
+          variant="filled"
+          size="lg"
+          onClick={handleSend}
+          disabled={chatLoading || isAtLimit || !chatInput.trim()}
+          aria-label="Send message"
+        >
+          <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 8h10M9 4l4 4-4 4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </ActionIcon>
+      </Group>
+
+      {/* File attachment indicator */}
+      {file && (
+        <Group gap="xs" mt="xs">
+          <Text variant="muted" className="text-xs">
+            📎 {file.name}
+          </Text>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="xs"
+            onClick={() => setFile(null)}
+            aria-label="Remove file"
+          >
+            ✕
+          </ActionIcon>
+        </Group>
+      )}
+    </div>
+  )
+
+  /* Shared metadata trigger + collapsible fields */
+  const metadataSection = (
+    <div className={hasMessages ? '' : 'w-full max-w-[600px]'}>
+      <button
+        type="button"
+        onClick={() => setMetadataOpen(o => !o)}
+        className="flex items-center gap-1 bg-transparent border-none cursor-pointer px-0 py-1"
+        style={{
+          color: 'var(--mantine-color-dimmed)',
+          fontFamily: 'var(--mantine-font-family)',
+          fontSize: '12px',
+        }}
+        aria-expanded={metadataOpen}
+      >
+        Block metadata
+        <span
+          style={{
+            display: 'inline-block',
+            transition: 'transform 150ms ease',
+            transform: metadataOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            fontSize: '10px',
+          }}
+        >
+          ▾
+        </span>
+      </button>
+
+      <Collapse in={metadataOpen}>
+        <div className="flex flex-col gap-3 pt-2">
+          {/* Row 1: Type + Topic side by side */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
+            <div className="min-w-0 flex-1">
+              <Select
+                label="Type"
+                placeholder="Select a type..."
+                data={TYPES}
+                value={type || null}
+                onChange={handleTypeChange}
+                allowDeselect={false}
+                size="sm"
+              />
+            </div>
+
+            {type && (
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-1.5">
+                  {topicsLoading ? (
+                    <Text variant="muted" className="text-xs">Loading topics...</Text>
+                  ) : (
+                    <Select
+                      label="Topic"
+                      placeholder="Select a topic..."
+                      data={[
+                        ...filteredTopics.map(t => ({ value: t.id, label: t.name })),
+                        { value: '__new__', label: 'New topic...' },
+                      ]}
+                      value={newTopicMode ? '__new__' : (topicId || null)}
+                      onChange={handleTopicChange}
+                      allowDeselect={false}
+                      size="sm"
+                    />
+                  )}
+
+                  {newTopicMode && (
+                    <div className="flex gap-2">
+                      <TextInput
+                        autoFocus
+                        value={newTopicName}
+                        onChange={e => setNewTopicName(e.currentTarget.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
+                        placeholder="Topic name..."
+                        className="min-w-0 flex-1"
+                        size="sm"
+                      />
+                      <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
+                        {isCreatingTopic ? '...' : 'Add'}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Row 2: Block name full width */}
+          {topicId && (
+            <TextInput
+              label="Block name"
+              value={blockName}
+              onChange={e => setBlockName(e.currentTarget.value)}
+              placeholder="e.g. Off-limit topics, Career summary..."
+              size="sm"
+            />
+          )}
+        </div>
+      </Collapse>
+    </div>
+  )
+
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
@@ -277,291 +470,139 @@ export default function PromptBuilderPage() {
         <Text variant="title">Composer</Text>
       </div>
 
-      {/* Canvas — fills available height, scrollable */}
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
-        {/* Exchange counter */}
-        {exchangeCount > 0 && (
-          <div className="sticky top-0 z-10 flex justify-end px-4 py-2 sm:px-6">
-            <span
-              className="rounded-full px-3 py-1 text-xs font-medium"
-              style={{
-                color: counterColor,
-                backgroundColor: 'var(--mantine-color-white)',
-                border: `1px solid ${counterColor}`,
-                fontFamily: 'var(--mantine-font-family-monospace)',
-              }}
-            >
-              {exchangeCount} of {MAX_EXCHANGES} exchanges
-            </span>
+      {/* ── Empty state: prompt + composer centered in canvas ── */}
+      {!hasMessages && (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-4 sm:px-6">
+          <p
+            className="select-none text-center"
+            style={{
+              fontFamily: 'var(--mantine-font-family)',
+              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+              color: 'var(--mantine-color-gray-5)',
+              fontWeight: 400,
+              letterSpacing: '-0.01em',
+              maxWidth: '320px',
+              lineHeight: 1.5,
+            }}
+          >
+            What would you like to add to your prompt?
+          </p>
+          {composerBar}
+          <div className="mt-[-8px]">
+            {metadataSection}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Empty state */}
-        {chatMessages.length === 0 && (
-          <div className="flex flex-1 items-center justify-center px-4">
-            <p
-              className="select-none text-center"
-              style={{
-                fontFamily: 'var(--mantine-font-family)',
-                fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-                color: 'var(--mantine-color-gray-5)',
-                fontWeight: 400,
-                letterSpacing: '-0.01em',
-                maxWidth: '320px',
-                lineHeight: 1.5,
-              }}
-            >
-              What would you like to add to your prompt?
-            </p>
-          </div>
-        )}
-
-        {/* Chat thread */}
-        {chatMessages.length > 0 && (
-          <div className="flex flex-col gap-4 px-4 py-4 sm:px-6">
-            {chatMessages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className="flex max-w-[85%] flex-col gap-1 sm:max-w-[75%]">
-                  <div
-                    className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                      msg.role === 'user'
-                        ? 'whitespace-pre-wrap text-white'
-                        : 'text-gray-900 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1'
-                    }`}
-                    style={
-                      msg.role === 'user'
-                        ? { backgroundColor: 'var(--mantine-color-green-filled)' }
-                        : { backgroundColor: 'var(--mantine-color-gray-0)' }
-                    }
-                  >
-                    {msg.role === 'assistant' ? (
-                      msg.content ? (
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      ) : chatLoading ? (
-                        <span className="text-gray-400">Thinking...</span>
-                      ) : null
-                    ) : (
-                      msg.content
-                    )}
-                  </div>
-                  <span
-                    className={`text-xs ${msg.role === 'user' ? 'text-right' : 'text-left'}`}
-                    style={{ color: 'var(--mantine-color-gray-5)' }}
-                  >
-                    {formatTime(msg.timestamp)}
-                  </span>
-                </div>
+      {/* ── Active state: canvas with messages ── */}
+      {hasMessages && (
+        <>
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
+            {/* Exchange counter */}
+            {exchangeCount > 0 && (
+              <div className="sticky top-0 z-10 flex justify-end px-4 py-2 sm:px-6">
+                <span
+                  className="rounded-full px-3 py-1 text-xs font-medium"
+                  style={{
+                    color: counterColor,
+                    backgroundColor: 'var(--mantine-color-white)',
+                    border: `1px solid ${counterColor}`,
+                    fontFamily: 'var(--mantine-font-family-monospace)',
+                  }}
+                >
+                  {exchangeCount} of {MAX_EXCHANGES} exchanges
+                </span>
               </div>
-            ))}
-
-            {/* Block confirmation card */}
-            {draftBlock && (
-              <Card variant="outlined" className="flex flex-col gap-3">
-                <Text variant="muted" className="text-xs font-semibold uppercase tracking-wider">
-                  Block ready
-                </Text>
-                <Text variant="label">{draftBlock.title}</Text>
-                <Text variant="muted" className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {draftBlock.content}
-                </Text>
-                <div className="flex gap-2">
-                  <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
-                    {isSaving ? 'Saving...' : 'Save block'}
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setDraftBlock(null)} disabled={isSaving}>
-                    Keep refining
-                  </Button>
-                </div>
-              </Card>
             )}
 
-            {/* Exchange limit message */}
-            {isAtLimit && !draftBlock && (
-              <Card variant="outlined" className="flex flex-col gap-2 border-red-200 bg-red-50">
-                <Text variant="label" style={{ color: 'var(--mantine-color-red-7)' }}>
-                  Exchange limit reached
-                </Text>
-                <Text variant="muted" className="text-sm">
-                  You&apos;ve reached the exchange limit for this session. Save your block or start a new chat.
-                </Text>
-                <div className="flex gap-2">
-                  {draftBlock && (
-                    <Button variant="primary" size="sm" onClick={handleSaveBlock}>
-                      Save block
+            {/* Chat thread */}
+            <div className="flex flex-col gap-4 px-4 py-4 sm:px-6">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className="flex max-w-[85%] flex-col gap-1 sm:max-w-[75%]">
+                    <div
+                      className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                        msg.role === 'user'
+                          ? 'whitespace-pre-wrap text-white'
+                          : 'text-gray-900 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1'
+                      }`}
+                      style={
+                        msg.role === 'user'
+                          ? { backgroundColor: 'var(--mantine-color-green-filled)' }
+                          : { backgroundColor: 'var(--mantine-color-gray-0)' }
+                      }
+                    >
+                      {msg.role === 'assistant' ? (
+                        msg.content ? (
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        ) : chatLoading ? (
+                          <span className="text-gray-400">Thinking...</span>
+                        ) : null
+                      ) : (
+                        msg.content
+                      )}
+                    </div>
+                    <span
+                      className={`text-xs ${msg.role === 'user' ? 'text-right' : 'text-left'}`}
+                      style={{ color: 'var(--mantine-color-gray-5)' }}
+                    >
+                      {formatTime(msg.timestamp)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Block confirmation card */}
+              {draftBlock && (
+                <Card variant="outlined" className="flex flex-col gap-3">
+                  <Text variant="muted" className="text-xs font-semibold uppercase tracking-wider">
+                    Block ready
+                  </Text>
+                  <Text variant="label">{draftBlock.title}</Text>
+                  <Text variant="muted" className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {draftBlock.content}
+                  </Text>
+                  <div className="flex gap-2">
+                    <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
+                      {isSaving ? 'Saving...' : 'Save block'}
                     </Button>
-                  )}
-                  <Button variant="ghost" size="sm" onClick={resetChat}>
-                    Start new chat
-                  </Button>
-                </div>
-              </Card>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-      </div>
-
-      {/* Composer — fixed at bottom */}
-      <div className="shrink-0 border-t border-gray-200 px-4 py-3 sm:px-6">
-        <Group gap="xs" align="flex-end" wrap="nowrap">
-          {/* Upload button */}
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="lg"
-            aria-label="Upload file"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isAtLimit}
-          >
-            <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 3v10M3 8h10" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </ActionIcon>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-            onChange={e => {
-              const f = e.target.files?.[0] ?? null
-              setFile(f)
-              e.target.value = ''
-            }}
-            style={{ display: 'none' }}
-          />
-
-          {/* Textarea */}
-          <Textarea
-            value={chatInput}
-            onChange={e => setChatInput(e.currentTarget.value)}
-            placeholder={isAtLimit ? 'Exchange limit reached' : 'Type or paste content...'}
-            autosize
-            minRows={1}
-            maxRows={4}
-            className="flex-1"
-            disabled={isAtLimit}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                handleSend()
-              }
-            }}
-          />
-
-          {/* Send button */}
-          <ActionIcon
-            variant="filled"
-            size="lg"
-            onClick={handleSend}
-            disabled={chatLoading || isAtLimit || !chatInput.trim()}
-            aria-label="Send message"
-          >
-            <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 8h10M9 4l4 4-4 4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </ActionIcon>
-        </Group>
-
-        {/* File attachment indicator */}
-        {file && (
-          <Group gap="xs" mt="xs">
-            <Text variant="muted" className="text-xs">
-              📎 {file.name}
-            </Text>
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              size="xs"
-              onClick={() => setFile(null)}
-              aria-label="Remove file"
-            >
-              ✕
-            </ActionIcon>
-          </Group>
-        )}
-      </div>
-
-      {/* Metadata accordion — below composer */}
-      <div className="shrink-0 border-t border-gray-200 px-4 pb-4 pt-2 sm:px-6">
-        <MantineAccordion
-          defaultValue={undefined}
-          variant="contained"
-          radius="md"
-        >
-          <MantineAccordion.Item value="metadata">
-            <MantineAccordion.Control>
-              <Text variant="label">Block metadata</Text>
-            </MantineAccordion.Control>
-            <MantineAccordion.Panel>
-              <div className="flex flex-col gap-5">
-                {/* Type */}
-                <Select
-                  label="Type"
-                  placeholder="Select a type..."
-                  data={TYPES}
-                  value={type || null}
-                  onChange={handleTypeChange}
-                  allowDeselect={false}
-                />
-
-                {/* Topic */}
-                {type && (
-                  <div className="flex flex-col gap-1.5">
-                    {topicsLoading ? (
-                      <Text variant="muted" className="text-xs">Loading topics...</Text>
-                    ) : (
-                      <Select
-                        label="Topic"
-                        placeholder="Select a topic..."
-                        data={[
-                          ...filteredTopics.map(t => ({ value: t.id, label: t.name })),
-                          { value: '__new__', label: 'New topic...' },
-                        ]}
-                        value={newTopicMode ? '__new__' : (topicId || null)}
-                        onChange={handleTopicChange}
-                        allowDeselect={false}
-                      />
-                    )}
-
-                    {newTopicMode && (
-                      <div className="flex gap-2">
-                        <TextInput
-                          autoFocus
-                          value={newTopicName}
-                          onChange={e => setNewTopicName(e.currentTarget.value)}
-                          onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
-                          placeholder="Topic name..."
-                          className="min-w-0 flex-1"
-                        />
-                        <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
-                          {isCreatingTopic ? '...' : 'Add'}
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
-                          Cancel
-                        </Button>
-                      </div>
-                    )}
-
-                    <Text variant="muted" className="text-xs">
-                      AI will fill this in if you&apos;re not sure
-                    </Text>
+                    <Button variant="ghost" size="sm" onClick={() => setDraftBlock(null)} disabled={isSaving}>
+                      Keep refining
+                    </Button>
                   </div>
-                )}
+                </Card>
+              )}
 
-                {/* Block name */}
-                {topicId && (
-                  <TextInput
-                    label="Block name"
-                    value={blockName}
-                    onChange={e => setBlockName(e.currentTarget.value)}
-                    placeholder="e.g. Off-limit topics, Career summary..."
-                  />
-                )}
-              </div>
-            </MantineAccordion.Panel>
-          </MantineAccordion.Item>
-        </MantineAccordion>
-      </div>
+              {/* Exchange limit message */}
+              {isAtLimit && !draftBlock && (
+                <Card variant="outlined" className="flex flex-col gap-2 border-red-200 bg-red-50">
+                  <Text variant="label" style={{ color: 'var(--mantine-color-red-7)' }}>
+                    Exchange limit reached
+                  </Text>
+                  <Text variant="muted" className="text-sm">
+                    You&apos;ve reached the exchange limit for this session. Save your block or start a new chat.
+                  </Text>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={resetChat}>
+                      Start new chat
+                    </Button>
+                  </div>
+                </Card>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          {/* Composer — pinned at bottom */}
+          <div className="shrink-0 border-t border-gray-200 px-4 py-3 sm:px-6">
+            {composerBar}
+            <div className="mt-2">
+              {metadataSection}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
