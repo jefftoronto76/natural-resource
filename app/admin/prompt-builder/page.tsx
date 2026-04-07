@@ -276,7 +276,7 @@ export default function PromptBuilderPage() {
   /* Shared composer container — bordered box with textarea + button row */
   const composerContainer = (
     <div
-      className={hasMessages ? 'w-full' : 'w-full max-w-[65%] max-sm:max-w-full'}
+      className={hasMessages ? 'w-full' : 'w-full max-w-[800px] max-sm:max-w-full'}
       style={{
         border: '1px solid var(--mantine-color-gray-3)',
         borderRadius: 'var(--mantine-radius-md)',
@@ -377,7 +377,7 @@ export default function PromptBuilderPage() {
 
   /* Shared metadata trigger + collapsible fields */
   const metadataSection = (
-    <div className={hasMessages ? '' : 'w-full max-w-[65%] max-sm:max-w-full'}>
+    <div className={hasMessages ? '' : 'w-full max-w-[800px] max-sm:max-w-full'}>
       <button
         type="button"
         onClick={() => setMetadataOpen(o => !o)}
