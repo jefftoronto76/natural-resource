@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Tooltip, Select, TextInput } from '@mantine/core'
+import { Tooltip, Select, TextInput, Textarea, Accordion as MantineAccordion, ActionIcon, Group } from '@mantine/core'
 import { Badge } from '@/components/admin/primitives/Badge'
 import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
@@ -15,7 +15,6 @@ import { readDataStream } from '@/lib/stream'
 // ─── Types & constants ───────────────────────────────────────────────────────
 
 type BlockType = 'guardrail' | 'knowledge' | 'prompt'
-type ContentMode = 'upload' | 'link' | 'create'
 
 interface Topic {
   id: string
@@ -103,7 +102,6 @@ export default function PromptBuilderPage() {
   const [newTopicName, setNewTopicName] = useState('')
   const [isCreatingTopic, setIsCreatingTopic] = useState(false)
   const [blockName, setBlockName] = useState('')
-  const [contentMode, setContentMode] = useState<ContentMode>('create')
   const [content, setContent] = useState('')
   const [file, setFile] = useState<File | null>(null)
 
@@ -115,6 +113,7 @@ export default function PromptBuilderPage() {
   const [draftBlock, setDraftBlock] = useState<DraftBlock | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Edit state
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
@@ -159,7 +158,6 @@ export default function PromptBuilderPage() {
     setNewTopicMode(false)
     setNewTopicName('')
     setBlockName('')
-    setContentMode('create')
     setContent('')
     setFile(null)
     setContentId(null)
@@ -266,8 +264,8 @@ export default function PromptBuilderPage() {
     setChatMessages([...messages, { role: 'assistant', content: '' }])
 
     try {
-      const contentType = contentMode === 'upload' ? 'upload' : contentMode === 'link' ? 'url' : 'text'
-      const raw = contentMode === 'upload' ? file?.name ?? '' : content
+      const contentType = file ? 'upload' : 'text'
+      const raw = file ? file.name : content
       const topicName = selectedTopic?.name ?? ''
 
       const response = await fetch('/api/admin/blocks/chat', {
@@ -301,7 +299,7 @@ export default function PromptBuilderPage() {
   }
 
   async function handleCreate() {
-    const raw = contentMode === 'upload' ? file?.name ?? '' : content
+    const raw = file ? file.name : content
     if (!raw.trim() || !ownerId || !blockName.trim() || !topicId) return
 
     setIsSubmitting(true)
@@ -315,7 +313,7 @@ export default function PromptBuilderPage() {
           tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
           owner_id: ownerId,
           name: topicName,
-          type: contentMode === 'upload' ? 'upload' : contentMode === 'link' ? 'url' : 'text',
+          type: file ? 'upload' : 'text',
           raw,
         }),
       })
@@ -451,148 +449,175 @@ export default function PromptBuilderPage() {
       </div>
 
       <div className="flex flex-col gap-4 p-4 sm:p-6">
-        {/* Create block form */}
+        {/* Create block form — Accordion, collapsed by default */}
         {showForm && !chatMode && (
-          <Card variant="outlined" className="flex flex-col gap-5">
-            <Text variant="label">New block</Text>
-
-            {/* Type */}
-            <Select
-              label="Type"
-              placeholder="Select a type..."
-              data={TYPES}
-              value={type || null}
-              onChange={handleTypeChange}
-              allowDeselect={false}
-            />
-
-            {/* Topic — hidden until Type is selected */}
-            {type && (
-              <div className="flex flex-col gap-1.5">
-                {topicsLoading ? (
-                  <Text variant="muted" className="text-xs">Loading topics...</Text>
-                ) : (
+          <MantineAccordion
+            defaultValue={undefined}
+            variant="contained"
+            radius="md"
+          >
+            <MantineAccordion.Item value="new-block">
+              <MantineAccordion.Control>
+                <Text variant="label">New block</Text>
+              </MantineAccordion.Control>
+              <MantineAccordion.Panel>
+                <div className="flex flex-col gap-5">
+                  {/* Type */}
                   <Select
-                    label="Topic"
-                    placeholder="Select a topic..."
-                    data={[
-                      ...filteredTopics.map(t => ({ value: t.id, label: t.name })),
-                      { value: '__new__', label: 'New topic...' },
-                    ]}
-                    value={newTopicMode ? '__new__' : (topicId || null)}
-                    onChange={handleTopicChange}
+                    label="Type"
+                    placeholder="Select a type..."
+                    data={TYPES}
+                    value={type || null}
+                    onChange={handleTypeChange}
                     allowDeselect={false}
                   />
-                )}
 
-                {newTopicMode && (
-                  <div className="flex gap-2">
+                  {/* Topic — hidden until Type is selected */}
+                  {type && (
+                    <div className="flex flex-col gap-1.5">
+                      {topicsLoading ? (
+                        <Text variant="muted" className="text-xs">Loading topics...</Text>
+                      ) : (
+                        <Select
+                          label="Topic"
+                          placeholder="Select a topic..."
+                          data={[
+                            ...filteredTopics.map(t => ({ value: t.id, label: t.name })),
+                            { value: '__new__', label: 'New topic...' },
+                          ]}
+                          value={newTopicMode ? '__new__' : (topicId || null)}
+                          onChange={handleTopicChange}
+                          allowDeselect={false}
+                        />
+                      )}
+
+                      {newTopicMode && (
+                        <div className="flex gap-2">
+                          <TextInput
+                            autoFocus
+                            value={newTopicName}
+                            onChange={e => setNewTopicName(e.currentTarget.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
+                            placeholder="Topic name..."
+                            className="min-w-0 flex-1"
+                          />
+                          <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
+                            {isCreatingTopic ? '...' : 'Add'}
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
+                            Cancel
+                          </Button>
+                        </div>
+                      )}
+
+                      <Text variant="muted" className="text-xs">
+                        AI will fill this in if you&apos;re not sure
+                      </Text>
+                    </div>
+                  )}
+
+                  {/* Block name — hidden until Topic is selected */}
+                  {topicId && (
                     <TextInput
-                      autoFocus
-                      value={newTopicName}
-                      onChange={e => setNewTopicName(e.currentTarget.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
-                      placeholder="Topic name..."
-                      className="min-w-0 flex-1"
+                      label="Block name"
+                      value={blockName}
+                      onChange={e => setBlockName(e.currentTarget.value)}
+                      placeholder="e.g. Off-limit topics, Career summary..."
                     />
-                    <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
-                      {isCreatingTopic ? '...' : 'Add'}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
-                      Cancel
-                    </Button>
+                  )}
+
+                  {/* Composer input */}
+                  <div className="flex flex-col gap-2">
+                    <Text variant="muted">Content</Text>
+                    <Group gap="xs" align="flex-end" wrap="nowrap">
+                      {/* Upload button */}
+                      <ActionIcon
+                        variant="subtle"
+                        color="gray"
+                        size="lg"
+                        aria-label="Upload file"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M8 3v10M3 8h10" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                      </ActionIcon>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                        onChange={e => {
+                          const f = e.target.files?.[0] ?? null
+                          setFile(f)
+                          e.target.value = ''
+                        }}
+                        style={{ display: 'none' }}
+                      />
+
+                      {/* Textarea */}
+                      <Textarea
+                        value={content}
+                        onChange={e => setContent(e.currentTarget.value)}
+                        placeholder="Type or paste content..."
+                        autosize
+                        minRows={1}
+                        maxRows={8}
+                        className="flex-1"
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && !e.shiftKey && blockName.trim() && (content.trim() || file)) {
+                            e.preventDefault()
+                            handleCreate()
+                          }
+                        }}
+                      />
+
+                      {/* Send button */}
+                      {(() => {
+                        const isDisabled = isSubmitting || !ownerId || !blockName.trim() || !topicId || !(content.trim() || file)
+                        const btn = (
+                          <ActionIcon
+                            variant="filled"
+                            size="lg"
+                            onClick={handleCreate}
+                            disabled={isDisabled}
+                            aria-label="Create block"
+                            style={isDisabled ? { cursor: 'not-allowed' } : undefined}
+                          >
+                            <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M3 8h10M9 4l4 4-4 4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </ActionIcon>
+                        )
+                        return isDisabled ? (
+                          <Tooltip label="Block name and content are required" position="top">
+                            <span>{btn}</span>
+                          </Tooltip>
+                        ) : btn
+                      })()}
+                    </Group>
+
+                    {/* File attachment indicator */}
+                    {file && (
+                      <Group gap="xs">
+                        <Text variant="muted" className="text-xs">
+                          📎 {file.name}
+                        </Text>
+                        <ActionIcon
+                          variant="subtle"
+                          color="gray"
+                          size="xs"
+                          onClick={() => setFile(null)}
+                          aria-label="Remove file"
+                        >
+                          ✕
+                        </ActionIcon>
+                      </Group>
+                    )}
                   </div>
-                )}
-
-                <Text variant="muted" className="text-xs">
-                  AI will fill this in if you&apos;re not sure
-                </Text>
-              </div>
-            )}
-
-            {/* Block name — hidden until Topic is selected */}
-            {topicId && (
-              <TextInput
-                label="Block name"
-                value={blockName}
-                onChange={e => setBlockName(e.currentTarget.value)}
-                placeholder="e.g. Off-limit topics, Career summary..."
-              />
-            )}
-
-            {/* Content mode */}
-            <div className="flex flex-col gap-2">
-              <Text variant="muted">Content</Text>
-              <div className="grid grid-cols-3 gap-2">
-                {(['upload', 'link', 'create'] as const).map(mode => (
-                  <Button
-                    key={mode}
-                    variant={contentMode === mode ? 'primary' : 'ghost'}
-                    color={contentMode === mode ? undefined : 'gray'}
-                    size="sm"
-                    onClick={() => {
-                      setContentMode(mode)
-                      setContent('')
-                      setFile(null)
-                    }}
-                  >
-                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                  </Button>
-                ))}
-              </div>
-
-              {contentMode === 'upload' && (
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                  onChange={e => setFile(e.target.files?.[0] ?? null)}
-                  className="text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium"
-                />
-              )}
-
-              {contentMode === 'link' && (
-                <input
-                  value={content}
-                  onChange={e => setContent(e.target.value)}
-                  placeholder="https://..."
-                  className="h-9 w-full rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 text-[length:var(--input-size)] text-[var(--input-text)] placeholder:text-[var(--input-muted)] outline-none"
-                  style={inputTokens}
-                />
-              )}
-
-              {contentMode === 'create' && (
-                <textarea
-                  value={content}
-                  onChange={e => setContent(e.target.value)}
-                  placeholder="Type or paste content..."
-                  rows={6}
-                  className="w-full resize-y rounded-[var(--input-radius)] border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 font-mono text-[length:var(--input-size)] text-[var(--input-text)] leading-relaxed placeholder:text-[var(--input-muted)] outline-none"
-                  style={inputTokens}
-                />
-              )}
-            </div>
-
-            {/* Submit */}
-            {(() => {
-              const isDisabled = isSubmitting || !ownerId || !blockName.trim() || !topicId || !(content.trim() || file)
-              const btn = (
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={handleCreate}
-                  disabled={isDisabled}
-                  style={isDisabled ? { cursor: 'not-allowed' } : undefined}
-                >
-                  {isSubmitting ? 'Saving...' : 'Create Block'}
-                </Button>
-              )
-              return isDisabled ? (
-                <Tooltip label="Block name and content are required" position="bottom">
-                  <span>{btn}</span>
-                </Tooltip>
-              ) : btn
-            })()}
-          </Card>
+                </div>
+              </MantineAccordion.Panel>
+            </MantineAccordion.Item>
+          </MantineAccordion>
         )}
 
         {/* Chat interface */}
