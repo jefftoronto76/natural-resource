@@ -96,7 +96,6 @@ export async function POST(req: Request) {
         session_type: 'composer',
         session_subtype: 'block',
         block_id: block.id,
-        message_count: messages.length,
         status: 'completed',
       })
 
