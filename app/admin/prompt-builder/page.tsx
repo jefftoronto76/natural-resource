@@ -579,7 +579,7 @@ export default function PromptBuilderPage() {
             )}
 
             {/* Chat thread */}
-            <div className="flex flex-col gap-4 px-4 py-4 sm:px-6">
+            <div className="mx-auto flex w-full max-w-[800px] flex-col gap-4 px-4 py-4 sm:px-6">
               {chatMessages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className="flex max-w-[85%] flex-col gap-1 sm:max-w-[75%]">
