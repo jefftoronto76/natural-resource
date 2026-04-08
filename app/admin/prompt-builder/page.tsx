@@ -635,20 +635,62 @@ export default function PromptBuilderPage() {
                   <Text variant="muted" className="whitespace-pre-wrap text-sm leading-relaxed">
                     {draftBlock.content}
                   </Text>
-                  {(draftBlock.suggestedType || draftBlock.suggestedTopic) && (
-                    <div className="flex gap-3">
-                      {draftBlock.suggestedType && (
-                        <Text variant="muted" className="text-xs">
-                          Type: <span style={{ fontWeight: 500 }}>{TYPES.find(t => t.value === draftBlock.suggestedType)?.label ?? draftBlock.suggestedType}</span>
-                        </Text>
-                      )}
-                      {draftBlock.suggestedTopic && (
-                        <Text variant="muted" className="text-xs">
-                          Topic: <span style={{ fontWeight: 500 }}>{draftBlock.suggestedTopic}</span>
-                        </Text>
-                      )}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
+                    <div className="min-w-0 flex-1">
+                      <Select
+                        label="Type"
+                        placeholder="Select a type..."
+                        data={TYPES}
+                        value={type || null}
+                        onChange={handleTypeChange}
+                        allowDeselect={false}
+                        size="sm"
+                      />
                     </div>
-                  )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-col gap-1.5">
+                        {type ? (
+                          topicsLoading ? (
+                            <Text variant="muted" className="text-xs">Loading topics...</Text>
+                          ) : (
+                            <Select
+                              label="Topic"
+                              placeholder="Select a topic..."
+                              data={[
+                                ...filteredTopics.map(t => ({ value: t.id, label: t.name })),
+                                { value: '__new__', label: 'New topic...' },
+                              ]}
+                              value={newTopicMode ? '__new__' : (topicId || null)}
+                              onChange={handleTopicChange}
+                              allowDeselect={false}
+                              size="sm"
+                            />
+                          )
+                        ) : (
+                          <Select label="Topic" placeholder="Select a type first..." data={[]} disabled size="sm" />
+                        )}
+                        {newTopicMode && (
+                          <div className="flex gap-2">
+                            <TextInput
+                              autoFocus
+                              value={newTopicName}
+                              onChange={e => setNewTopicName(e.currentTarget.value)}
+                              onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
+                              placeholder="Topic name..."
+                              className="min-w-0 flex-1"
+                              size="sm"
+                            />
+                            <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
+                              {isCreatingTopic ? '...' : 'Add'}
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
+                              Cancel
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                   {isPlatformAdmin && (
                     <Checkbox
                       label="Mark as default block"
