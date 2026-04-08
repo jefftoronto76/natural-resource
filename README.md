@@ -123,3 +123,28 @@ CLERK_SECRET_KEY=
 - TypeScript strict mode throughout
 - Mobile-first — minimum 16px font, spacing in multiples of 4px
 - Push directly to `main` unless otherwise specified
+
+---
+
+## What was built (April 7, 2026)
+
+### Composer (Prompt Builder)
+- Block creation chat wired end-to-end
+- AI guides block creation, suggests type and topic
+- Confirmation card with inline editable type, topic, block name
+- is_default toggle for platform admins (Clerk publicMetadata.role)
+- Blocks save to Supabase with auto-created content record
+- Composer conversation saved to chat_sessions linked to block
+- Post-save continuation — "Block saved! What would you like to build next?"
+- Exchange counter, max-width 800px, auto-focus after send
+
+### Blocks Page
+- /admin/prompt-studio/blocks — lists all blocks with type badges and topics
+
+### History Page
+- /admin/prompt-studio/history — lists all composer sessions linked to blocks
+
+### Schema changes
+- blocks: is_default, default audit columns, updated type constraint
+- chat_sessions: session_type, session_subtype, block_id, owner_id
+- content: added wizard type
