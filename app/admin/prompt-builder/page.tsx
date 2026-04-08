@@ -82,6 +82,8 @@ export default function PromptBuilderPage() {
   const [isDefault, setIsDefault] = useState(false)
   const [contentId, setContentId] = useState<string | null>(null)
   const [sessionStartIndex, setSessionStartIndex] = useState(0)
+  const [copiedId, setCopiedId] = useState<number | null>(null)
+  const [copiedAll, setCopiedAll] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -129,6 +131,21 @@ export default function PromptBuilderPage() {
     setIsDefault(false)
     setSaveError(null)
     setContentId(null)
+  }
+
+  function handleCopyBubble(index: number, content: string) {
+    navigator.clipboard.writeText(content)
+    setCopiedId(index)
+    setTimeout(() => setCopiedId(null), 1000)
+  }
+
+  function handleCopyAll() {
+    const text = chatMessages
+      .map(m => `${m.role}: ${m.content}`)
+      .join('\n\n')
+    navigator.clipboard.writeText(text)
+    setCopiedAll(true)
+    setTimeout(() => setCopiedAll(false), 1500)
   }
 
   function handleTypeChange(value: string | null) {
@@ -578,9 +595,22 @@ export default function PromptBuilderPage() {
       {hasMessages && (
         <>
           <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
-            {/* Exchange counter */}
-            {exchangeCount > 0 && (
-              <div className="sticky top-0 z-10 flex justify-end px-4 py-2 sm:px-6">
+            {/* Top bar: Copy all + Exchange counter */}
+            <div className="sticky top-0 z-10 flex items-center justify-end gap-2 px-4 py-2 sm:px-6">
+              <button
+                type="button"
+                onClick={handleCopyAll}
+                className="border-none bg-transparent cursor-pointer px-0 py-0"
+                style={{
+                  color: copiedAll ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-dimmed)',
+                  fontFamily: 'var(--mantine-font-family)',
+                  fontSize: '12px',
+                  transition: 'color 150ms ease',
+                }}
+              >
+                {copiedAll ? 'Copied!' : 'Copy all'}
+              </button>
+              {exchangeCount > 0 && (
                 <Badge
                   variant="outline"
                   color={exchangeCount >= MAX_EXCHANGES ? 'red' : exchangeCount >= WARN_THRESHOLD ? 'yellow' : 'gray'}
@@ -590,8 +620,8 @@ export default function PromptBuilderPage() {
                 >
                   {exchangeCount} of {MAX_EXCHANGES} exchanges
                 </Badge>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Chat thread */}
             <div className="mx-auto flex w-full max-w-[800px] flex-col gap-4 px-4 py-4 sm:px-6">
@@ -599,16 +629,20 @@ export default function PromptBuilderPage() {
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className="flex max-w-[85%] flex-col gap-1 sm:max-w-[75%]">
                     <div
-                      className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                      className={`rounded-2xl px-4 py-3 text-sm leading-relaxed cursor-pointer ${
                         msg.role === 'user'
                           ? 'whitespace-pre-wrap text-white'
                           : 'text-gray-900 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-1'
                       }`}
-                      style={
-                        msg.role === 'user'
+                      style={{
+                        transition: 'outline 150ms ease, background-color 150ms ease',
+                        outline: copiedId === i ? '2px solid var(--mantine-color-green-4)' : '2px solid transparent',
+                        ...(msg.role === 'user'
                           ? { backgroundColor: 'var(--mantine-color-green-filled)' }
-                          : { backgroundColor: 'var(--mantine-color-gray-0)' }
-                      }
+                          : { backgroundColor: copiedId === i ? 'var(--mantine-color-green-0)' : 'var(--mantine-color-gray-0)' }),
+                      }}
+                      onClick={() => msg.content && handleCopyBubble(i, msg.content)}
+                      title="Click to copy"
                     >
                       {msg.role === 'assistant' ? (
                         msg.content ? (
