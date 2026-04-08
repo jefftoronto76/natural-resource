@@ -10,6 +10,7 @@ const NAV_ITEMS = [
 
 const PROMPT_STUDIO_ITEMS = [
   { label: 'Composer', href: '/admin/prompt-builder' },
+  { label: 'Blocks',   href: '/admin/prompt-studio/blocks' },
   { label: 'History',  href: '/admin/prompt-studio/history' },
   { label: 'Assets',   href: '/admin/prompt-studio/assets' },
   { label: 'Prompt',   href: '/admin/prompt-studio/prompt' },
