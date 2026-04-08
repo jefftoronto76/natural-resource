@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid } from '@mantine/core'
 import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
@@ -317,12 +317,6 @@ export default function PromptBuilderPage() {
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
-  const counterColor = exchangeCount >= MAX_EXCHANGES
-    ? 'var(--mantine-color-red-6)'
-    : exchangeCount >= WARN_THRESHOLD
-      ? 'var(--mantine-color-yellow-6)'
-      : 'var(--mantine-color-gray-5)'
-
   const hasMessages = chatMessages.length > 0
 
   /* Shared composer container — bordered box with textarea + button row */
@@ -362,11 +356,9 @@ export default function PromptBuilderPage() {
       />
 
       {/* Button row — inside container */}
-      <div
-        className="flex items-center justify-between"
-        style={{
-          padding: hasMessages ? '4px 8px 8px' : '8px 12px 12px',
-        }}
+      <Group
+        justify="space-between"
+        style={{ padding: hasMessages ? '4px 8px 8px' : '8px 12px 12px' }}
       >
         {/* Left: upload */}
         <ActionIcon
@@ -405,11 +397,11 @@ export default function PromptBuilderPage() {
             <path d="M3 8h10M9 4l4 4-4 4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </ActionIcon>
-      </div>
+      </Group>
 
       {/* File attachment indicator */}
       {file && (
-        <div className="flex items-center gap-2 px-3 pb-2" style={{ marginTop: '-4px' }}>
+        <Group gap="xs" px="sm" pb="xs" mt={-4}>
           <Text variant="muted" className="text-xs">
             📎 {file.name}
           </Text>
@@ -422,7 +414,7 @@ export default function PromptBuilderPage() {
           >
             ✕
           </ActionIcon>
-        </div>
+        </Group>
       )}
     </div>
   )
@@ -455,64 +447,60 @@ export default function PromptBuilderPage() {
       </button>
 
       <Collapse in={metadataOpen}>
-        <div className="flex flex-col gap-3 pt-2">
+        <Stack gap="sm" pt="xs">
           {/* Row 1: Type + Topic side by side */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
-            <div className="min-w-0 flex-1">
-              <Select
-                label="Type"
-                placeholder="Select a type..."
-                data={TYPES}
-                value={type || null}
-                onChange={handleTypeChange}
-                allowDeselect={false}
-                size="sm"
-              />
-            </div>
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+            <Select
+              label="Type"
+              placeholder="Select a type..."
+              data={TYPES}
+              value={type || null}
+              onChange={handleTypeChange}
+              allowDeselect={false}
+              size="sm"
+            />
 
             {type && (
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-col gap-1.5">
-                  {topicsLoading ? (
-                    <Text variant="muted" className="text-xs">Loading topics...</Text>
-                  ) : (
-                    <Select
-                      label="Topic"
-                      placeholder="Select a topic..."
-                      data={[
-                        ...filteredTopics.map(t => ({ value: t.id, label: t.name })),
-                        { value: '__new__', label: 'New topic...' },
-                      ]}
-                      value={newTopicMode ? '__new__' : (topicId || null)}
-                      onChange={handleTopicChange}
-                      allowDeselect={false}
+              <Stack gap={6}>
+                {topicsLoading ? (
+                  <Text variant="muted" className="text-xs">Loading topics...</Text>
+                ) : (
+                  <Select
+                    label="Topic"
+                    placeholder="Select a topic..."
+                    data={[
+                      ...filteredTopics.map(t => ({ value: t.id, label: t.name })),
+                      { value: '__new__', label: 'New topic...' },
+                    ]}
+                    value={newTopicMode ? '__new__' : (topicId || null)}
+                    onChange={handleTopicChange}
+                    allowDeselect={false}
+                    size="sm"
+                  />
+                )}
+
+                {newTopicMode && (
+                  <Group gap="xs" wrap="nowrap">
+                    <TextInput
+                      autoFocus
+                      value={newTopicName}
+                      onChange={e => setNewTopicName(e.currentTarget.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
+                      placeholder="Topic name..."
+                      style={{ flex: 1, minWidth: 0 }}
                       size="sm"
                     />
-                  )}
-
-                  {newTopicMode && (
-                    <div className="flex gap-2">
-                      <TextInput
-                        autoFocus
-                        value={newTopicName}
-                        onChange={e => setNewTopicName(e.currentTarget.value)}
-                        onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
-                        placeholder="Topic name..."
-                        className="min-w-0 flex-1"
-                        size="sm"
-                      />
-                      <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
-                        {isCreatingTopic ? '...' : 'Add'}
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
-                        Cancel
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
+                    <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
+                      {isCreatingTopic ? '...' : 'Add'}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
+                      Cancel
+                    </Button>
+                  </Group>
+                )}
+              </Stack>
             )}
-          </div>
+          </SimpleGrid>
 
           {/* Row 2: Block name full width */}
           {topicId && (
@@ -524,7 +512,7 @@ export default function PromptBuilderPage() {
               size="sm"
             />
           )}
-        </div>
+        </Stack>
       </Collapse>
     </div>
   )
@@ -574,17 +562,15 @@ export default function PromptBuilderPage() {
             {/* Exchange counter */}
             {exchangeCount > 0 && (
               <div className="sticky top-0 z-10 flex justify-end px-4 py-2 sm:px-6">
-                <span
-                  className="rounded-full px-3 py-1 text-xs font-medium"
-                  style={{
-                    color: counterColor,
-                    backgroundColor: 'var(--mantine-color-white)',
-                    border: `1px solid ${counterColor}`,
-                    fontFamily: 'var(--mantine-font-family-monospace)',
-                  }}
+                <Badge
+                  variant="outline"
+                  color={exchangeCount >= MAX_EXCHANGES ? 'red' : exchangeCount >= WARN_THRESHOLD ? 'yellow' : 'gray'}
+                  radius="xl"
+                  size="sm"
+                  style={{ fontFamily: 'var(--mantine-font-family-monospace)' }}
                 >
                   {exchangeCount} of {MAX_EXCHANGES} exchanges
-                </span>
+                </Badge>
               </div>
             )}
 
@@ -627,16 +613,16 @@ export default function PromptBuilderPage() {
 
               {/* Block confirmation card */}
               {draftBlock && (
-                <Card variant="outlined" className="flex flex-col gap-3">
-                  <Text variant="muted" className="text-xs font-semibold uppercase tracking-wider">
-                    Block ready
-                  </Text>
-                  <Text variant="label">{draftBlock.title}</Text>
-                  <Text variant="muted" className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {draftBlock.content}
-                  </Text>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:gap-3">
-                    <div className="min-w-0 flex-1">
+                <Card variant="outlined">
+                  <Stack gap="sm">
+                    <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Block ready
+                    </Text>
+                    <Text variant="label">{draftBlock.title}</Text>
+                    <Text variant="muted" style={{ whiteSpace: 'pre-wrap', fontSize: 'var(--mantine-font-size-sm)', lineHeight: 1.6 }}>
+                      {draftBlock.content}
+                    </Text>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
                       <Select
                         label="Type"
                         placeholder="Select a type..."
@@ -646,9 +632,7 @@ export default function PromptBuilderPage() {
                         allowDeselect={false}
                         size="sm"
                       />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-col gap-1.5">
+                      <Stack gap={6}>
                         {type ? (
                           topicsLoading ? (
                             <Text variant="muted" className="text-xs">Loading topics...</Text>
@@ -670,14 +654,14 @@ export default function PromptBuilderPage() {
                           <Select label="Topic" placeholder="Select a type first..." data={[]} disabled size="sm" />
                         )}
                         {newTopicMode && (
-                          <div className="flex gap-2">
+                          <Group gap="xs" wrap="nowrap">
                             <TextInput
                               autoFocus
                               value={newTopicName}
                               onChange={e => setNewTopicName(e.currentTarget.value)}
                               onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
                               placeholder="Topic name..."
-                              className="min-w-0 flex-1"
+                              style={{ flex: 1, minWidth: 0 }}
                               size="sm"
                             />
                             <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
@@ -686,53 +670,55 @@ export default function PromptBuilderPage() {
                             <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
                               Cancel
                             </Button>
-                          </div>
+                          </Group>
                         )}
-                      </div>
-                    </div>
-                  </div>
-                  {isPlatformAdmin && (
-                    <Checkbox
-                      label="Mark as default block"
-                      checked={isDefault}
-                      onChange={(e) => setIsDefault(e.currentTarget.checked)}
-                      size="sm"
-                    />
-                  )}
-                  {saveError && (
-                    <Text variant="muted" className="text-sm" style={{ color: 'var(--mantine-color-red-6)' }}>
-                      {saveError}
-                    </Text>
-                  )}
-                  <div className="flex gap-2">
-                    <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
-                      {isSaving ? 'Saving...' : 'Save block'}
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => {
-                      setDraftBlock(null)
-                      setSaveError(null)
-                      setChatMessages(prev => [...prev, { role: 'assistant', content: 'Got it — what would you like to change?', timestamp: Date.now() }])
-                    }} disabled={isSaving}>
-                      Keep refining
-                    </Button>
-                  </div>
+                      </Stack>
+                    </SimpleGrid>
+                    {isPlatformAdmin && (
+                      <Checkbox
+                        label="Mark as default block"
+                        checked={isDefault}
+                        onChange={(e) => setIsDefault(e.currentTarget.checked)}
+                        size="sm"
+                      />
+                    )}
+                    {saveError && (
+                      <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)', color: 'var(--mantine-color-red-6)' }}>
+                        {saveError}
+                      </Text>
+                    )}
+                    <Group gap="xs">
+                      <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
+                        {isSaving ? 'Saving...' : 'Save block'}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        setDraftBlock(null)
+                        setSaveError(null)
+                        setChatMessages(prev => [...prev, { role: 'assistant', content: 'Got it — what would you like to change?', timestamp: Date.now() }])
+                      }} disabled={isSaving}>
+                        Keep refining
+                      </Button>
+                    </Group>
+                  </Stack>
                 </Card>
               )}
 
               {/* Exchange limit message */}
               {isAtLimit && !draftBlock && (
-                <Card variant="outlined" className="flex flex-col gap-2 border-red-200 bg-red-50">
-                  <Text variant="label" style={{ color: 'var(--mantine-color-red-7)' }}>
-                    Exchange limit reached
-                  </Text>
-                  <Text variant="muted" className="text-sm">
-                    You&apos;ve reached the exchange limit for this session. Save your block or start a new chat.
-                  </Text>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={resetChat}>
-                      Start new chat
-                    </Button>
-                  </div>
+                <Card variant="outlined" style={{ borderColor: 'var(--mantine-color-red-2)', backgroundColor: 'var(--mantine-color-red-0)' }}>
+                  <Stack gap="xs">
+                    <Text variant="label" style={{ color: 'var(--mantine-color-red-7)' }}>
+                      Exchange limit reached
+                    </Text>
+                    <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+                      You&apos;ve reached the exchange limit for this session. Save your block or start a new chat.
+                    </Text>
+                    <Group gap="xs">
+                      <Button variant="ghost" size="sm" onClick={resetChat}>
+                        Start new chat
+                      </Button>
+                    </Group>
+                  </Stack>
                 </Card>
               )}
 
