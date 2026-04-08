@@ -505,15 +505,13 @@ export default function PromptBuilderPage() {
           </SimpleGrid>
 
           {/* Row 2: Block name full width */}
-          {topicId && (
-            <TextInput
-              label="Block name"
-              value={blockName}
-              onChange={e => setBlockName(e.currentTarget.value)}
-              placeholder="e.g. Off-limit topics, Career summary..."
-              size="sm"
-            />
-          )}
+          <TextInput
+            label="Block name"
+            value={blockName}
+            onChange={e => setBlockName(e.currentTarget.value)}
+            placeholder="e.g. Off-limit topics, Career summary..."
+            size="sm"
+          />
         </Stack>
       </Collapse>
     </div>
