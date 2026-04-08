@@ -6,7 +6,7 @@ export async function POST(req: Request) {
     topic_id: string
     title: string
     body: string
-    source_id: string
+    source_id?: string | null
     owner_id: string
     is_default?: boolean
   }
@@ -17,13 +17,35 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { type, topic_id, title, body: blockBody, source_id, owner_id, is_default } = body
+  const { type, topic_id, title, body: blockBody, owner_id, is_default } = body
+  let { source_id } = body
 
-  if (!type || !topic_id || !title || !blockBody || !source_id || !owner_id) {
+  if (!type || !topic_id || !title || !blockBody || !owner_id) {
     return Response.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
   const supabase = getAdminClient()
+
+  // If no source content record was provided, create one from the block body
+  if (!source_id) {
+    const { data: content, error: contentCreateError } = await supabase
+      .from('content')
+      .insert({
+        owner_id,
+        tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
+        type: 'wizard',
+        raw: blockBody,
+      })
+      .select('id')
+      .single()
+
+    if (contentCreateError) {
+      console.error('[blocks/save] content create failed:', contentCreateError.message)
+      return Response.json({ error: 'Failed to create content record' }, { status: 500 })
+    }
+
+    source_id = content.id
+  }
 
   // Insert the block
   const { data: block, error: blockError } = await supabase

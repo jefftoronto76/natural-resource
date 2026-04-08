@@ -300,13 +300,15 @@ export default function PromptBuilderPage() {
       })
 
       if (!res.ok) {
-        console.error('[handleSaveBlock] save failed:', await res.json())
+        const data = await res.json().catch(() => null)
+        setSaveError(data?.error ?? 'Failed to save block. Please try again.')
         return
       }
 
       resetChat()
     } catch (err) {
       console.error('[handleSaveBlock] request failed:', err)
+      setSaveError('Network error — could not reach the server.')
     } finally {
       setIsSaving(false)
     }
