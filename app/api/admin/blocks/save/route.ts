@@ -8,6 +8,7 @@ export async function POST(req: Request) {
     body: string
     source_id: string
     owner_id: string
+    is_default?: boolean
   }
 
   try {
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { type, topic_id, title, body: blockBody, source_id, owner_id } = body
+  const { type, topic_id, title, body: blockBody, source_id, owner_id, is_default } = body
 
   if (!type || !topic_id || !title || !blockBody || !source_id || !owner_id) {
     return Response.json({ error: 'Missing required fields' }, { status: 400 })
@@ -36,6 +37,7 @@ export async function POST(req: Request) {
       owner_id,
       tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
       active: true,
+      is_default: is_default ?? false,
     })
     .select()
     .single()

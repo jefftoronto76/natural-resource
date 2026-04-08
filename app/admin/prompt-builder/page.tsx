@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Collapse, ActionIcon } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox } from '@mantine/core'
+import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
 import { Text } from '@/components/admin/primitives/Text'
@@ -48,6 +49,8 @@ function formatTime(ts: number): string {
 
 export default function PromptBuilderPage() {
   const ownerId = useAdminUserId()
+  const { user: clerkUser } = useUser()
+  const isPlatformAdmin = (clerkUser?.publicMetadata as Record<string, unknown>)?.role === 'platform_admin'
 
   // Topics from Supabase
   const [allTopics, setAllTopics] = useState<Topic[]>([])
@@ -69,6 +72,7 @@ export default function PromptBuilderPage() {
   const [chatLoading, setChatLoading] = useState(false)
   const [draftBlock, setDraftBlock] = useState<DraftBlock | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDefault, setIsDefault] = useState(false)
   const [contentId, setContentId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -112,6 +116,7 @@ export default function PromptBuilderPage() {
     setChatInput('')
     setChatLoading(false)
     setDraftBlock(null)
+    setIsDefault(false)
     setContentId(null)
   }
 
@@ -247,6 +252,7 @@ export default function PromptBuilderPage() {
           body: draftBlock.content,
           source_id: contentId,
           owner_id: ownerId,
+          is_default: isDefault,
         }),
       })
 
@@ -583,6 +589,14 @@ export default function PromptBuilderPage() {
                   <Text variant="muted" className="whitespace-pre-wrap text-sm leading-relaxed">
                     {draftBlock.content}
                   </Text>
+                  {isPlatformAdmin && (
+                    <Checkbox
+                      label="Mark as default block"
+                      checked={isDefault}
+                      onChange={(e) => setIsDefault(e.currentTarget.checked)}
+                      size="sm"
+                    />
+                  )}
                   <div className="flex gap-2">
                     <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
                       {isSaving ? 'Saving...' : 'Save block'}
