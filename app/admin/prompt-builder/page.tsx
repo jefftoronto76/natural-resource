@@ -123,6 +123,7 @@ export default function PromptBuilderPage() {
     setChatInput('')
     setChatLoading(false)
     setDraftBlock(null)
+    setBlockName('')
     setIsDefault(false)
     setSaveError(null)
     setContentId(null)
@@ -184,8 +185,8 @@ export default function PromptBuilderPage() {
       const parsed = JSON.parse(match[0].trim())
       if (parsed.done && parsed.title && parsed.content) {
         const draft: DraftBlock = { title: parsed.title, content: parsed.content }
-        if (typeof parsed.type === 'string' && VALID_TYPES.has(parsed.type)) {
-          draft.suggestedType = parsed.type as BlockType
+        if (typeof parsed.type === 'string' && VALID_TYPES.has(parsed.type.toLowerCase())) {
+          draft.suggestedType = parsed.type.toLowerCase() as BlockType
         }
         if (typeof parsed.topic === 'string' && parsed.topic.trim()) {
           draft.suggestedTopic = parsed.topic.trim()
@@ -234,6 +235,7 @@ export default function PromptBuilderPage() {
       setChatMessages([...messages, { role: 'assistant', content: displayText, timestamp: placeholderMsg.timestamp }])
       if (draft) {
         setDraftBlock(draft)
+        setBlockName(draft.title)
         if (draft.suggestedType) {
           setType(draft.suggestedType)
           // Find matching topic by name within the suggested type
@@ -276,7 +278,7 @@ export default function PromptBuilderPage() {
     const missing: string[] = []
     if (!type) missing.push('type')
     if (!topicId) missing.push('topic')
-    if (!draftBlock.title) missing.push('title')
+    if (!blockName.trim()) missing.push('block name')
 
     if (missing.length > 0) {
       setSaveError(`Missing required fields: ${missing.join(', ')}. Open block metadata to set them.`)
@@ -292,7 +294,7 @@ export default function PromptBuilderPage() {
         body: JSON.stringify({
           type,
           topic_id: topicId,
-          title: draftBlock.title,
+          title: blockName.trim(),
           body: draftBlock.content,
           source_id: contentId,
           owner_id: ownerId,
@@ -618,11 +620,17 @@ export default function PromptBuilderPage() {
                     <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Block ready
                     </Text>
-                    <Text variant="label">{draftBlock.title}</Text>
                     <Text variant="muted" style={{ whiteSpace: 'pre-wrap', fontSize: 'var(--mantine-font-size-sm)', lineHeight: 1.6 }}>
                       {draftBlock.content}
                     </Text>
-                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                    <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+                      <TextInput
+                        label="Block name"
+                        value={blockName}
+                        onChange={e => setBlockName(e.currentTarget.value)}
+                        placeholder="e.g. Curious Mindset"
+                        size="sm"
+                      />
                       <Select
                         label="Type"
                         placeholder="Select a type..."
