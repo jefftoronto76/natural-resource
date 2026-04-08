@@ -72,6 +72,7 @@ export default function PromptBuilderPage() {
   const [chatLoading, setChatLoading] = useState(false)
   const [draftBlock, setDraftBlock] = useState<DraftBlock | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [isDefault, setIsDefault] = useState(false)
   const [contentId, setContentId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -117,6 +118,7 @@ export default function PromptBuilderPage() {
     setChatLoading(false)
     setDraftBlock(null)
     setIsDefault(false)
+    setSaveError(null)
     setContentId(null)
   }
 
@@ -238,8 +240,19 @@ export default function PromptBuilderPage() {
   }
 
   async function handleSaveBlock() {
-    if (!draftBlock || !ownerId || !topicId) return
+    if (!draftBlock || !ownerId) return
 
+    const missing: string[] = []
+    if (!type) missing.push('type')
+    if (!topicId) missing.push('topic')
+    if (!draftBlock.title) missing.push('title')
+
+    if (missing.length > 0) {
+      setSaveError(`Missing required fields: ${missing.join(', ')}. Open block metadata to set them.`)
+      return
+    }
+
+    setSaveError(null)
     setIsSaving(true)
     try {
       const res = await fetch('/api/admin/blocks/save', {
@@ -596,6 +609,11 @@ export default function PromptBuilderPage() {
                       onChange={(e) => setIsDefault(e.currentTarget.checked)}
                       size="sm"
                     />
+                  )}
+                  {saveError && (
+                    <Text variant="muted" className="text-sm" style={{ color: 'var(--mantine-color-red-6)' }}>
+                      {saveError}
+                    </Text>
                   )}
                   <div className="flex gap-2">
                     <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
