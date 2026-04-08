@@ -270,6 +270,7 @@ export default function PromptBuilderPage() {
   }
 
   async function handleSaveBlock() {
+    console.log('[handleSaveBlock]', { ownerId, draftBlock, type, topicId })
     if (!draftBlock || !ownerId) return
 
     const missing: string[] = []
