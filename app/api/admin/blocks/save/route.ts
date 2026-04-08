@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       owner_id,
       tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
       type: 'wizard',
-      name: title,
+      name: title || 'Untitled block',
       raw: blockBody,
     }
     console.log('[blocks/save] auto-creating content record:', contentPayload)
