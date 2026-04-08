@@ -30,6 +30,8 @@ interface ChatMessage {
 interface DraftBlock {
   title: string
   content: string
+  suggestedType?: BlockType
+  suggestedTopic?: string
 }
 
 const TYPES: { value: BlockType; label: string }[] = [
@@ -39,6 +41,8 @@ const TYPES: { value: BlockType; label: string }[] = [
   { value: 'process', label: 'Process' },
   { value: 'escalation', label: 'Escalation' },
 ]
+
+const VALID_TYPES = new Set<string>(TYPES.map(t => t.value))
 
 const MAX_EXCHANGES = 10
 const WARN_THRESHOLD = 8
@@ -179,9 +183,16 @@ export default function PromptBuilderPage() {
     try {
       const parsed = JSON.parse(match[0].trim())
       if (parsed.done && parsed.title && parsed.content) {
+        const draft: DraftBlock = { title: parsed.title, content: parsed.content }
+        if (typeof parsed.type === 'string' && VALID_TYPES.has(parsed.type)) {
+          draft.suggestedType = parsed.type as BlockType
+        }
+        if (typeof parsed.topic === 'string' && parsed.topic.trim()) {
+          draft.suggestedTopic = parsed.topic.trim()
+        }
         return {
           displayText: text.slice(0, text.length - match[0].length).trim(),
-          draft: { title: parsed.title, content: parsed.content },
+          draft,
         }
       }
     } catch { /* not valid JSON yet */ }
@@ -221,7 +232,24 @@ export default function PromptBuilderPage() {
 
       const { displayText, draft } = parseDoneJson(finalText)
       setChatMessages([...messages, { role: 'assistant', content: displayText || finalText, timestamp: placeholderMsg.timestamp }])
-      if (draft) setDraftBlock(draft)
+      if (draft) {
+        setDraftBlock(draft)
+        if (draft.suggestedType) {
+          setType(draft.suggestedType)
+          // Find matching topic by name within the suggested type
+          if (draft.suggestedTopic) {
+            const matchingTopic = allTopics.find(
+              t => t.type === draft.suggestedType && t.name.toLowerCase() === draft.suggestedTopic!.toLowerCase()
+            )
+            if (matchingTopic) {
+              setTopicId(matchingTopic.id)
+            } else {
+              setNewTopicMode(true)
+              setNewTopicName(draft.suggestedTopic)
+            }
+          }
+        }
+      }
     } catch (err) {
       console.error('[chat] request failed:', err)
       setChatMessages(messages)
