@@ -301,6 +301,7 @@ export default function PromptBuilderPage() {
           source_id: contentId,
           owner_id: ownerId,
           is_default: isDefault,
+          messages: chatMessages.map(m => ({ role: m.role, content: m.content })),
         }),
       })
 

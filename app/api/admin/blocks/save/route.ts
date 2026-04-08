@@ -9,6 +9,7 @@ export async function POST(req: Request) {
     source_id?: string | null
     owner_id: string
     is_default?: boolean
+    messages?: { role: string; content: string }[]
   }
 
   try {
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { type, topic_id, title, body: blockBody, owner_id, is_default } = body
+  const { type, topic_id, title, body: blockBody, owner_id, is_default, messages } = body
   let { source_id } = body
 
   if (!type || !topic_id || !title || !blockBody || !owner_id) {
@@ -82,6 +83,27 @@ export async function POST(req: Request) {
   if (contentError) {
     console.error('[blocks/save] content update failed:', contentError.message)
     // Block was saved — log but don't fail the request
+  }
+
+  // Save the composer conversation to chat_sessions
+  if (messages && messages.length > 0) {
+    const { error: sessionError } = await supabase
+      .from('chat_sessions')
+      .insert({
+        tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
+        owner_id,
+        messages,
+        session_type: 'composer',
+        session_subtype: 'block',
+        block_id: block.id,
+        message_count: messages.length,
+        status: 'completed',
+      })
+
+    if (sessionError) {
+      console.error('[blocks/save] chat_session insert failed:', sessionError.message)
+      // Block was saved — log but don't fail the request
+    }
   }
 
   return Response.json(block)
