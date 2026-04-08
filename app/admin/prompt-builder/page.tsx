@@ -13,7 +13,7 @@ import { readDataStream } from '@/lib/stream'
 
 // ─── Types & constants ───────────────────────────────────────────────────────
 
-type BlockType = 'guardrail' | 'knowledge' | 'prompt'
+type BlockType = 'identity' | 'knowledge' | 'guardrail' | 'process' | 'escalation'
 
 interface Topic {
   id: string
@@ -33,9 +33,11 @@ interface DraftBlock {
 }
 
 const TYPES: { value: BlockType; label: string }[] = [
-  { value: 'guardrail', label: 'Guardrail' },
+  { value: 'identity', label: 'Identity & Voice' },
   { value: 'knowledge', label: 'Knowledge' },
-  { value: 'prompt', label: 'Prompt' },
+  { value: 'guardrail', label: 'Guardrail' },
+  { value: 'process', label: 'Process' },
+  { value: 'escalation', label: 'Escalation' },
 ]
 
 const MAX_EXCHANGES = 10

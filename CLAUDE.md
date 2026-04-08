@@ -161,6 +161,16 @@ Row Level Security is enforced at the Supabase layer.
 | `master_prompt` | id, tenant_id, content, version, safety_check_result |
 | `master_prompt_history` | id, prompt_id, tenant_id, content, version |
 
+### Block Types
+
+| Type | Purpose |
+|------|---------|
+| `identity` | Identity & Voice — who Sage is, tone, personality |
+| `knowledge` | Factual context about the business, owner, services |
+| `guardrail` | Rules and constraints on Sage's behavior |
+| `process` | Step-by-step instructions for how Sage should handle situations |
+| `escalation` | When and how to route to a human or off-ramp |
+
 ---
 
 ## Definition of Done
