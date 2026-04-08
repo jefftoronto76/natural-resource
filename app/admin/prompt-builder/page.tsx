@@ -227,11 +227,11 @@ export default function PromptBuilderPage() {
 
       const finalText = await readDataStream(response, (accumulated) => {
         const { displayText } = parseDoneJson(accumulated)
-        setChatMessages([...messages, { role: 'assistant', content: displayText || accumulated, timestamp: placeholderMsg.timestamp }])
+        setChatMessages([...messages, { role: 'assistant', content: displayText, timestamp: placeholderMsg.timestamp }])
       })
 
       const { displayText, draft } = parseDoneJson(finalText)
-      setChatMessages([...messages, { role: 'assistant', content: displayText || finalText, timestamp: placeholderMsg.timestamp }])
+      setChatMessages([...messages, { role: 'assistant', content: displayText, timestamp: placeholderMsg.timestamp }])
       if (draft) {
         setDraftBlock(draft)
         if (draft.suggestedType) {
@@ -340,7 +340,7 @@ export default function PromptBuilderPage() {
       <Textarea
         value={chatInput}
         onChange={e => setChatInput(e.currentTarget.value)}
-        placeholder={isAtLimit ? 'Exchange limit reached' : 'What would you like to add to your prompt?'}
+        placeholder={isAtLimit ? 'Exchange limit reached' : 'Type or paste content...'}
         autosize
         minRows={hasMessages ? 1 : 2}
         maxRows={4}
@@ -635,6 +635,20 @@ export default function PromptBuilderPage() {
                   <Text variant="muted" className="whitespace-pre-wrap text-sm leading-relaxed">
                     {draftBlock.content}
                   </Text>
+                  {(draftBlock.suggestedType || draftBlock.suggestedTopic) && (
+                    <div className="flex gap-3">
+                      {draftBlock.suggestedType && (
+                        <Text variant="muted" className="text-xs">
+                          Type: <span style={{ fontWeight: 500 }}>{TYPES.find(t => t.value === draftBlock.suggestedType)?.label ?? draftBlock.suggestedType}</span>
+                        </Text>
+                      )}
+                      {draftBlock.suggestedTopic && (
+                        <Text variant="muted" className="text-xs">
+                          Topic: <span style={{ fontWeight: 500 }}>{draftBlock.suggestedTopic}</span>
+                        </Text>
+                      )}
+                    </div>
+                  )}
                   {isPlatformAdmin && (
                     <Checkbox
                       label="Mark as default block"
@@ -652,7 +666,11 @@ export default function PromptBuilderPage() {
                     <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
                       {isSaving ? 'Saving...' : 'Save block'}
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setDraftBlock(null)} disabled={isSaving}>
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      setDraftBlock(null)
+                      setSaveError(null)
+                      setChatMessages(prev => [...prev, { role: 'assistant', content: 'Got it — what would you like to change?', timestamp: Date.now() }])
+                    }} disabled={isSaving}>
                       Keep refining
                     </Button>
                   </div>
