@@ -83,6 +83,7 @@ export default function PromptBuilderPage() {
   const [contentId, setContentId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Exchange counter — counts user messages
   const exchangeCount = chatMessages.filter(m => m.role === 'user').length
@@ -269,6 +270,7 @@ export default function PromptBuilderPage() {
     const userMsg: ChatMessage = { role: 'user', content: text, timestamp: Date.now() }
     const updated = [...chatMessages, userMsg]
     await sendChatMessage(updated)
+    textareaRef.current?.focus()
   }
 
   async function handleSaveBlock() {
@@ -334,6 +336,7 @@ export default function PromptBuilderPage() {
     >
       {/* Textarea — unstyled, no border */}
       <Textarea
+        ref={textareaRef}
         value={chatInput}
         onChange={e => setChatInput(e.currentTarget.value)}
         placeholder={isAtLimit ? 'Exchange limit reached' : 'Type or paste content...'}
