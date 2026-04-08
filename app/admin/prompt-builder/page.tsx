@@ -81,12 +81,13 @@ export default function PromptBuilderPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [isDefault, setIsDefault] = useState(false)
   const [contentId, setContentId] = useState<string | null>(null)
+  const [sessionStartIndex, setSessionStartIndex] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Exchange counter — counts user messages
-  const exchangeCount = chatMessages.filter(m => m.role === 'user').length
+  // Exchange counter — counts user messages in the current session only
+  const exchangeCount = chatMessages.slice(sessionStartIndex).filter(m => m.role === 'user').length
   const isAtLimit = exchangeCount >= MAX_EXCHANGES
 
   // Derived
@@ -301,7 +302,7 @@ export default function PromptBuilderPage() {
           source_id: contentId,
           owner_id: ownerId,
           is_default: isDefault,
-          messages: chatMessages.map(m => ({ role: m.role, content: m.content })),
+          messages: chatMessages.slice(sessionStartIndex).map(m => ({ role: m.role, content: m.content })),
         }),
       })
 
@@ -311,7 +312,21 @@ export default function PromptBuilderPage() {
         return
       }
 
-      resetChat()
+      // Reset draft and form state, but keep the message thread
+      setDraftBlock(null)
+      setBlockName('')
+      setIsDefault(false)
+      setSaveError(null)
+      setContentId(null)
+      setType('')
+      setTopicId('')
+      setNewTopicMode(false)
+      setNewTopicName('')
+
+      // Inject synthetic continuation message and advance session boundary
+      setChatMessages(prev => [...prev, { role: 'assistant', content: 'Block saved! What would you like to build next?', timestamp: Date.now() }])
+      setSessionStartIndex(chatMessages.length + 1)
+      textareaRef.current?.focus()
     } catch (err) {
       console.error('[handleSaveBlock] request failed:', err)
       setSaveError('Network error — could not reach the server.')
@@ -327,7 +342,7 @@ export default function PromptBuilderPage() {
   /* Shared composer container — bordered box with textarea + button row */
   const composerContainer = (
     <div
-      className={hasMessages ? 'w-full' : 'w-full max-w-[800px] max-sm:max-w-full'}
+      className="mx-auto w-full max-w-[800px]"
       style={{
         border: '1px solid var(--mantine-color-gray-3)',
         borderRadius: 'var(--mantine-radius-md)',
