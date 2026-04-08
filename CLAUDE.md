@@ -152,7 +152,7 @@ Row Level Security is enforced at the Supabase layer.
 | `tenants` | id, parent_id, name, slug, type, settings |
 | `tenant_users` | tenant_id, user_id, role |
 | `users` | id, clerk_id, email, name |
-| `blocks` | id, topic_id, owner_id, tenant_id, type, title, body, active, order |
+| `blocks` | id, topic_id, owner_id, tenant_id, type, title, body, active, order, is_default (bool default false), default_edited_at (timestamptz), default_edited_by (uuid references users(id)), default_action (text: 'edited' \| 'deleted'), default_acknowledged (bool default false), default_acknowledged_at (timestamptz) |
 | `topics` | id, tenant_id, type, name |
 | `content` | id, owner_id, tenant_id, block_id, type, name, raw, storage_path |
 | `chat_sessions` | id, tenant_id, visitor_name, messages, status, message_count |
