@@ -41,7 +41,7 @@ export default async function AdminPage() {
         color: 'var(--color-text-primary)',
         marginBottom: '8px',
       }}>
-        Chat Sessions
+        Inbound Chats
       </h1>
       <p style={{
         fontFamily: 'var(--font-body)',

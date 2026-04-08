@@ -59,7 +59,7 @@ export default async function SessionPage({
           marginBottom: '32px',
         }}
       >
-        ← Sessions
+        ← Inbound Chats
       </Link>
 
       {/* Session header */}

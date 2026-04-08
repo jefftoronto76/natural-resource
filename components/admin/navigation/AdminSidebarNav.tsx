@@ -4,7 +4,7 @@ import { NavLink, Stack, Text } from '@mantine/core';
 import { usePathname, useRouter } from 'next/navigation';
 
 const NAV_ITEMS = [
-  { label: 'Sessions', href: '/admin' },
+  { label: 'Inbound Chats', href: '/admin' },
   { label: 'Prompt',   href: '/admin/prompt' },
 ] as const;
 
