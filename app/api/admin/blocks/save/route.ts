@@ -28,14 +28,17 @@ export async function POST(req: Request) {
 
   // If no source content record was provided, create one from the block body
   if (!source_id) {
+    const contentPayload = {
+      owner_id,
+      tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
+      type: 'wizard',
+      raw: blockBody,
+    }
+    console.log('[blocks/save] auto-creating content record:', contentPayload)
+
     const { data: content, error: contentCreateError } = await supabase
       .from('content')
-      .insert({
-        owner_id,
-        tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
-        type: 'wizard',
-        raw: blockBody,
-      })
+      .insert(contentPayload)
       .select('id')
       .single()
 
