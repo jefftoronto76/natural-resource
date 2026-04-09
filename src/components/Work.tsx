@@ -88,13 +88,13 @@ export function Work() {
           className="text-lg leading-relaxed mb-4"
           style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400, color: 'rgba(26,25,23,0.6)' }}
         >
-          I studied coaching at the graduate level, and it shapes how I approach growth and leadership.
+          I trained in executive coaching at the graduate level. It shapes how I approach growth, leadership, and decision-making.
         </p>
         <p
           className="text-lg leading-relaxed"
           style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400, color: 'rgba(26,25,23,0.6)' }}
         >
-          The goal of every conversation is simple: clearer priorities and 1–2 practical next moves for you.
+          Every conversation drives one outcome: clearer priorities and 1–2 practical next moves.
         </p>
       </div>
 
