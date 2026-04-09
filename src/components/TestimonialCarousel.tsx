@@ -540,7 +540,12 @@ export function TestimonialCarousel() {
                     </p>
                   </div>
 
-                  {/* What Got Me There */}
+                  {/* Progression summary */}
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '24px' }}>
+                    Progressed from Special Projects to Director of Sales & Relationship Management, ultimately responsible for more than 50% of annual bookings in North America.
+                  </p>
+
+                  {/* Where It Started */}
                   <div style={{
                     fontFamily: 'DM Mono, monospace',
                     fontSize: '11px',
@@ -549,25 +554,16 @@ export function TestimonialCarousel() {
                     color: 'var(--color-text-muted)',
                     marginBottom: '12px',
                   }}>
-                    What Got Me There
-                  </div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     Where It Started
-                  </p>
+                  </div>
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     Started part-time in Special Projects, supporting the executive team, reporting to the VP of Business Development (co-founder).
                   </p>
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     Built early CRM and pipeline discipline, supported executive decisions, and saw firsthand how Constellation operators run software businesses.
                   </p>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     This is where I learned that great companies are built on discipline, focus, and consistent execution over time.
-                  </p>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '8px' }}>
-                    Progressed from Special Projects to Director of Relationship Management, North America — ultimately responsible for more than 50% of annual bookings.
-                  </p>
-                  <p style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', lineHeight: 1.7, color: 'rgba(26,25,23,0.5)', letterSpacing: '0.05em', marginBottom: '0' }}>
-                    Special Projects → Key Accounts → Regional Manager → Director
                   </p>
 
                   {/* The Business */}
@@ -604,8 +600,9 @@ export function TestimonialCarousel() {
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {[
                       { bold: 'Scaled multiple revenue segments.', text: 'Led growth across small sector, SMB, enterprise, and partner channels.' },
-                      { bold: 'Led commercial integration through acquisition and ownership transitions.', text: 'Protecting pipeline, revenue continuity, and customer relationships.' },
+                      { bold: 'Led commercial integration through acquisition and leadership transitions.', text: 'Protecting the pipeline, revenue continuity, and customer relationships.' },
                       { bold: 'Built repeatable commercial systems.', text: 'Implemented sales playbooks, onboarding programs, forecasting discipline, and win/loss processes.' },
+                      { bold: 'Operator and performer.', text: 'Consistently delivered as top individual contributor, top territory leader, top team leader, largest deals, and strongest quarters across roles.' },
                       { bold: 'Built trusted enterprise relationships.', text: 'Developed executive-level customer relationships that positioned Trapeze as a long-term strategic partner for more than 70 of the top 200 key accounts.' },
                     ].map((item, idx) => (
                       <li key={idx} style={{
@@ -614,7 +611,7 @@ export function TestimonialCarousel() {
                         lineHeight: 1.7,
                         paddingLeft: '20px',
                         position: 'relative',
-                        marginBottom: idx < 3 ? '16px' : '0',
+                        marginBottom: idx < 4 ? '16px' : '0',
                       }}>
                         <span style={{
                           position: 'absolute',
