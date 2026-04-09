@@ -56,7 +56,7 @@ export function WhyMe() {
             Clear thinking. Direct conversations. <em style={{ fontStyle: 'italic' }}>Measurable progress.</em>
           </h2>
           <div style={{ marginBottom: '40px' }}>
-            <p style={{ ...bodyStyle, marginBottom: 0 }}>I'm Jeff. I work with technology companies and ambitious professionals as an executive coach and fractional operator.</p>
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>Hi, I'm Jeff. I work with technology companies and ambitious professionals as an executive coach and fractional operator, focused on revenue growth.</p>
           </div>
 
           <div className="nr-split">
