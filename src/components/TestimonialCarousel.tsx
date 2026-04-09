@@ -143,7 +143,7 @@ const CARDS: CarouselCard[] = [
     logo: ['/logos/DesginLab_Logo.svg', '/logos/IDF_Logo.svg', '/logos/deeplearningai.svg'],
     year: '2023–2025',
     program: 'Product, UX & Applied AI',
-    focus: 'Invested in continuous learning across product, UX, and applied AI. Built the judgment to lead at the intersection of commercial outcomes and product execution.',
+    focus: 'Invested to build the judgment to lead at the intersection of commercial outcomes and product execution.',
     coursework: 'UX Foundations · Design Thinking · Technical Product Management · AI for Everyone · Building SaaS Products with AI · Structured Decision Making',
   }
 ]
