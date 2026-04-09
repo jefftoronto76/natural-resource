@@ -16,6 +16,7 @@ interface StatsCard {
   tagline: string
   metric: string
   metricLabel?: string
+  title?: string
   outcome: string
   story: string
   details: string[]
@@ -42,7 +43,7 @@ const CARDS: CarouselCard[] = [
   },
   {
     logo: "/logos/Trapeze.svg",
-    year: "2000",
+    year: "1998-2013",
     tagline: "Struggling Provider → Trusted Partner",
     metric: "$350K → $25M",
     outcome: "Led the sales transformation that helped establish Trapeze as industry leader.",
@@ -62,22 +63,23 @@ const CARDS: CarouselCard[] = [
     type: 'education',
     logo: '/logos/York_University_Logo.svg',
     year: '2011',
-    program: 'Certificate in Executive Sales Leadership',
-    focus: 'Executive training in sales strategy, team leadership, and executive presence. Built the foundation for leading performance-driven revenue organizations.',
+    program: 'I\'ve always been a strong seller. This taught me to lead sellers.',
+    focus: 'Executive training in sales strategy, leadership, and executive presence. Learned to build revenue systems that make teams better and performance repeatable.',
   },
   {
     type: 'education',
     logo: '/logos/royalroads_Logo.svg',
-    year: '2014',
-    program: 'Graduate Certificate in Executive Coaching',
-    focus: 'ICF-certified executive coaching training focused on leadership judgment, team effectiveness, and developing accountable, high-trust organizations.',
+    year: '2014-2015',
+    program: 'Most performance problems aren\'t skill problems. Cognitive coaching taught me to see the difference.',
+    focus: 'ICF-certified executive coaching training focused on developing leaders who think clearly, take ownership, and help teams perform without constant direction.',
   },
   {
     logo: "/logos/Infor.svg",
-    year: "2015",
+    year: "2015-2017",
     tagline: "Legacy Vendor → Viable Cloud Partner",
     metric: "$1.7M",
-    outcome: "Built a $2.5M enterprise pipeline and closed a landmark CloudSuite HCM project.",
+    title: "Account Executive, HCM",
+    outcome: "Built a $2.5M enterprise pipeline and closed a $1.7M CloudSuite HCM deal.",
     story: "Joined during Infor's push to expand cloud adoption and modernize its legacy ERP customer base.",
     details: [
       "Tier-1 enterprise software environment selling complex HCM transformation deals with long sales cycles, formal procurement, and executive stakeholders.",
@@ -93,15 +95,16 @@ const CARDS: CarouselCard[] = [
     type: 'education',
     logo: '/logos/JohnHopkins_Logo.svg',
     year: '2017',
-    program: 'Executive Data Science Specialization',
-    focus: 'Executive training in data-driven leadership, analytics strategy, and using metrics to improve decision quality and operational execution.',
+    program: 'Took this to understand what\'s happening under the hood \u2014 ML, AI, and how data drives product and commercial decisions.',
+    focus: 'Executive training in data science and analytics. Built a practical understanding of machine learning and how to guide product and operational decisions with data.',
   },
   {
     logo: "/logos/Keyhole.svg",
-    year: "2017",
+    year: "2017-2018",
     tagline: "Self Service → Multi-Motion Revenue",
     metric: "3×",
     metricLabel: "Deal Size",
+    title: "VP, Revenue",
     outcome: "Transitioned the revenue model from PLG to inbound and enterprise.",
     story: "Recruited by the CEO to rebuild revenue, grow deal size, and expand growth channels; owned hiring and growth spend.",
     details: [
@@ -117,10 +120,11 @@ const CARDS: CarouselCard[] = [
   },
   {
     logo: "/logos/MealGarden.svg",
-    year: "2019",
+    year: "2019-2025",
     tagline: "Stalled Product → Real Business",
     metric: "9×",
     metricLabel: "ARR Growth",
+    title: "Head of Revenue, Product & Operations",
     outcome: "Full P&L ownership across product, revenue, and operations. Turned a promising product into a real business.",
     story: "Recruited by the Founder to operationalize the business, establish P&L discipline, and build the leadership and commercial foundation for scale.",
     details: [
@@ -139,7 +143,7 @@ const CARDS: CarouselCard[] = [
     logo: ['/logos/DesginLab_Logo.svg', '/logos/IDF_Logo.svg', '/logos/deeplearningai.svg'],
     year: '2023–2025',
     program: 'Product, UX & Applied AI',
-    focus: 'Continuous education across UX foundations, design thinking, technical product management, SaaS product development, structured decision-making, and applied AI. Focused on strengthening modern product judgment and AI fluency.',
+    focus: 'Invested in continuous learning across product, UX, and applied AI. Built the judgment to lead at the intersection of commercial outcomes and product execution.',
     coursework: 'UX Foundations · Design Thinking · Technical Product Management · AI for Everyone · Building SaaS Products with AI · Structured Decision Making',
   }
 ]
@@ -373,6 +377,18 @@ export function TestimonialCarousel() {
             )}
           </div>
 
+          {/* Title */}
+          {(currentCard as StatsCard).title && (
+            <p style={{
+              fontFamily: 'DM Sans, sans-serif',
+              fontSize: '14px',
+              color: 'rgba(26,25,23,0.5)',
+              marginBottom: '12px',
+            }}>
+              {(currentCard as StatsCard).title}
+            </p>
+          )}
+
           {/* Outcome sentence */}
           <p style={{
             fontSize: '16px',
@@ -536,7 +552,7 @@ export function TestimonialCarousel() {
                     What Got Me There
                   </div>
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
-                    My commercial training ground.
+                    Where It Started
                   </p>
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     Started part-time in Special Projects, supporting the executive team, reporting to the VP of Business Development (co-founder).
@@ -544,8 +560,14 @@ export function TestimonialCarousel() {
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     Built early CRM and pipeline discipline, supported executive decisions, and saw firsthand how Constellation operators run software businesses.
                   </p>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '16px' }}>
                     This is where I learned that great companies are built on discipline, focus, and consistent execution over time.
+                  </p>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '8px' }}>
+                    Progressed from Special Projects to Director of Relationship Management, North America — ultimately responsible for more than 50% of annual bookings.
+                  </p>
+                  <p style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', lineHeight: 1.7, color: 'rgba(26,25,23,0.5)', letterSpacing: '0.05em', marginBottom: '0' }}>
+                    Special Projects → Key Accounts → Regional Manager → Director
                   </p>
 
                   {/* The Business */}
@@ -582,10 +604,8 @@ export function TestimonialCarousel() {
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {[
                       { bold: 'Scaled multiple revenue segments.', text: 'Led growth across small sector, SMB, enterprise, and partner channels.' },
-                      { bold: 'Commercial leadership through acquisition integration.', text: 'Integrated acquired businesses across sales structure, territories, and customer relationships while protecting pipeline and revenue continuity.' },
-                      { bold: 'Protected revenue during organizational change.', text: 'Ensured deals progressed and customers remained stable through ownership and structural transitions.' },
+                      { bold: 'Led commercial integration through acquisition and ownership transitions.', text: 'Protecting pipeline, revenue continuity, and customer relationships.' },
                       { bold: 'Built repeatable commercial systems.', text: 'Implemented sales playbooks, onboarding programs, forecasting discipline, and win/loss processes.' },
-                      { bold: 'Operator and performer.', text: 'Consistently delivered as top individual contributor, top territory leader, top team leader, largest deals, and strongest quarters across roles.' },
                       { bold: 'Built trusted enterprise relationships.', text: 'Developed executive-level customer relationships that positioned Trapeze as a long-term strategic partner for more than 70 of the top 200 key accounts.' },
                     ].map((item, idx) => (
                       <li key={idx} style={{
@@ -594,7 +614,7 @@ export function TestimonialCarousel() {
                         lineHeight: 1.7,
                         paddingLeft: '20px',
                         position: 'relative',
-                        marginBottom: idx < 5 ? '16px' : '0',
+                        marginBottom: idx < 3 ? '16px' : '0',
                       }}>
                         <span style={{
                           position: 'absolute',
@@ -639,7 +659,7 @@ export function TestimonialCarousel() {
                     </p>
                   </div>
 
-                  {/* What Got Me There */}
+                  {/* Why Infor */}
                   <div style={{
                     fontFamily: 'DM Mono, monospace',
                     fontSize: '11px',
@@ -648,10 +668,10 @@ export function TestimonialCarousel() {
                     color: 'var(--color-text-muted)',
                     marginBottom: '12px',
                   }}>
-                    What Got Me There
+                    Why Infor
                   </div>
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
-                    Joined during Infor's transition from legacy ERP provider to cloud platform, helping expand CloudSuite adoption into both enterprise and mid-market organizations while building credibility in a highly structured Tier-1 sales environment.
+                    Joined during Infor's transition from legacy ERP provider to cloud platform. Expanded CloudSuite adoption into both enterprise and mid-market organizations while building credibility in a highly structured Tier-1 sales environment.
                   </p>
 
                   {/* Market Context */}
@@ -667,7 +687,7 @@ export function TestimonialCarousel() {
                     The Business
                   </div>
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
-                    Global vertical software provider transitioning to a cloud-first strategy. Led CloudSuite HCM growth in Canada, helping introduce Talent Science as a strategic differentiator in complex enterprise sales.
+                    Global vertical software provider transitioning to a cloud-first strategy. Led CloudSuite HCM growth in Canada. Introduced Talent Science as a strategic differentiator in complex enterprise sales.
                   </p>
 
                   {/* Impact */}
@@ -685,7 +705,7 @@ export function TestimonialCarousel() {
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {[
                       { bold: 'Built a $2.5M+ qualified pipeline in under 18 months.', text: 'Established and developed relationships with key enterprise accounts across Canada, engaging in multiple competitive RFP processes.' },
-                      { bold: 'Expanded cloud adoption into new customer segments.', text: 'Helped drive CloudSuite adoption in the 1,000–5,000 employee segment while also competing successfully in large enterprise opportunities.' },
+                      { bold: 'Expanded cloud adoption into new customer segments.', text: 'Drove CloudSuite adoption in the 1,000–5,000 employee segment while also competing successfully in large enterprise opportunities.' },
                       { bold: 'Closed the largest CloudSuite HCM deal in company history.', text: 'Transformed a narrow payroll evaluation into a full platform transformation — ~10,000 employees across HCM, Payroll, WFM, Talent Science, and Learning. Beat Dayforce in a head-to-head evaluation through persistence, preparation, and differentiated positioning.' },
                     ].map((item, idx) => (
                       <li key={idx} style={{
@@ -739,7 +759,7 @@ export function TestimonialCarousel() {
                     </p>
                   </div>
 
-                  {/* What Got Me There */}
+                  {/* The Mandate */}
                   <div style={{
                     fontFamily: 'DM Mono, monospace',
                     fontSize: '11px',
@@ -748,7 +768,7 @@ export function TestimonialCarousel() {
                     color: 'var(--color-text-muted)',
                     marginBottom: '12px',
                   }}>
-                    What Got Me There
+                    The Mandate
                   </div>
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Recruited by the CEO to rebuild revenue, increase deal size, and expand growth channels. Owned hiring, revenue structure, and growth investment decisions.
@@ -789,7 +809,6 @@ export function TestimonialCarousel() {
                       { bold: 'Expanded revenue ownership beyond sales.', text: 'Added customer success, demand generation, and pipeline development capabilities.' },
                       { bold: 'Built commercial operating structure.', text: 'Introduced hiring plans, performance management, forecasting, and growth investment discipline.' },
                       { bold: 'Connected customer insights directly to product and GTM decisions.', text: 'Partnered with the CEO to close the loop between customer feedback, product direction, and go-to-market execution.' },
-                      { bold: 'Developed team capability while delivering results.', text: 'Grew individual contributors through operator-coach leadership while hitting revenue outcomes.' },
                     ].map((item, idx) => (
                       <li key={idx} style={{
                         fontFamily: 'DM Sans, sans-serif',
@@ -797,7 +816,7 @@ export function TestimonialCarousel() {
                         lineHeight: 1.7,
                         paddingLeft: '20px',
                         position: 'relative',
-                        marginBottom: idx < 5 ? '16px' : '0',
+                        marginBottom: idx < 4 ? '16px' : '0',
                       }}>
                         <span style={{
                           position: 'absolute',
@@ -842,7 +861,7 @@ export function TestimonialCarousel() {
                     </p>
                   </div>
 
-                  {/* What Got Me There */}
+                  {/* The Mandate */}
                   <div style={{
                     fontFamily: 'DM Mono, monospace',
                     fontSize: '11px',
@@ -851,7 +870,7 @@ export function TestimonialCarousel() {
                     color: 'var(--color-text-muted)',
                     marginBottom: '12px',
                   }}>
-                    What Got Me There
+                    The Mandate
                   </div>
                   <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '14px', lineHeight: 1.7, color: 'var(--color-text-primary)', marginBottom: '0' }}>
                     Recruited by the Founder to operationalize the business, introduce P&L discipline, and build the leadership and commercial foundation required to turn early traction into a sustainable company.
@@ -887,9 +906,9 @@ export function TestimonialCarousel() {
                   </div>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {[
-                      { bold: 'Built the operating infrastructure from the ground up.', text: 'Introduced financial discipline, budget ownership, and performance cadence across revenue, product, and operations.' },
+                      { bold: 'Introduced operating infrastructure from the ground up.', text: 'Introduced financial discipline, budget ownership, and performance cadence across revenue, product, and operations.' },
                       { bold: 'Built enterprise and institutional partnerships.', text: 'Signed HEB (one of the largest grocery chains in the US), Nutrigenomix, and Metabolic Balance as white-label and teams channel partners.' },
-                      { bold: 'Built demand generation from scratch.', text: 'Hired and structured a team to drive awareness and trials, growing web traffic by triple digits.' },
+                      { bold: 'Created demand generation from scratch.', text: 'Hired and structured a team to drive awareness and trials, growing web traffic by triple digits.' },
                       { bold: 'Expanded into new revenue channels.', text: 'Added teams, education, and platform partner motions — increasing deal size and shifting the base toward annual agreements.' },
                       { bold: 'Spearheaded core product enhancements.', text: 'Drove delivery of payments, mobile, meal plan auto-generation, and enhanced food data — closing critical gaps for enterprise and practitioner use cases.' },
                       { bold: 'Sustained strong conversion performance.', text: 'Maintained >18% trial-to-conversion through improved qualification, onboarding, and customer success.' },
