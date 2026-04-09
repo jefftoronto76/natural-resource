@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, type ReactNode, useEffect } from 'react';
+import { Suspense, type ReactNode, useEffect, useState } from 'react';
 import { AppShell, Burger, Group, Overlay, Text, Stack } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { UserButton } from '@clerk/nextjs';
@@ -12,7 +12,10 @@ export interface AdminShellProps {
 
 export function AdminShell({ children }: AdminShellProps) {
   const [opened, { toggle, close }] = useDisclosure();
+  const [mounted, setMounted] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 62em)');
+
+  useEffect(() => { setMounted(true); }, []);
 
   // Auto-close mobile nav when viewport crosses to desktop
   useEffect(() => {
@@ -115,8 +118,8 @@ export function AdminShell({ children }: AdminShellProps) {
           backgroundColor: 'var(--mantine-color-white)',
         }}
       >
-        {/* Mobile overlay — tap outside navbar to close */}
-        {opened && (
+        {/* Mobile overlay — client-only to avoid hydration mismatch */}
+        {mounted && opened && (
           <Overlay
             onClick={close}
             fixed
