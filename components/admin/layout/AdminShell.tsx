@@ -120,7 +120,7 @@ export function AdminShell({ children }: AdminShellProps) {
           <Overlay
             onClick={close}
             fixed
-            zIndex={199}
+            zIndex={99}
             backgroundOpacity={0.5}
             hiddenFrom="md"
           />
