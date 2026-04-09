@@ -21,7 +21,7 @@ export function AdminShell({ children }: AdminShellProps) {
 
   return (
     <AppShell
-      header={{ height: { base: 48, md: 0 } }}
+      header={{ height: 48 }}
       navbar={{
         width: 240,
         breakpoint: 'md',
@@ -31,7 +31,6 @@ export function AdminShell({ children }: AdminShellProps) {
     >
       {/* Mobile-only header with burger — hidden on desktop, 0-height on desktop */}
       <AppShell.Header
-        hiddenFrom="md"
         style={{
           backgroundColor: 'var(--mantine-color-white)',
           borderBottom: '1px solid var(--mantine-color-gray-2)',
