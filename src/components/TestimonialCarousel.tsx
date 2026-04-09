@@ -95,7 +95,7 @@ const CARDS: CarouselCard[] = [
     type: 'education',
     logo: '/logos/JohnHopkins_Logo.svg',
     year: '2017',
-    program: 'Took this to understand what\'s happening under the hood \u2014 ML, AI, and how data drives product and commercial decisions.',
+    program: 'Understanding ML and AI isn\'t optional anymore. This is where I built that foundation.',
     focus: 'Executive training in data science and analytics. Built a practical understanding of machine learning and how to guide product and operational decisions with data.',
   },
   {
