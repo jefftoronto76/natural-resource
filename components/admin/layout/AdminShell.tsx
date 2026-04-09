@@ -151,6 +151,7 @@ export function AdminShell({ children }: AdminShellProps) {
         size={240}
         hiddenFrom="md"
         withCloseButton={false}
+        transitionProps={{ duration: 400 }}
         styles={{
           body: { padding: 0, height: '100%' },
           content: { backgroundColor: 'var(--mantine-color-dark-9)' },
