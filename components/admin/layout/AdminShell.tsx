@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, type ReactNode } from 'react';
-import { AppShell, Burger, Group, Text, Stack } from '@mantine/core';
+import { AppShell, Burger, Drawer, Group, Text, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { UserButton } from '@clerk/nextjs';
 import { AdminSidebarNav } from '@/components/admin/navigation/AdminSidebarNav';
@@ -10,17 +10,67 @@ export interface AdminShellProps {
   children: ReactNode;
 }
 
+function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <Stack
+      gap={0}
+      h="100%"
+      data-mantine-color-scheme="dark"
+      style={{
+        backgroundColor: 'var(--mantine-color-dark-9)',
+      }}
+    >
+      {/* Wordmark */}
+      <div style={{ padding: 'var(--mantine-spacing-sm)' }}>
+        <Text
+          size="md"
+          fw={400}
+          c="gray.1"
+          style={{
+            fontFamily: 'var(--mantine-font-family-headings)',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          Natural Resource
+        </Text>
+        <Text
+          size="xs"
+          c="green.6"
+          style={{
+            fontFamily: 'var(--mantine-font-family-monospace)',
+            fontSize: '9px',
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Admin
+        </Text>
+      </div>
+
+      {/* Navigation */}
+      <div style={{ flex: 1, overflowY: 'auto' }} onClick={onNavigate}>
+        <Suspense>
+          <AdminSidebarNav />
+        </Suspense>
+      </div>
+
+      {/* Footer — Clerk UserButton */}
+      <Stack p="sm">
+        <UserButton />
+      </Stack>
+    </Stack>
+  );
+}
+
 export function AdminShell({ children }: AdminShellProps) {
   const [opened, { toggle, close }] = useDisclosure();
 
   return (
     <AppShell
-      opened={opened}
       header={{ height: 48 }}
       navbar={{
         width: 240,
         breakpoint: 'md',
-        collapsed: { mobile: !opened },
       }}
       padding="lg"
     >
@@ -41,16 +91,17 @@ export function AdminShell({ children }: AdminShellProps) {
         </Group>
       </AppShell.Header>
 
+      {/* Desktop sidebar */}
       <AppShell.Navbar
         p="sm"
         withBorder={false}
+        visibleFrom="md"
         data-mantine-color-scheme="dark"
         style={{
           backgroundColor: 'var(--mantine-color-dark-9)',
           borderRight: '1px solid var(--mantine-color-dark-6)',
         }}
       >
-        {/* Wordmark */}
         <AppShell.Section>
           <div style={{ padding: 'var(--mantine-spacing-sm)' }}>
             <Text
@@ -79,20 +130,34 @@ export function AdminShell({ children }: AdminShellProps) {
           </div>
         </AppShell.Section>
 
-        {/* Navigation — close drawer on link click */}
-        <AppShell.Section grow style={{ overflowY: 'auto' }} onClick={close}>
+        <AppShell.Section grow style={{ overflowY: 'auto' }}>
           <Suspense>
             <AdminSidebarNav />
           </Suspense>
         </AppShell.Section>
 
-        {/* Footer — Clerk UserButton */}
         <AppShell.Section>
           <Stack p="sm">
             <UserButton />
           </Stack>
         </AppShell.Section>
       </AppShell.Navbar>
+
+      {/* Mobile drawer */}
+      <Drawer
+        opened={opened}
+        onClose={close}
+        position="left"
+        size={240}
+        hiddenFrom="md"
+        withCloseButton={false}
+        styles={{
+          body: { padding: 0, height: '100%' },
+          content: { backgroundColor: 'var(--mantine-color-dark-9)' },
+        }}
+      >
+        <NavContent onNavigate={close} />
+      </Drawer>
 
       <AppShell.Main
         style={{
