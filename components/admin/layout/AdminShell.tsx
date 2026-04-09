@@ -20,31 +20,43 @@ export function AdminShell({ children }: AdminShellProps) {
   }, [isDesktop, close]);
 
   return (
-    <AppShell
-      header={{ height: 48 }}
-      navbar={{
-        width: 240,
-        breakpoint: 'md',
-        collapsed: { mobile: !opened },
-      }}
-      padding="lg"
-    >
-      {/* Mobile-only header with burger — hidden on desktop, 0-height on desktop */}
-      <AppShell.Header
-        style={{
-          backgroundColor: 'var(--mantine-color-white)',
-          borderBottom: '1px solid var(--mantine-color-gray-2)',
+    <>
+      <style>{`
+        @media (min-width: 62em) {
+          .admin-shell {
+            --app-shell-header-height: 0px !important;
+          }
+          .admin-shell .mantine-AppShell-header {
+            display: none;
+          }
+        }
+      `}</style>
+      <AppShell
+        className="admin-shell"
+        header={{ height: 48 }}
+        navbar={{
+          width: 240,
+          breakpoint: 'md',
+          collapsed: { mobile: !opened },
         }}
+        padding="lg"
       >
-        <Group h="100%" px="md">
-          <Burger
-            opened={opened}
-            onClick={toggle}
-            size="sm"
-            aria-label="Toggle navigation"
-          />
-        </Group>
-      </AppShell.Header>
+        <AppShell.Header
+          style={{
+            backgroundColor: 'var(--mantine-color-white)',
+            borderBottom: '1px solid var(--mantine-color-gray-2)',
+          }}
+        >
+          <Group h="100%" px="md">
+            <Burger
+              opened={opened}
+              onClick={toggle}
+              hiddenFrom="md"
+              size="sm"
+              aria-label="Toggle navigation"
+            />
+          </Group>
+        </AppShell.Header>
 
       <AppShell.Navbar
         p="sm"
@@ -115,6 +127,7 @@ export function AdminShell({ children }: AdminShellProps) {
         )}
         {children}
       </AppShell.Main>
-    </AppShell>
+      </AppShell>
+    </>
   );
 }
