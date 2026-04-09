@@ -124,7 +124,7 @@ export function Work() {
             className="text-4xl"
             style={{ fontFamily: 'Playfair Display, serif', fontWeight: 400 }}
           >
-            1-on-1 Coaching
+            Executive Coaching
           </h3>
 
           {/* Description */}
@@ -225,11 +225,11 @@ export function Work() {
           )}
 
           {/* Book Button */}
+          <div style={{ marginTop: 'auto', paddingTop: '24px' }} />
           {openCalendar !== 'card1' && (
             <button
               onClick={() => setOpenCalendar('card1')}
               style={{
-                marginTop: 'auto',
                 width: '100%',
                 padding: '16px 32px',
                 background: 'rgba(26,25,23,0.9)',
@@ -408,11 +408,11 @@ export function Work() {
           )}
 
           {/* Book Button */}
+          <div style={{ marginTop: 'auto', paddingTop: '24px' }} />
           {openCalendar !== 'card2' && (
             <button
               onClick={() => setOpenCalendar('card2')}
               style={{
-                marginTop: 'auto',
                 width: '100%',
                 padding: '16px 32px',
                 background: 'rgba(26,25,23,0.9)',
