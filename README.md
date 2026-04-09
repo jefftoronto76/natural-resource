@@ -148,3 +148,22 @@ CLERK_SECRET_KEY=
 - blocks: is_default, default audit columns, updated type constraint
 - chat_sessions: session_type, session_subtype, block_id, owner_id
 - content: added wizard type
+
+---
+
+## What was built (April 8, 2026)
+
+### Mobile
+- Mobile drawer navigation — burger top left, Mantine Drawer slides in from left
+- Card layouts for all admin pages — Inbound Chats, Blocks, History
+- Mobile-first is now a hard principle — every component must be tested at 390px before considered done
+
+### Schema
+- chat_sessions: added owner_id column
+
+### Known mobile gaps (next sprint)
+- Composer design pass on mobile
+- Blocks — edit, sort, bottom filters
+- History — edit, sort
+- Desktop — 48px white header bar
+- Drawer animation speed
