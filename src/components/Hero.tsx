@@ -40,7 +40,7 @@ export function Hero() {
 
           <p style={{
             fontSize: 'clamp(16px, 2vw, 18px)', lineHeight: 1.7, fontWeight: 400,
-            color: 'var(--color-text-muted)', maxWidth: '540px', marginBottom: '48px',
+            color: 'var(--color-text-muted)', marginBottom: '48px',
           }}>
             Hi, I'm Jeff.<br />
             I work with technology companies and ambitious professionals as an executive coach and fractional operator, focused on revenue growth.
