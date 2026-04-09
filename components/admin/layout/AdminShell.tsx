@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, type ReactNode, useEffect } from 'react';
-import { AppShell, Burger, Overlay, Text, Stack } from '@mantine/core';
+import { AppShell, Burger, Group, Overlay, Text, Stack } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { UserButton } from '@clerk/nextjs';
 import { AdminSidebarNav } from '@/components/admin/navigation/AdminSidebarNav';
@@ -21,6 +21,7 @@ export function AdminShell({ children }: AdminShellProps) {
 
   return (
     <AppShell
+      header={{ height: { base: 48, md: 0 } }}
       navbar={{
         width: 240,
         breakpoint: 'md',
@@ -28,32 +29,23 @@ export function AdminShell({ children }: AdminShellProps) {
       }}
       padding="lg"
     >
-      {/* Mobile burger — fixed top-left, hidden on desktop */}
-      <Burger
-        opened={opened}
-        onClick={toggle}
+      {/* Mobile-only header with burger — hidden on desktop, 0-height on desktop */}
+      <AppShell.Header
         hiddenFrom="md"
-        size="sm"
-        color={opened ? 'white' : undefined}
-        aria-label="Toggle navigation"
         style={{
-          position: 'fixed',
-          top: 12,
-          left: 12,
-          zIndex: 300,
+          backgroundColor: 'var(--mantine-color-white)',
+          borderBottom: '1px solid var(--mantine-color-gray-2)',
         }}
-      />
-
-      {/* Mobile overlay — tap outside navbar to close */}
-      {opened && (
-        <Overlay
-          onClick={close}
-          fixed
-          zIndex={199}
-          backgroundOpacity={0.5}
-          hiddenFrom="md"
-        />
-      )}
+      >
+        <Group h="100%" px="md">
+          <Burger
+            opened={opened}
+            onClick={toggle}
+            size="sm"
+            aria-label="Toggle navigation"
+          />
+        </Group>
+      </AppShell.Header>
 
       <AppShell.Navbar
         p="sm"
@@ -63,8 +55,8 @@ export function AdminShell({ children }: AdminShellProps) {
           borderRight: '1px solid var(--mantine-color-dark-6)',
         }}
       >
-        {/* Wordmark — extra top margin on mobile to clear the burger */}
-        <AppShell.Section mt={{ base: 44, md: 0 }}>
+        {/* Wordmark */}
+        <AppShell.Section>
           <div style={{ padding: 'var(--mantine-spacing-sm)' }}>
             <Text
               size="md"
@@ -112,6 +104,16 @@ export function AdminShell({ children }: AdminShellProps) {
           backgroundColor: 'var(--mantine-color-white)',
         }}
       >
+        {/* Mobile overlay — tap outside navbar to close */}
+        {opened && (
+          <Overlay
+            onClick={close}
+            fixed
+            zIndex={199}
+            backgroundOpacity={0.5}
+            hiddenFrom="md"
+          />
+        )}
         {children}
       </AppShell.Main>
     </AppShell>
