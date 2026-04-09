@@ -1,8 +1,8 @@
 'use client';
 
-import { Suspense, type ReactNode, useEffect, useState } from 'react';
-import { AppShell, Burger, Group, Overlay, Text, Stack } from '@mantine/core';
-import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { Suspense, type ReactNode } from 'react';
+import { AppShell, Burger, Group, Text, Stack } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { UserButton } from '@clerk/nextjs';
 import { AdminSidebarNav } from '@/components/admin/navigation/AdminSidebarNav';
 
@@ -12,54 +12,33 @@ export interface AdminShellProps {
 
 export function AdminShell({ children }: AdminShellProps) {
   const [opened, { toggle, close }] = useDisclosure();
-  const [mounted, setMounted] = useState(false);
-  const isDesktop = useMediaQuery('(min-width: 62em)');
-
-  useEffect(() => { setMounted(true); }, []);
-
-  // Auto-close mobile nav when viewport crosses to desktop
-  useEffect(() => {
-    if (isDesktop) close();
-  }, [isDesktop, close]);
 
   return (
-    <>
-      <style>{`
-        @media (min-width: 62em) {
-          .admin-shell {
-            --app-shell-header-height: 0px !important;
-          }
-          .admin-shell .mantine-AppShell-header {
-            display: none;
-          }
-        }
-      `}</style>
-      <AppShell
-        className="admin-shell"
-        header={{ height: 48 }}
-        navbar={{
-          width: 240,
-          breakpoint: 'md',
-          collapsed: { mobile: !opened },
+    <AppShell
+      header={{ height: 48 }}
+      navbar={{
+        width: 240,
+        breakpoint: 'md',
+        collapsed: { mobile: !opened },
+      }}
+      padding="lg"
+    >
+      <AppShell.Header
+        style={{
+          backgroundColor: 'var(--mantine-color-white)',
+          borderBottom: '1px solid var(--mantine-color-gray-2)',
         }}
-        padding="lg"
       >
-        <AppShell.Header
-          style={{
-            backgroundColor: 'var(--mantine-color-white)',
-            borderBottom: '1px solid var(--mantine-color-gray-2)',
-          }}
-        >
-          <Group h="100%" px="md">
-            <Burger
-              opened={opened}
-              onClick={toggle}
-              hiddenFrom="md"
-              size="sm"
-              aria-label="Toggle navigation"
-            />
-          </Group>
-        </AppShell.Header>
+        <Group h="100%" px="md">
+          <Burger
+            opened={opened}
+            onClick={toggle}
+            hiddenFrom="md"
+            size="sm"
+            aria-label="Toggle navigation"
+          />
+        </Group>
+      </AppShell.Header>
 
       <AppShell.Navbar
         p="sm"
@@ -118,19 +97,8 @@ export function AdminShell({ children }: AdminShellProps) {
           backgroundColor: 'var(--mantine-color-white)',
         }}
       >
-        {/* Mobile overlay — client-only to avoid hydration mismatch */}
-        {mounted && opened && (
-          <Overlay
-            onClick={close}
-            fixed
-            zIndex={99}
-            backgroundOpacity={0.5}
-            hiddenFrom="md"
-          />
-        )}
         {children}
       </AppShell.Main>
-      </AppShell>
-    </>
+    </AppShell>
   );
 }
