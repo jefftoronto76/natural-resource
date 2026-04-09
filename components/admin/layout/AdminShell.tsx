@@ -1,7 +1,8 @@
 'use client';
 
-import { Suspense, type ReactNode } from 'react';
-import { AppShell, Text, Stack } from '@mantine/core';
+import { Suspense, type ReactNode, useEffect } from 'react';
+import { AppShell, Burger, Overlay, Text, Stack } from '@mantine/core';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { UserButton } from '@clerk/nextjs';
 import { AdminSidebarNav } from '@/components/admin/navigation/AdminSidebarNav';
 
@@ -10,14 +11,50 @@ export interface AdminShellProps {
 }
 
 export function AdminShell({ children }: AdminShellProps) {
+  const [opened, { toggle, close }] = useDisclosure();
+  const isDesktop = useMediaQuery('(min-width: 62em)');
+
+  // Auto-close mobile nav when viewport crosses to desktop
+  useEffect(() => {
+    if (isDesktop) close();
+  }, [isDesktop, close]);
+
   return (
     <AppShell
       navbar={{
         width: 240,
         breakpoint: 'md',
+        collapsed: { mobile: !opened },
       }}
       padding="lg"
     >
+      {/* Mobile burger — fixed top-left, hidden on desktop */}
+      <Burger
+        opened={opened}
+        onClick={toggle}
+        hiddenFrom="md"
+        size="sm"
+        color={opened ? 'white' : undefined}
+        aria-label="Toggle navigation"
+        style={{
+          position: 'fixed',
+          top: 12,
+          left: 12,
+          zIndex: 300,
+        }}
+      />
+
+      {/* Mobile overlay — tap outside navbar to close */}
+      {opened && (
+        <Overlay
+          onClick={close}
+          fixed
+          zIndex={199}
+          backgroundOpacity={0.5}
+          hiddenFrom="md"
+        />
+      )}
+
       <AppShell.Navbar
         p="sm"
         data-mantine-color-scheme="dark"
@@ -26,8 +63,8 @@ export function AdminShell({ children }: AdminShellProps) {
           borderRight: '1px solid var(--mantine-color-dark-6)',
         }}
       >
-        {/* Wordmark */}
-        <AppShell.Section>
+        {/* Wordmark — extra top margin on mobile to clear the burger */}
+        <AppShell.Section mt={{ base: 44, md: 0 }}>
           <div style={{ padding: 'var(--mantine-spacing-sm)' }}>
             <Text
               size="md"
@@ -55,8 +92,8 @@ export function AdminShell({ children }: AdminShellProps) {
           </div>
         </AppShell.Section>
 
-        {/* Navigation */}
-        <AppShell.Section grow style={{ overflowY: 'auto' }}>
+        {/* Navigation — close drawer on link click */}
+        <AppShell.Section grow style={{ overflowY: 'auto' }} onClick={close}>
           <Suspense>
             <AdminSidebarNav />
           </Suspense>
