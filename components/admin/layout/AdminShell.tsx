@@ -15,6 +15,7 @@ export function AdminShell({ children }: AdminShellProps) {
 
   return (
     <AppShell
+      opened={opened}
       header={{ height: 48 }}
       navbar={{
         width: 240,
@@ -25,7 +26,6 @@ export function AdminShell({ children }: AdminShellProps) {
     >
       <AppShell.Header
         style={{
-          position: 'fixed',
           backgroundColor: 'var(--mantine-color-white)',
           borderBottom: '1px solid var(--mantine-color-gray-2)',
         }}
@@ -48,7 +48,6 @@ export function AdminShell({ children }: AdminShellProps) {
         style={{
           backgroundColor: 'var(--mantine-color-dark-9)',
           borderRight: '1px solid var(--mantine-color-dark-6)',
-          zIndex: 300,
         }}
       >
         {/* Wordmark */}
