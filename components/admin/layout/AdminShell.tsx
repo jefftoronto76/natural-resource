@@ -25,6 +25,7 @@ export function AdminShell({ children }: AdminShellProps) {
     >
       <AppShell.Header
         style={{
+          position: 'fixed',
           backgroundColor: 'var(--mantine-color-white)',
           borderBottom: '1px solid var(--mantine-color-gray-2)',
         }}
@@ -42,10 +43,12 @@ export function AdminShell({ children }: AdminShellProps) {
 
       <AppShell.Navbar
         p="sm"
+        withBorder={false}
         data-mantine-color-scheme="dark"
         style={{
           backgroundColor: 'var(--mantine-color-dark-9)',
           borderRight: '1px solid var(--mantine-color-dark-6)',
+          zIndex: 300,
         }}
       >
         {/* Wordmark */}
