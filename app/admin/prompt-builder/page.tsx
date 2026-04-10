@@ -10,6 +10,8 @@ import {
   IconBrandDropbox,
   IconBox,
   IconScreenshot,
+  IconCheck,
+  IconLoader2,
 } from '@tabler/icons-react'
 import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/admin/primitives/Button'
@@ -88,6 +90,9 @@ export default function PromptBuilderPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [isDefault, setIsDefault] = useState(false)
   const [contentId, setContentId] = useState<string | null>(null)
+  const [fileUploading, setFileUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
   const [sessionStartIndex, setSessionStartIndex] = useState(0)
   const [copiedId, setCopiedId] = useState<number | null>(null)
   const [copiedAll, setCopiedAll] = useState(false)
@@ -138,6 +143,45 @@ export default function PromptBuilderPage() {
     setIsDefault(false)
     setSaveError(null)
     setContentId(null)
+    setFile(null)
+    setFileUploading(false)
+    setUploadError(null)
+    setUploadedFileName(null)
+  }
+
+  async function handleFileUpload(f: File) {
+    setFile(f)
+    setFileUploading(true)
+    setUploadError(null)
+    setUploadedFileName(null)
+
+    const formData = new FormData()
+    formData.append('file', f)
+
+    try {
+      const res = await fetch('/api/admin/assets/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        setUploadError(data?.error ?? 'Upload failed')
+        setFile(null)
+        return
+      }
+
+      const data: { content_id: string; name: string; raw: string } = await res.json()
+      setContentId(data.content_id)
+      setUploadedFileName(data.name)
+      setFile(null)
+    } catch (err) {
+      console.error('[handleFileUpload] failed:', err)
+      setUploadError('Network error — could not upload file')
+      setFile(null)
+    } finally {
+      setFileUploading(false)
+    }
   }
 
   function handleCopyBubble(index: number, content: string) {
@@ -447,7 +491,7 @@ export default function PromptBuilderPage() {
           accept=".pdf,.docx,.txt"
           onChange={e => {
             const f = e.target.files?.[0] ?? null
-            setFile(f)
+            if (f) handleFileUpload(f)
             e.target.value = ''
           }}
           style={{ display: 'none' }}
@@ -467,21 +511,48 @@ export default function PromptBuilderPage() {
         </ActionIcon>
       </Group>
 
-      {/* File attachment indicator */}
-      {file && (
+      {/* File upload status */}
+      {(fileUploading || uploadedFileName || uploadError) && (
         <Group gap="xs" px="sm" pb="xs" mt={-4}>
-          <Text variant="muted" className="text-xs">
-            📎 {file.name}
-          </Text>
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            size="xs"
-            onClick={() => setFile(null)}
-            aria-label="Remove file"
-          >
-            ✕
-          </ActionIcon>
+          {fileUploading && (
+            <Text variant="muted" className="text-xs">
+              <IconLoader2 size={12} className="mr-1 inline animate-spin" />
+              Uploading {file?.name}...
+            </Text>
+          )}
+          {uploadedFileName && !fileUploading && (
+            <>
+              <Text variant="muted" className="text-xs" style={{ color: 'var(--mantine-color-green-6)' }}>
+                <IconCheck size={12} className="mr-1 inline" />
+                {uploadedFileName}
+              </Text>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="xs"
+                onClick={() => { setUploadedFileName(null); setContentId(null) }}
+                aria-label="Remove file"
+              >
+                ✕
+              </ActionIcon>
+            </>
+          )}
+          {uploadError && !fileUploading && (
+            <>
+              <Text variant="muted" className="text-xs" style={{ color: 'var(--mantine-color-red-6)' }}>
+                {uploadError}
+              </Text>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="xs"
+                onClick={() => setUploadError(null)}
+                aria-label="Dismiss error"
+              >
+                ✕
+              </ActionIcon>
+            </>
+          )}
         </Group>
       )}
     </div>
