@@ -3,7 +3,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu } from '@mantine/core'
+import {
+  IconFile,
+  IconBrandGoogleDrive,
+  IconBrandDropbox,
+  IconBox,
+  IconScreenshot,
+} from '@tabler/icons-react'
 import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/admin/primitives/Button'
 import { Card } from '@/components/admin/primitives/Card'
@@ -398,23 +405,46 @@ export default function PromptBuilderPage() {
         justify="space-between"
         style={{ padding: hasMessages ? '4px 8px 8px' : '8px 12px 12px' }}
       >
-        {/* Left: upload */}
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          size="lg"
-          aria-label="Upload file"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isAtLimit}
-        >
-          <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 3v10M3 8h10" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </ActionIcon>
+        {/* Left: upload menu */}
+        <Menu position="top-start" withinPortal shadow="md">
+          <Menu.Target>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="lg"
+              aria-label="Add content"
+              disabled={isAtLimit}
+            >
+              <svg viewBox="0 0 16 16" width={16} height={16} fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 3v10M3 8h10" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              leftSection={<IconFile size={16} />}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Add files
+            </Menu.Item>
+            <Menu.Item leftSection={<IconBrandGoogleDrive size={16} />} disabled>
+              Google Drive
+            </Menu.Item>
+            <Menu.Item leftSection={<IconBrandDropbox size={16} />} disabled>
+              Dropbox
+            </Menu.Item>
+            <Menu.Item leftSection={<IconBox size={16} />} disabled>
+              Box
+            </Menu.Item>
+            <Menu.Item leftSection={<IconScreenshot size={16} />} disabled>
+              Take a screenshot
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+          accept=".pdf,.docx,.txt"
           onChange={e => {
             const f = e.target.files?.[0] ?? null
             setFile(f)
