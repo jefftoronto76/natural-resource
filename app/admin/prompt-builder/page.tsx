@@ -515,17 +515,23 @@ export default function PromptBuilderPage() {
       {(fileUploading || uploadedFileName || uploadError) && (
         <Group gap="xs" px="sm" pb="xs" mt={-4}>
           {fileUploading && (
-            <Text variant="muted" className="text-xs">
-              <IconLoader2 size={12} className="mr-1 inline animate-spin" />
+            <span
+              className="text-xs flex items-center"
+              style={{ color: 'var(--mantine-color-dimmed)' }}
+            >
+              <IconLoader2 size={12} className="mr-1 animate-spin" />
               Uploading {file?.name}...
-            </Text>
+            </span>
           )}
           {uploadedFileName && !fileUploading && (
             <>
-              <Text variant="muted" className="text-xs" style={{ color: 'var(--mantine-color-green-6)' }}>
-                <IconCheck size={12} className="mr-1 inline" />
+              <span
+                className="text-xs flex items-center"
+                style={{ color: 'var(--mantine-color-green-6)' }}
+              >
+                <IconCheck size={12} className="mr-1" />
                 {uploadedFileName}
-              </Text>
+              </span>
               <ActionIcon
                 variant="subtle"
                 color="gray"
@@ -539,9 +545,12 @@ export default function PromptBuilderPage() {
           )}
           {uploadError && !fileUploading && (
             <>
-              <Text variant="muted" className="text-xs" style={{ color: 'var(--mantine-color-red-6)' }}>
+              <span
+                className="text-xs"
+                style={{ color: 'var(--mantine-color-red-6)' }}
+              >
                 {uploadError}
-              </Text>
+              </span>
               <ActionIcon
                 variant="subtle"
                 color="gray"

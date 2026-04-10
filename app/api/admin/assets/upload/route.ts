@@ -3,6 +3,11 @@ import { PDFParse } from 'pdf-parse'
 import mammoth from 'mammoth'
 import { getAdminClient } from '@/lib/supabase-admin'
 
+// App Router route segment config — allow up to 60 s for PDF text extraction.
+// Body size is governed by the deployment platform (Vercel: 4.5 MB serverless),
+// not by a per-route config in App Router (that pattern is Pages Router only).
+export const maxDuration = 60
+
 // Hardcoded tenant/owner for now — will be replaced with auth context
 const HARDCODED_TENANT_ID = '00000000-0000-0000-0000-000000000001'
 const HARDCODED_OWNER_ID = '00000000-0000-0000-0000-000000000001'
