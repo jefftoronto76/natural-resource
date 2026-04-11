@@ -14,7 +14,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('blocks')
-    .select('id, title, type, body')
+    .select('id, title, type, body, is_default')
     .eq('tenant_id', authCtx.tenant_id)
     .eq('active', true)
     .order('type')

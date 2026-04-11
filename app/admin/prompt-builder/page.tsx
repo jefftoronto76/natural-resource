@@ -47,6 +47,7 @@ interface ExistingBlock {
   title: string
   type: string
   body: string
+  is_default: boolean
 }
 
 const TYPES: { value: BlockType; label: string }[] = [
@@ -105,6 +106,8 @@ export default function PromptBuilderPage() {
   const [copiedId, setCopiedId] = useState<number | null>(null)
   const [copiedAll, setCopiedAll] = useState(false)
   const [existingBlocks, setExistingBlocks] = useState<ExistingBlock[]>([])
+  const [blocksLoaded, setBlocksLoaded] = useState(false)
+  const hasOpeningSent = useRef(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -142,6 +145,8 @@ export default function PromptBuilderPage() {
         setExistingBlocks(data)
       } catch (err) {
         console.error('[fetchBlocks] failed:', err)
+      } finally {
+        setBlocksLoaded(true)
       }
     }
     fetchBlocks()
@@ -172,6 +177,29 @@ export default function PromptBuilderPage() {
     sendChatMessage([triggerMsg])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingAutoTrigger, uploadedRaw])
+
+  // Auto-send opening message after blocks load on mount.
+  // The trigger is hidden from the chat UI — only the AI response appears.
+  useEffect(() => {
+    if (!blocksLoaded || hasOpeningSent.current) return
+    hasOpeningSent.current = true
+
+    const hasCustom = existingBlocks.some(b => !b.is_default)
+    const allDefault = existingBlocks.length > 0 && !hasCustom
+
+    let trigger: string
+    if (existingBlocks.length === 0) {
+      trigger = 'The owner has no blocks yet. This is their first time in the Composer. Write a warm, concise opening message (2-3 sentences) that explains what blocks are, why they matter for Sage, and the three ways to create them: type a description, paste content, or upload a document. Do NOT output the done JSON.'
+    } else if (allDefault && !hasCustom) {
+      trigger = 'The owner only has default starter blocks — no custom blocks yet. Write a short opening message acknowledging the foundation is set and suggesting they customize or add blocks specific to their business. Do NOT output the done JSON.'
+    } else {
+      const types = [...new Set(existingBlocks.map(b => b.type))]
+      trigger = `The owner has ${existingBlocks.length} existing blocks covering: ${types.join(', ')}. Write a short opening message summarizing what's covered, identifying any missing block types, and suggesting what to build next. Do NOT output the done JSON.`
+    }
+
+    sendChatMessage([], trigger)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blocksLoaded])
 
   function resetChat() {
     setChatMessages([])
@@ -313,7 +341,7 @@ export default function PromptBuilderPage() {
     return { displayText: text, draft: null }
   }
 
-  async function sendChatMessage(messages: ChatMessage[]) {
+  async function sendChatMessage(messages: ChatMessage[], hiddenPrompt?: string) {
     setChatLoading(true)
     const placeholderMsg: ChatMessage = { role: 'assistant', content: '', timestamp: Date.now() }
     setChatMessages([...messages, placeholderMsg])
@@ -323,7 +351,10 @@ export default function PromptBuilderPage() {
       const raw = file ? file.name : chatInput
       const topicName = selectedTopic?.name ?? ''
 
-      const apiMessages = messages.map(m => ({ role: m.role, content: m.content }))
+      const apiMessages = [
+        ...(hiddenPrompt ? [{ role: 'user', content: hiddenPrompt }] : []),
+        ...messages.map(m => ({ role: m.role, content: m.content })),
+      ]
 
       const response = await fetch('/api/admin/blocks/chat', {
         method: 'POST',
