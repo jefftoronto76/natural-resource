@@ -328,30 +328,51 @@ export default function PromptBuilderPage() {
 
   function parseAllDoneJson(text: string): { displayText: string; drafts: DraftBlock[] } {
     const drafts: DraftBlock[] = []
-    const displayLines: string[] = []
+    let displayText = text
 
-    for (const line of text.split('\n')) {
-      const trimmed = line.trim()
-      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-        try {
-          const parsed = JSON.parse(trimmed)
-          if (parsed.done && parsed.title && parsed.content) {
-            const draft: DraftBlock = { title: parsed.title, content: parsed.content }
-            if (typeof parsed.type === 'string' && VALID_TYPES.has(parsed.type.toLowerCase())) {
-              draft.suggestedType = parsed.type.toLowerCase() as BlockType
-            }
-            if (typeof parsed.topic === 'string' && parsed.topic.trim()) {
-              draft.suggestedTopic = parsed.topic.trim()
-            }
-            drafts.push(draft)
-            continue
-          }
-        } catch { /* not valid JSON — keep as display text */ }
-      }
-      displayLines.push(line)
+    // Match JSON objects containing "done":true anywhere in the text.
+    // Uses a balanced-brace approach: find { then count braces to find the matching }.
+    const jsonStarts: number[] = []
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] === '{') jsonStarts.push(i)
     }
 
-    return { displayText: displayLines.join('\n').trim(), drafts }
+    const matched: { start: number; end: number }[] = []
+    for (const start of jsonStarts) {
+      let depth = 0
+      let end = -1
+      for (let i = start; i < text.length; i++) {
+        if (text[i] === '{') depth++
+        else if (text[i] === '}') {
+          depth--
+          if (depth === 0) { end = i; break }
+        }
+      }
+      if (end === -1) continue
+
+      const candidate = text.slice(start, end + 1)
+      try {
+        const parsed = JSON.parse(candidate)
+        if (parsed.done && parsed.title && parsed.content) {
+          const draft: DraftBlock = { title: parsed.title, content: parsed.content }
+          if (typeof parsed.type === 'string' && VALID_TYPES.has(parsed.type.toLowerCase())) {
+            draft.suggestedType = parsed.type.toLowerCase() as BlockType
+          }
+          if (typeof parsed.topic === 'string' && parsed.topic.trim()) {
+            draft.suggestedTopic = parsed.topic.trim()
+          }
+          drafts.push(draft)
+          matched.push({ start, end: end + 1 })
+        }
+      } catch { /* not valid JSON — skip */ }
+    }
+
+    // Strip matched JSON from display text (reverse order to preserve indices)
+    for (let i = matched.length - 1; i >= 0; i--) {
+      displayText = displayText.slice(0, matched[i].start) + displayText.slice(matched[i].end)
+    }
+
+    return { displayText: displayText.trim(), drafts }
   }
 
   async function sendChatMessage(messages: ChatMessage[], hiddenPrompt?: string) {
