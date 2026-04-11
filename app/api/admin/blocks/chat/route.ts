@@ -70,7 +70,7 @@ Rules:
       model: anthropic('claude-sonnet-4-6'),
       system: systemPrompt + documentSection + blocksSection,
       messages: conversationMessages,
-      maxTokens: 800,
+      maxTokens: 4000,
     })
     return result.toDataStreamResponse()
   } catch (error) {
