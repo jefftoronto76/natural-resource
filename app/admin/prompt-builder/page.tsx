@@ -93,6 +93,7 @@ export default function PromptBuilderPage() {
   const [fileUploading, setFileUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
+  const [uploadedRaw, setUploadedRaw] = useState<string | null>(null)
   const [sessionStartIndex, setSessionStartIndex] = useState(0)
   const [copiedId, setCopiedId] = useState<number | null>(null)
   const [copiedAll, setCopiedAll] = useState(false)
@@ -147,6 +148,7 @@ export default function PromptBuilderPage() {
     setFileUploading(false)
     setUploadError(null)
     setUploadedFileName(null)
+    setUploadedRaw(null)
   }
 
   async function handleFileUpload(f: File) {
@@ -174,6 +176,7 @@ export default function PromptBuilderPage() {
       const data: { content_id: string; name: string; raw: string } = await res.json()
       setContentId(data.content_id)
       setUploadedFileName(data.name)
+      setUploadedRaw(data.raw)
       setFile(null)
     } catch (err) {
       console.error('[handleFileUpload] failed:', err)
@@ -291,6 +294,7 @@ export default function PromptBuilderPage() {
           content_type: contentType,
           content: raw,
           messages: apiMessages,
+          ...(uploadedRaw ? { documentContext: uploadedRaw } : {}),
         }),
       })
 
@@ -536,7 +540,7 @@ export default function PromptBuilderPage() {
                 variant="subtle"
                 color="gray"
                 size="xs"
-                onClick={() => { setUploadedFileName(null); setContentId(null) }}
+                onClick={() => { setUploadedFileName(null); setContentId(null); setUploadedRaw(null) }}
                 aria-label="Remove file"
               >
                 ✕

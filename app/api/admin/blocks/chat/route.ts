@@ -13,6 +13,7 @@ export async function POST(req: Request) {
     content_type: string
     content: string
     messages: { role: string; content: string }[]
+    documentContext?: string
   }
 
   try {
@@ -21,7 +22,11 @@ export async function POST(req: Request) {
     return new Response('Invalid JSON body', { status: 400 })
   }
 
-  const { type, topic, content_type, content, messages } = body
+  const { type, topic, content_type, content, messages, documentContext } = body
+
+  const documentSection = documentContext
+    ? `\n\nThe owner has uploaded a document. Here is its content:\n\n${documentContext}\n\nUse this to suggest relevant blocks.`
+    : ''
 
   const systemPrompt = `You are a prompt block builder for Sage, an AI sales assistant. Your job is to help the owner create a single, well-structured prompt block through conversation — ideally in 3-5 exchanges.
 
@@ -58,7 +63,7 @@ Rules:
   try {
     const result = await streamText({
       model: anthropic('claude-sonnet-4-6'),
-      system: systemPrompt,
+      system: systemPrompt + documentSection,
       messages: conversationMessages,
       maxTokens: 800,
     })
