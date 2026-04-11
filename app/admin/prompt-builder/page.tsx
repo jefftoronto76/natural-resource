@@ -94,6 +94,7 @@ export default function PromptBuilderPage() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
   const [uploadedRaw, setUploadedRaw] = useState<string | null>(null)
+  const [pendingAutoTrigger, setPendingAutoTrigger] = useState(false)
   const [sessionStartIndex, setSessionStartIndex] = useState(0)
   const [copiedId, setCopiedId] = useState<number | null>(null)
   const [copiedAll, setCopiedAll] = useState(false)
@@ -135,6 +136,22 @@ export default function PromptBuilderPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMessages, chatLoading])
 
+  // Auto-trigger Composer after a successful upload.
+  // Runs in a fresh render cycle so all upload state (uploadedRaw, file=null,
+  // fileUploading=false) has committed and sendChatMessage's closure is current.
+  useEffect(() => {
+    if (!pendingAutoTrigger || !uploadedRaw) return
+    setPendingAutoTrigger(false)
+
+    const triggerMsg: ChatMessage = {
+      role: 'user',
+      content: "I've uploaded a document. Please analyze it and suggest the most useful blocks for Sage.",
+      timestamp: Date.now(),
+    }
+    sendChatMessage([triggerMsg])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingAutoTrigger, uploadedRaw])
+
   function resetChat() {
     setChatMessages([])
     setChatInput('')
@@ -149,6 +166,7 @@ export default function PromptBuilderPage() {
     setUploadError(null)
     setUploadedFileName(null)
     setUploadedRaw(null)
+    setPendingAutoTrigger(false)
   }
 
   async function handleFileUpload(f: File) {
@@ -178,6 +196,7 @@ export default function PromptBuilderPage() {
       setUploadedFileName(data.name)
       setUploadedRaw(data.raw)
       setFile(null)
+      setPendingAutoTrigger(true)
     } catch (err) {
       console.error('[handleFileUpload] failed:', err)
       setUploadError('Network error — could not upload file')
