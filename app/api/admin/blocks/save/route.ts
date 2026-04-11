@@ -1,13 +1,21 @@
 import { getAdminClient } from '@/lib/supabase-admin'
+import { getAuthContext } from '@/lib/get-auth-context'
 
 export async function POST(req: Request) {
+  let authCtx: { owner_id: string; tenant_id: string }
+  try {
+    authCtx = await getAuthContext()
+  } catch (err) {
+    console.error('[blocks/save] auth failed:', err instanceof Error ? err.message : err)
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   let body: {
     type: string
     topic_id: string
     title: string
     body: string
     source_id?: string | null
-    owner_id: string
     is_default?: boolean
     messages?: { role: string; content: string }[]
   }
@@ -18,10 +26,10 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { type, topic_id, title, body: blockBody, owner_id, is_default, messages } = body
+  const { type, topic_id, title, body: blockBody, is_default, messages } = body
   let { source_id } = body
 
-  if (!type || !topic_id || !title || !blockBody || !owner_id) {
+  if (!type || !topic_id || !title || !blockBody) {
     return Response.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
@@ -30,8 +38,8 @@ export async function POST(req: Request) {
   // If no source content record was provided, create one from the block body
   if (!source_id) {
     const contentPayload = {
-      owner_id,
-      tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
+      owner_id: authCtx.owner_id,
+      tenant_id: authCtx.tenant_id,
       type: 'wizard',
       name: title || 'Untitled block',
       raw: blockBody,
@@ -61,8 +69,8 @@ export async function POST(req: Request) {
       title,
       body: blockBody,
       source_id,
-      owner_id,
-      tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
+      owner_id: authCtx.owner_id,
+      tenant_id: authCtx.tenant_id,
       active: true,
       is_default: is_default ?? false,
     })
@@ -90,8 +98,8 @@ export async function POST(req: Request) {
     const { error: sessionError } = await supabase
       .from('chat_sessions')
       .insert({
-        tenant_id: 'e07334a0-2afd-4544-898b-edb124d2dd33',
-        owner_id,
+        tenant_id: authCtx.tenant_id,
+        owner_id: authCtx.owner_id,
         messages,
         session_type: 'composer',
         session_subtype: 'block',

@@ -3,15 +3,12 @@ import { generateText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import mammoth from 'mammoth'
 import { getAdminClient } from '@/lib/supabase-admin'
+import { getAuthContext } from '@/lib/get-auth-context'
 
 // App Router route segment config — allow up to 60 s for PDF text extraction.
 // Body size is governed by the deployment platform (Vercel: 4.5 MB serverless),
 // not by a per-route config in App Router (that pattern is Pages Router only).
 export const maxDuration = 60
-
-// Hardcoded tenant/owner for now — will be replaced with auth context
-const HARDCODED_TENANT_ID = '00000000-0000-0000-0000-000000000001'
-const HARDCODED_OWNER_ID = '00000000-0000-0000-0000-000000000001'
 
 const ACCEPTED_TYPES: Record<string, string> = {
   'application/pdf': 'pdf',
@@ -63,6 +60,14 @@ async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
 
 export async function POST(req: NextRequest) {
   console.log('[assets/upload] route hit')
+
+  let authCtx: { owner_id: string; tenant_id: string }
+  try {
+    authCtx = await getAuthContext()
+  } catch (err) {
+    console.error('[assets/upload] auth failed:', err instanceof Error ? err.message : err)
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   let formData: FormData
   try {
@@ -116,8 +121,8 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase
     .from('content')
     .insert({
-      tenant_id: HARDCODED_TENANT_ID,
-      owner_id: HARDCODED_OWNER_ID,
+      tenant_id: authCtx.tenant_id,
+      owner_id: authCtx.owner_id,
       name: file.name,
       type: 'document',
       raw: raw.trim(),

@@ -1,14 +1,21 @@
 import { getAdminClient } from '@/lib/supabase-admin'
-
-const TENANT_ID = 'e07334a0-2afd-4544-898b-edb124d2dd33'
+import { getAuthContext } from '@/lib/get-auth-context'
 
 export async function GET() {
+  let authCtx: { owner_id: string; tenant_id: string }
+  try {
+    authCtx = await getAuthContext()
+  } catch (err) {
+    console.error('[topics] auth failed:', err instanceof Error ? err.message : err)
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const supabase = getAdminClient()
 
   const { data, error } = await supabase
     .from('topics')
     .select('id, name, type')
-    .eq('tenant_id', TENANT_ID)
+    .eq('tenant_id', authCtx.tenant_id)
     .order('name')
 
   if (error) {
@@ -20,6 +27,14 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  let authCtx: { owner_id: string; tenant_id: string }
+  try {
+    authCtx = await getAuthContext()
+  } catch (err) {
+    console.error('[topics] auth failed:', err instanceof Error ? err.message : err)
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   let body: { name: string; type: string }
 
   try {
@@ -38,7 +53,7 @@ export async function POST(req: Request) {
 
   const { data, error } = await supabase
     .from('topics')
-    .insert({ name, type, tenant_id: TENANT_ID })
+    .insert({ name, type, tenant_id: authCtx.tenant_id })
     .select('id, name, type')
     .single()
 

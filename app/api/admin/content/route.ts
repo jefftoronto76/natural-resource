@@ -1,9 +1,16 @@
 import { getAdminClient } from '@/lib/supabase-admin'
+import { getAuthContext } from '@/lib/get-auth-context'
 
 export async function POST(req: Request) {
+  let authCtx: { owner_id: string; tenant_id: string }
+  try {
+    authCtx = await getAuthContext()
+  } catch (err) {
+    console.error('[content/create] auth failed:', err instanceof Error ? err.message : err)
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   let body: {
-    tenant_id: string
-    owner_id: string
     name: string
     type: string
     raw: string
@@ -15,9 +22,9 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { tenant_id, owner_id, name, type, raw } = body
+  const { name, type, raw } = body
 
-  if (!tenant_id || !owner_id || !name || !type || !raw) {
+  if (!name || !type || !raw) {
     return Response.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
@@ -25,7 +32,7 @@ export async function POST(req: Request) {
 
   const { data, error } = await supabase
     .from('content')
-    .insert({ tenant_id, owner_id, name, type, raw })
+    .insert({ tenant_id: authCtx.tenant_id, owner_id: authCtx.owner_id, name, type, raw })
     .select()
     .single()
 
