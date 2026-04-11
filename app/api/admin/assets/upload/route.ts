@@ -1,6 +1,4 @@
 import { NextRequest } from 'next/server'
-import { generateText } from 'ai'
-import { anthropic } from '@ai-sdk/anthropic'
 import mammoth from 'mammoth'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { getAuthContext } from '@/lib/get-auth-context'
@@ -18,33 +16,73 @@ const ACCEPTED_TYPES: Record<string, string> = {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 
+async function extractTextFromPdf(buffer: Buffer): Promise<string> {
+  const base64 = buffer.toString('base64')
+  console.log('[assets/upload] PDF base64 length:', base64.length)
+
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not configured')
+
+  const requestBody = {
+    model: 'claude-sonnet-4-6',
+    max_tokens: 16000,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'document',
+            source: {
+              type: 'base64',
+              media_type: 'application/pdf',
+              data: base64,
+            },
+          },
+          {
+            type: 'text',
+            text: 'Extract all text from this document exactly as written. Return only the extracted text with no commentary.',
+          },
+        ],
+      },
+    ],
+  }
+
+  console.log('[assets/upload] sending to Anthropic API, content types:', requestBody.messages[0].content.map(c => c.type))
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify(requestBody),
+  })
+
+  if (!res.ok) {
+    const errorBody = await res.text()
+    console.error('[assets/upload] Anthropic API error:', { status: res.status, body: errorBody })
+    throw new Error(`Anthropic API error: ${res.status} ${errorBody}`)
+  }
+
+  const data = await res.json()
+  console.log('[assets/upload] Anthropic response stop_reason:', data.stop_reason, 'content blocks:', data.content?.length)
+
+  const textBlock = data.content?.find((b: { type: string }) => b.type === 'text')
+  if (!textBlock?.text) {
+    console.error('[assets/upload] no text in Anthropic response:', JSON.stringify(data.content))
+    throw new Error('No text returned from Anthropic')
+  }
+
+  return textBlock.text
+}
+
 async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
   const fileType = ACCEPTED_TYPES[mimeType]
 
   switch (fileType) {
     case 'pdf': {
-      const base64 = buffer.toString('base64')
-      const { text } = await generateText({
-        model: anthropic('claude-sonnet-4-6'),
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'file',
-                data: base64,
-                mimeType: 'application/pdf',
-              },
-              {
-                type: 'text',
-                text: 'Extract all text from this document exactly as written. Return only the extracted text with no commentary.',
-              },
-            ],
-          },
-        ],
-        maxTokens: 16000,
-      })
-      return text
+      return extractTextFromPdf(buffer)
     }
     case 'docx': {
       const result = await mammoth.extractRawText({ buffer })
