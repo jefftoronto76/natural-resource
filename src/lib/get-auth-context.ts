@@ -12,6 +12,7 @@ export interface AuthContext {
  */
 export async function getAuthContext(): Promise<AuthContext> {
   const { userId: clerkId } = await auth()
+  console.log('[getAuthContext] clerk userId:', clerkId)
   if (!clerkId) {
     throw new Error('Unauthorized')
   }
