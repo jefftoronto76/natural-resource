@@ -412,9 +412,11 @@ export default function PromptBuilderPage() {
       })
 
       const { displayText, drafts } = parseAllDoneJson(finalText)
+      console.log('[parseAllDoneJson] finalText length:', finalText.length, 'drafts found:', drafts.length, 'finalText tail:', finalText.slice(-300))
       setChatMessages([...messages, { role: 'assistant', content: displayText, timestamp: placeholderMsg.timestamp }])
       if (drafts.length > 0) {
         setDraftBlocks(drafts)
+        console.log('[setDraftBlocks] drafts:', JSON.stringify(drafts.map(d => ({ title: d.title, type: d.suggestedType }))))
         setDraftMetas(drafts.map(d => {
           const draftType = d.suggestedType ?? ''
           let resolvedTopicId = ''
@@ -920,6 +922,7 @@ export default function PromptBuilderPage() {
               ))}
 
               {/* Block confirmation cards */}
+              {(() => { console.log('[render] draftBlocks.length:', draftBlocks.length); return null })()}
               {draftBlocks.map((draft, cardIndex) => {
                 const meta = draftMetas[cardIndex]
                 if (!meta) return null
