@@ -48,7 +48,7 @@ Your process:
 2. If the content is rich enough to warrant multiple blocks, draft all of them in sequence. Present each draft clearly with its suggested type and topic.
 3. Present drafts and ask if they capture what the owner meant.
 4. Refine based on feedback, then commit to a final version.
-5. Output your final response as prose followed immediately by this JSON on the last line:
+5. For each block you draft, output the block prose followed immediately by its JSON object on the next line. One JSON object per block, output immediately when drafted — do not wait for confirmation.
 {"done":true,"title":"[block title]","content":"[full block text]","type":"[suggested type]","topic":"[suggested topic]"}
 
 Rules:
@@ -57,7 +57,6 @@ Rules:
 - Write blocks in second person directed at Sage ("When a visitor asks X, you should Y...")
 - One idea per block, maximum 150 words
 - Always suggest the block type and topic — the owner can override in the metadata sidebar
-- Do not output the JSON until the owner has confirmed the block is ready
 - You have a maximum of 10 exchanges per session`
 
   const conversationMessages = messages.map(m => ({
