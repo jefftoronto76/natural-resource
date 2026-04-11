@@ -42,6 +42,13 @@ interface DraftBlock {
   suggestedTopic?: string
 }
 
+interface ExistingBlock {
+  id: string
+  title: string
+  type: string
+  body: string
+}
+
 const TYPES: { value: BlockType; label: string }[] = [
   { value: 'identity', label: 'Identity & Voice' },
   { value: 'knowledge', label: 'Knowledge' },
@@ -97,6 +104,7 @@ export default function PromptBuilderPage() {
   const [sessionStartIndex, setSessionStartIndex] = useState(0)
   const [copiedId, setCopiedId] = useState<number | null>(null)
   const [copiedAll, setCopiedAll] = useState(false)
+  const [existingBlocks, setExistingBlocks] = useState<ExistingBlock[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -124,6 +132,20 @@ export default function PromptBuilderPage() {
   }, [])
 
   useEffect(() => { fetchTopics() }, [fetchTopics])
+
+  useEffect(() => {
+    async function fetchBlocks() {
+      try {
+        const res = await fetch('/api/admin/blocks')
+        if (!res.ok) return
+        const data: ExistingBlock[] = await res.json()
+        setExistingBlocks(data)
+      } catch (err) {
+        console.error('[fetchBlocks] failed:', err)
+      }
+    }
+    fetchBlocks()
+  }, [])
 
   useEffect(() => {
     if (filteredTopics.length > 0 && !filteredTopics.find(t => t.id === topicId)) {
@@ -313,6 +335,7 @@ export default function PromptBuilderPage() {
           content: raw,
           messages: apiMessages,
           ...(uploadedRaw ? { documentContext: uploadedRaw } : {}),
+          ...(existingBlocks.length > 0 ? { existingBlocks: existingBlocks.map(b => ({ title: b.title, type: b.type, body: b.body })) } : {}),
         }),
       })
 
