@@ -40,6 +40,7 @@ interface DraftBlock {
   content: string
   suggestedType?: BlockType
   suggestedTopic?: string
+  warning?: string
 }
 
 interface ExistingBlock {
@@ -59,6 +60,7 @@ interface DraftCardMeta {
   isDefault: boolean
   saveError: string | null
   isSaving: boolean
+  warning: string | null
 }
 
 const TYPES: { value: BlockType; label: string }[] = [
@@ -361,6 +363,9 @@ export default function PromptBuilderPage() {
           if (typeof parsed.topic === 'string' && parsed.topic.trim()) {
             draft.suggestedTopic = parsed.topic.trim()
           }
+          if (typeof parsed.warning === 'string' && parsed.warning.trim()) {
+            draft.warning = parsed.warning.trim()
+          }
           drafts.push(draft)
           matched.push({ start, end: end + 1 })
         }
@@ -435,6 +440,7 @@ export default function PromptBuilderPage() {
             isDefault: false,
             saveError: null,
             isSaving: false,
+            warning: d.warning ?? null,
           }
         }))
       }
@@ -1021,6 +1027,11 @@ export default function PromptBuilderPage() {
                           onChange={(e) => updateDraftMeta(cardIndex, { isDefault: e.currentTarget.checked })}
                           size="sm"
                         />
+                      )}
+                      {meta.warning && (
+                        <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', color: 'var(--mantine-color-yellow-7)' }}>
+                          {meta.warning}
+                        </Text>
                       )}
                       {meta.saveError && (
                         <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)', color: 'var(--mantine-color-red-6)' }}>
