@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu, Progress } from '@mantine/core'
 import {
   IconFile,
   IconBrandGoogleDrive,
@@ -11,7 +11,6 @@ import {
   IconBox,
   IconScreenshot,
   IconCheck,
-  IconLoader2,
 } from '@tabler/icons-react'
 import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/admin/primitives/Button'
@@ -535,56 +534,65 @@ export default function PromptBuilderPage() {
       </Group>
 
       {/* File upload status */}
-      {(fileUploading || uploadedFileName || uploadError) && (
+      {fileUploading && (
+        <Stack gap={4} px="sm" pb="xs" mt={-4}>
+          <span
+            style={{
+              color: 'var(--mantine-color-dimmed)',
+              fontFamily: 'var(--mantine-font-family)',
+              fontSize: 'var(--mantine-font-size-xs)',
+            }}
+          >
+            Processing your document...
+          </span>
+          <Progress size="xs" animated value={100} />
+        </Stack>
+      )}
+      {uploadedFileName && !fileUploading && (
         <Group gap="xs" px="sm" pb="xs" mt={-4}>
-          {fileUploading && (
-            <span
-              className="text-xs flex items-center"
-              style={{ color: 'var(--mantine-color-dimmed)' }}
-            >
-              <IconLoader2 size={12} className="mr-1 animate-spin" />
-              Uploading {file?.name}...
-            </span>
-          )}
-          {uploadedFileName && !fileUploading && (
-            <>
-              <span
-                className="text-xs flex items-center"
-                style={{ color: 'var(--mantine-color-green-6)' }}
-              >
-                <IconCheck size={12} className="mr-1" />
-                {uploadedFileName}
-              </span>
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                size="xs"
-                onClick={() => { setUploadedFileName(null); setContentId(null); setUploadedRaw(null) }}
-                aria-label="Remove file"
-              >
-                ✕
-              </ActionIcon>
-            </>
-          )}
-          {uploadError && !fileUploading && (
-            <>
-              <span
-                className="text-xs"
-                style={{ color: 'var(--mantine-color-red-6)' }}
-              >
-                {uploadError}
-              </span>
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                size="xs"
-                onClick={() => setUploadError(null)}
-                aria-label="Dismiss error"
-              >
-                ✕
-              </ActionIcon>
-            </>
-          )}
+          <span
+            style={{
+              color: 'var(--mantine-color-green-6)',
+              fontFamily: 'var(--mantine-font-family)',
+              fontSize: 'var(--mantine-font-size-xs)',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <IconCheck size={12} style={{ marginRight: 4 }} />
+            Saved to assets.
+          </span>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="xs"
+            onClick={() => { setUploadedFileName(null); setContentId(null); setUploadedRaw(null) }}
+            aria-label="Remove file"
+          >
+            ✕
+          </ActionIcon>
+        </Group>
+      )}
+      {uploadError && !fileUploading && (
+        <Group gap="xs" px="sm" pb="xs" mt={-4}>
+          <span
+            style={{
+              color: 'var(--mantine-color-red-6)',
+              fontFamily: 'var(--mantine-font-family)',
+              fontSize: 'var(--mantine-font-size-xs)',
+            }}
+          >
+            {uploadError}
+          </span>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="xs"
+            onClick={() => setUploadError(null)}
+            aria-label="Dismiss error"
+          >
+            ✕
+          </ActionIcon>
         </Group>
       )}
     </div>
