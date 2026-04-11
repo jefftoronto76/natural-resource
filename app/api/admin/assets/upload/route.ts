@@ -117,6 +117,7 @@ export async function POST(req: NextRequest) {
 
   const supabase = getAdminClient()
 
+  // 1. Insert content record to get the content_id
   console.log('[assets/upload] inserting content record:', { name: file.name, rawLength: raw.trim().length })
   const { data, error } = await supabase
     .from('content')
@@ -133,6 +134,35 @@ export async function POST(req: NextRequest) {
   if (error) {
     console.error('[assets/upload] supabase insert failed:', { message: error.message, code: error.code, details: error.details, hint: error.hint })
     return Response.json({ error: error.message }, { status: 500 })
+  }
+
+  // 2. Upload original file to Supabase Storage
+  const storagePath = `${authCtx.tenant_id}/${data.id}/${file.name}`
+  console.log('[assets/upload] uploading to storage:', storagePath)
+
+  const fileBuffer = await file.arrayBuffer()
+  const { error: storageError } = await supabase.storage
+    .from('assets')
+    .upload(storagePath, fileBuffer, {
+      contentType: file.type,
+      upsert: false,
+    })
+
+  if (storageError) {
+    console.error('[assets/upload] storage upload failed:', { message: storageError.message })
+    // Content record was saved — log but don't fail the request
+  } else {
+    console.log('[assets/upload] storage upload success:', storagePath)
+
+    // 3. Update content record with the storage path
+    const { error: updateError } = await supabase
+      .from('content')
+      .update({ storage_path: storagePath })
+      .eq('id', data.id)
+
+    if (updateError) {
+      console.error('[assets/upload] storage_path update failed:', { message: updateError.message })
+    }
   }
 
   console.log('[assets/upload] success, content_id:', data.id)
