@@ -178,16 +178,6 @@ export default function PromptBuilderPage() {
       setUploadedFileName(data.name)
       setUploadedRaw(data.raw)
       setFile(null)
-
-      // Auto-trigger Composer analysis
-      const triggerMsg: ChatMessage = {
-        role: 'user',
-        content: "I've uploaded a document. Please analyze it and suggest the most useful blocks for Sage.",
-        timestamp: Date.now(),
-      }
-      setFileUploading(false)
-      await sendChatMessage([triggerMsg], data.raw)
-      return
     } catch (err) {
       console.error('[handleFileUpload] failed:', err)
       setUploadError('Network error — could not upload file')
@@ -283,7 +273,7 @@ export default function PromptBuilderPage() {
     return { displayText: text, draft: null }
   }
 
-  async function sendChatMessage(messages: ChatMessage[], documentContextOverride?: string) {
+  async function sendChatMessage(messages: ChatMessage[]) {
     setChatLoading(true)
     const placeholderMsg: ChatMessage = { role: 'assistant', content: '', timestamp: Date.now() }
     setChatMessages([...messages, placeholderMsg])
@@ -304,7 +294,7 @@ export default function PromptBuilderPage() {
           content_type: contentType,
           content: raw,
           messages: apiMessages,
-          ...((documentContextOverride ?? uploadedRaw) ? { documentContext: documentContextOverride ?? uploadedRaw } : {}),
+          ...(uploadedRaw ? { documentContext: uploadedRaw } : {}),
         }),
       })
 
