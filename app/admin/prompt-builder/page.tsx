@@ -50,6 +50,17 @@ interface ExistingBlock {
   is_default: boolean
 }
 
+interface DraftCardMeta {
+  blockName: string
+  type: BlockType | ''
+  topicId: string
+  newTopicMode: boolean
+  newTopicName: string
+  isDefault: boolean
+  saveError: string | null
+  isSaving: boolean
+}
+
 const TYPES: { value: BlockType; label: string }[] = [
   { value: 'identity', label: 'Identity & Voice' },
   { value: 'knowledge', label: 'Knowledge' },
@@ -92,10 +103,8 @@ export default function PromptBuilderPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
-  const [draftBlock, setDraftBlock] = useState<DraftBlock | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
-  const [isDefault, setIsDefault] = useState(false)
+  const [draftBlocks, setDraftBlocks] = useState<DraftBlock[]>([])
+  const [draftMetas, setDraftMetas] = useState<DraftCardMeta[]>([])
   const [contentId, setContentId] = useState<string | null>(null)
   const [fileUploading, setFileUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -205,10 +214,8 @@ export default function PromptBuilderPage() {
     setChatMessages([])
     setChatInput('')
     setChatLoading(false)
-    setDraftBlock(null)
-    setBlockName('')
-    setIsDefault(false)
-    setSaveError(null)
+    setDraftBlocks([])
+    setDraftMetas([])
     setContentId(null)
     setFile(null)
     setFileUploading(false)
@@ -319,26 +326,32 @@ export default function PromptBuilderPage() {
     }
   }
 
-  function parseDoneJson(text: string): { displayText: string; draft: DraftBlock | null } {
-    const match = text.match(/\n?\{[\s\S]*?"done"\s*:\s*true[\s\S]*?\}\s*$/)
-    if (!match) return { displayText: text, draft: null }
-    try {
-      const parsed = JSON.parse(match[0].trim())
-      if (parsed.done && parsed.title && parsed.content) {
-        const draft: DraftBlock = { title: parsed.title, content: parsed.content }
-        if (typeof parsed.type === 'string' && VALID_TYPES.has(parsed.type.toLowerCase())) {
-          draft.suggestedType = parsed.type.toLowerCase() as BlockType
-        }
-        if (typeof parsed.topic === 'string' && parsed.topic.trim()) {
-          draft.suggestedTopic = parsed.topic.trim()
-        }
-        return {
-          displayText: text.slice(0, text.length - match[0].length).trim(),
-          draft,
-        }
+  function parseAllDoneJson(text: string): { displayText: string; drafts: DraftBlock[] } {
+    const drafts: DraftBlock[] = []
+    const displayLines: string[] = []
+
+    for (const line of text.split('\n')) {
+      const trimmed = line.trim()
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        try {
+          const parsed = JSON.parse(trimmed)
+          if (parsed.done && parsed.title && parsed.content) {
+            const draft: DraftBlock = { title: parsed.title, content: parsed.content }
+            if (typeof parsed.type === 'string' && VALID_TYPES.has(parsed.type.toLowerCase())) {
+              draft.suggestedType = parsed.type.toLowerCase() as BlockType
+            }
+            if (typeof parsed.topic === 'string' && parsed.topic.trim()) {
+              draft.suggestedTopic = parsed.topic.trim()
+            }
+            drafts.push(draft)
+            continue
+          }
+        } catch { /* not valid JSON — keep as display text */ }
       }
-    } catch { /* not valid JSON yet */ }
-    return { displayText: text, draft: null }
+      displayLines.push(line)
+    }
+
+    return { displayText: displayLines.join('\n').trim(), drafts }
   }
 
   async function sendChatMessage(messages: ChatMessage[], hiddenPrompt?: string) {
@@ -373,30 +386,34 @@ export default function PromptBuilderPage() {
       if (!response.ok) throw new Error(`API error: ${response.status}`)
 
       const finalText = await readDataStream(response, (accumulated) => {
-        const { displayText } = parseDoneJson(accumulated)
+        const { displayText } = parseAllDoneJson(accumulated)
         setChatMessages([...messages, { role: 'assistant', content: displayText, timestamp: placeholderMsg.timestamp }])
       })
 
-      const { displayText, draft } = parseDoneJson(finalText)
+      const { displayText, drafts } = parseAllDoneJson(finalText)
       setChatMessages([...messages, { role: 'assistant', content: displayText, timestamp: placeholderMsg.timestamp }])
-      if (draft) {
-        setDraftBlock(draft)
-        setBlockName(draft.title)
-        if (draft.suggestedType) {
-          setType(draft.suggestedType)
-          // Find matching topic by name within the suggested type
-          if (draft.suggestedTopic) {
-            const matchingTopic = allTopics.find(
-              t => t.type === draft.suggestedType && t.name.toLowerCase() === draft.suggestedTopic!.toLowerCase()
+      if (drafts.length > 0) {
+        setDraftBlocks(drafts)
+        setDraftMetas(drafts.map(d => {
+          const draftType = d.suggestedType ?? ''
+          let resolvedTopicId = ''
+          if (d.suggestedTopic && draftType) {
+            const match = allTopics.find(
+              t => t.type === draftType && t.name.toLowerCase() === d.suggestedTopic!.toLowerCase()
             )
-            if (matchingTopic) {
-              setTopicId(matchingTopic.id)
-            } else {
-              setNewTopicMode(true)
-              setNewTopicName(draft.suggestedTopic)
-            }
+            if (match) resolvedTopicId = match.id
           }
-        }
+          return {
+            blockName: d.title,
+            type: draftType,
+            topicId: resolvedTopicId,
+            newTopicMode: false,
+            newTopicName: '',
+            isDefault: false,
+            saveError: null,
+            isSaving: false,
+          }
+        }))
       }
     } catch (err) {
       console.error('[chat] request failed:', err)
@@ -411,71 +428,93 @@ export default function PromptBuilderPage() {
     if (!text || chatLoading || isAtLimit) return
 
     setChatInput('')
-    setDraftBlock(null)
+    setDraftBlocks([])
+    setDraftMetas([])
     const userMsg: ChatMessage = { role: 'user', content: text, timestamp: Date.now() }
     const updated = [...chatMessages, userMsg]
     await sendChatMessage(updated)
     textareaRef.current?.focus()
   }
 
-  async function handleSaveBlock() {
-    console.log('[handleSaveBlock]', { ownerId, draftBlock, type, topicId })
-    if (!draftBlock || !ownerId) return
+  function updateDraftMeta(index: number, updates: Partial<DraftCardMeta>) {
+    setDraftMetas(prev => prev.map((m, i) => i === index ? { ...m, ...updates } : m))
+  }
+
+  function removeDraft(index: number) {
+    setDraftBlocks(prev => prev.filter((_, i) => i !== index))
+    setDraftMetas(prev => prev.filter((_, i) => i !== index))
+  }
+
+  async function handleSaveBlock(index: number) {
+    const draft = draftBlocks[index]
+    const meta = draftMetas[index]
+    if (!draft || !meta || !ownerId) return
 
     const missing: string[] = []
-    if (!type) missing.push('type')
-    if (!topicId) missing.push('topic')
-    if (!blockName.trim()) missing.push('block name')
+    if (!meta.type) missing.push('type')
+    if (!meta.topicId) missing.push('topic')
+    if (!meta.blockName.trim()) missing.push('block name')
 
     if (missing.length > 0) {
-      setSaveError(`Missing required fields: ${missing.join(', ')}. Open block metadata to set them.`)
+      updateDraftMeta(index, { saveError: `Missing required fields: ${missing.join(', ')}.` })
       return
     }
 
-    setSaveError(null)
-    setIsSaving(true)
+    updateDraftMeta(index, { saveError: null, isSaving: true })
     try {
       const res = await fetch('/api/admin/blocks/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type,
-          topic_id: topicId,
-          title: blockName.trim(),
-          body: draftBlock.content,
+          type: meta.type,
+          topic_id: meta.topicId,
+          title: meta.blockName.trim(),
+          body: draft.content,
           source_id: contentId,
           owner_id: ownerId,
-          is_default: isDefault,
+          is_default: meta.isDefault,
           messages: chatMessages.slice(sessionStartIndex).map(m => ({ role: m.role, content: m.content })),
         }),
       })
 
       if (!res.ok) {
         const data = await res.json().catch(() => null)
-        setSaveError(data?.error ?? 'Failed to save block. Please try again.')
+        updateDraftMeta(index, { saveError: data?.error ?? 'Failed to save block.', isSaving: false })
         return
       }
 
-      // Reset draft and form state, but keep the message thread
-      setDraftBlock(null)
-      setBlockName('')
-      setIsDefault(false)
-      setSaveError(null)
-      setContentId(null)
-      setType('')
-      setTopicId('')
-      setNewTopicMode(false)
-      setNewTopicName('')
+      removeDraft(index)
 
-      // Inject synthetic continuation message and advance session boundary
-      setChatMessages(prev => [...prev, { role: 'assistant', content: 'Block saved! What would you like to build next?', timestamp: Date.now() }])
-      setSessionStartIndex(chatMessages.length + 1)
-      textareaRef.current?.focus()
+      // If all drafts saved, inject continuation message
+      if (draftBlocks.length <= 1) {
+        setChatMessages(prev => [...prev, { role: 'assistant', content: 'Block saved! What would you like to build next?', timestamp: Date.now() }])
+        setSessionStartIndex(chatMessages.length + 1)
+        textareaRef.current?.focus()
+      }
     } catch (err) {
       console.error('[handleSaveBlock] request failed:', err)
-      setSaveError('Network error — could not reach the server.')
-    } finally {
-      setIsSaving(false)
+      updateDraftMeta(index, { saveError: 'Network error — could not reach the server.', isSaving: false })
+    }
+  }
+
+  async function handleConfirmNewTopicForCard(index: number) {
+    const meta = draftMetas[index]
+    if (!meta) return
+    const name = meta.newTopicName.trim()
+    if (!name) return
+
+    try {
+      const res = await fetch('/api/admin/topics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, type: meta.type }),
+      })
+      if (!res.ok) return
+      const newTopic: Topic = await res.json()
+      setAllTopics(prev => [...prev, newTopic])
+      updateDraftMeta(index, { topicId: newTopic.id, newTopicMode: false, newTopicName: '' })
+    } catch (err) {
+      console.error('[confirmNewTopicForCard] failed:', err)
     }
   }
 
@@ -859,106 +898,113 @@ export default function PromptBuilderPage() {
                 </div>
               ))}
 
-              {/* Block confirmation card */}
-              {draftBlock && (
-                <Card variant="outlined">
-                  <Stack gap="sm">
-                    <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Block ready
-                    </Text>
-                    <Text variant="muted" style={{ whiteSpace: 'pre-wrap', fontSize: 'var(--mantine-font-size-sm)', lineHeight: 1.6 }}>
-                      {draftBlock.content}
-                    </Text>
-                    <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
-                      <TextInput
-                        label="Block name"
-                        value={blockName}
-                        onChange={e => setBlockName(e.currentTarget.value)}
-                        placeholder="e.g. Curious Mindset"
-                        size="sm"
-                      />
-                      <Select
-                        label="Type"
-                        placeholder="Select a type..."
-                        data={TYPES}
-                        value={type || null}
-                        onChange={handleTypeChange}
-                        allowDeselect={false}
-                        size="sm"
-                      />
-                      <Stack gap={6}>
-                        {type ? (
-                          topicsLoading ? (
-                            <Text variant="muted" className="text-xs">Loading topics...</Text>
-                          ) : (
-                            <Select
-                              label="Topic"
-                              placeholder="Select a topic..."
-                              data={[
-                                ...filteredTopics.map(t => ({ value: t.id, label: t.name })),
-                                { value: '__new__', label: 'New topic...' },
-                              ]}
-                              value={newTopicMode ? '__new__' : (topicId || null)}
-                              onChange={handleTopicChange}
-                              allowDeselect={false}
-                              size="sm"
-                            />
-                          )
-                        ) : (
-                          <Select label="Topic" placeholder="Select a type first..." data={[]} disabled size="sm" />
-                        )}
-                        {newTopicMode && (
-                          <Group gap="xs" wrap="nowrap">
-                            <TextInput
-                              autoFocus
-                              value={newTopicName}
-                              onChange={e => setNewTopicName(e.currentTarget.value)}
-                              onKeyDown={e => { if (e.key === 'Enter') confirmNewTopic() }}
-                              placeholder="Topic name..."
-                              style={{ flex: 1, minWidth: 0 }}
-                              size="sm"
-                            />
-                            <Button size="sm" variant="primary" onClick={confirmNewTopic} disabled={isCreatingTopic}>
-                              {isCreatingTopic ? '...' : 'Add'}
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={cancelNewTopic} disabled={isCreatingTopic}>
-                              Cancel
-                            </Button>
-                          </Group>
-                        )}
-                      </Stack>
-                    </SimpleGrid>
-                    {isPlatformAdmin && (
-                      <Checkbox
-                        label="Mark as default block"
-                        checked={isDefault}
-                        onChange={(e) => setIsDefault(e.currentTarget.checked)}
-                        size="sm"
-                      />
-                    )}
-                    {saveError && (
-                      <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)', color: 'var(--mantine-color-red-6)' }}>
-                        {saveError}
+              {/* Block confirmation cards */}
+              {draftBlocks.map((draft, cardIndex) => {
+                const meta = draftMetas[cardIndex]
+                if (!meta) return null
+                const cardTopics = allTopics.filter(t => t.type === meta.type)
+                return (
+                  <Card key={cardIndex} variant="outlined">
+                    <Stack gap="sm">
+                      <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Block ready{draftBlocks.length > 1 ? ` (${cardIndex + 1} of ${draftBlocks.length})` : ''}
                       </Text>
-                    )}
-                    <Group gap="xs">
-                      <Button variant="primary" size="sm" onClick={handleSaveBlock} disabled={isSaving}>
-                        {isSaving ? 'Saving...' : 'Save block'}
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => {
-                        setDraftBlock(null)
-                        setSaveError(null)
-                        setChatMessages(prev => [...prev, { role: 'assistant', content: 'Got it — what would you like to change?', timestamp: Date.now() }])
-                      }} disabled={isSaving}>
-                        Keep refining
-                      </Button>
-                    </Group>
-                  </Stack>
-                </Card>
-              )}
+                      <Text variant="muted" style={{ whiteSpace: 'pre-wrap', fontSize: 'var(--mantine-font-size-sm)', lineHeight: 1.6 }}>
+                        {draft.content}
+                      </Text>
+                      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+                        <TextInput
+                          label="Block name"
+                          value={meta.blockName}
+                          onChange={e => updateDraftMeta(cardIndex, { blockName: e.currentTarget.value })}
+                          placeholder="e.g. Curious Mindset"
+                          size="sm"
+                        />
+                        <Select
+                          label="Type"
+                          placeholder="Select a type..."
+                          data={TYPES}
+                          value={meta.type || null}
+                          onChange={v => updateDraftMeta(cardIndex, { type: (v ?? '') as BlockType | '', topicId: '' })}
+                          allowDeselect={false}
+                          size="sm"
+                        />
+                        <Stack gap={6}>
+                          {meta.type ? (
+                            topicsLoading ? (
+                              <Text variant="muted" className="text-xs">Loading topics...</Text>
+                            ) : (
+                              <Select
+                                label="Topic"
+                                placeholder="Select a topic..."
+                                data={[
+                                  ...cardTopics.map(t => ({ value: t.id, label: t.name })),
+                                  { value: '__new__', label: 'New topic...' },
+                                ]}
+                                value={meta.newTopicMode ? '__new__' : (meta.topicId || null)}
+                                onChange={v => {
+                                  if (v === '__new__') {
+                                    updateDraftMeta(cardIndex, { newTopicMode: true, newTopicName: '' })
+                                  } else {
+                                    updateDraftMeta(cardIndex, { newTopicMode: false, topicId: v ?? '' })
+                                  }
+                                }}
+                                allowDeselect={false}
+                                size="sm"
+                              />
+                            )
+                          ) : (
+                            <Select label="Topic" placeholder="Select a type first..." data={[]} disabled size="sm" />
+                          )}
+                          {meta.newTopicMode && (
+                            <Group gap="xs" wrap="nowrap">
+                              <TextInput
+                                autoFocus
+                                value={meta.newTopicName}
+                                onChange={e => updateDraftMeta(cardIndex, { newTopicName: e.currentTarget.value })}
+                                onKeyDown={e => { if (e.key === 'Enter') handleConfirmNewTopicForCard(cardIndex) }}
+                                placeholder="Topic name..."
+                                style={{ flex: 1, minWidth: 0 }}
+                                size="sm"
+                              />
+                              <Button size="sm" variant="primary" onClick={() => handleConfirmNewTopicForCard(cardIndex)}>
+                                Add
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={() => updateDraftMeta(cardIndex, { newTopicMode: false, newTopicName: '' })}>
+                                Cancel
+                              </Button>
+                            </Group>
+                          )}
+                        </Stack>
+                      </SimpleGrid>
+                      {isPlatformAdmin && (
+                        <Checkbox
+                          label="Mark as default block"
+                          checked={meta.isDefault}
+                          onChange={(e) => updateDraftMeta(cardIndex, { isDefault: e.currentTarget.checked })}
+                          size="sm"
+                        />
+                      )}
+                      {meta.saveError && (
+                        <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)', color: 'var(--mantine-color-red-6)' }}>
+                          {meta.saveError}
+                        </Text>
+                      )}
+                      <Group gap="xs">
+                        <Button variant="primary" size="sm" onClick={() => handleSaveBlock(cardIndex)} disabled={meta.isSaving}>
+                          {meta.isSaving ? 'Saving...' : 'Save block'}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => removeDraft(cardIndex)} disabled={meta.isSaving}>
+                          Discard
+                        </Button>
+                      </Group>
+                    </Stack>
+                  </Card>
+                )
+              })}
 
               {/* Exchange limit message */}
-              {isAtLimit && !draftBlock && (
+              {isAtLimit && draftBlocks.length === 0 && (
                 <Card variant="outlined" style={{ borderColor: 'var(--mantine-color-red-2)', backgroundColor: 'var(--mantine-color-red-0)' }}>
                   <Stack gap="xs">
                     <Text variant="label" style={{ color: 'var(--mantine-color-red-7)' }}>
