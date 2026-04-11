@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
-import { PDFParse } from 'pdf-parse'
+import { generateText } from 'ai'
+import { anthropic } from '@ai-sdk/anthropic'
 import mammoth from 'mammoth'
 import { getAdminClient } from '@/lib/supabase-admin'
 
@@ -25,10 +26,28 @@ async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
 
   switch (fileType) {
     case 'pdf': {
-      const parser = new PDFParse({ data: new Uint8Array(buffer) })
-      const result = await parser.getText()
-      await parser.destroy()
-      return result.text
+      const base64 = buffer.toString('base64')
+      const { text } = await generateText({
+        model: anthropic('claude-sonnet-4-6'),
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'file',
+                data: base64,
+                mimeType: 'application/pdf',
+              },
+              {
+                type: 'text',
+                text: 'Extract all text from this document exactly as written. Return only the extracted text with no commentary.',
+              },
+            ],
+          },
+        ],
+        maxTokens: 16000,
+      })
+      return text
     }
     case 'docx': {
       const result = await mammoth.extractRawText({ buffer })
