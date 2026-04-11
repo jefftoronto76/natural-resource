@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // pdf-parse and mammoth use Node.js APIs that must not be bundled
-  serverExternalPackages: ['pdf-parse', 'mammoth'],
+  // mammoth uses Node.js APIs that must not be bundled
+  serverExternalPackages: ['mammoth'],
 
   experimental: {
     // Increase body size limit for file uploads (applies to server actions;
