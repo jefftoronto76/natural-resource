@@ -882,7 +882,19 @@ export default function PromptBuilderPage() {
 
             {/* Chat thread */}
             <div className="mx-auto flex w-full max-w-[800px] flex-col gap-4 px-4 py-4 sm:px-6">
-              {chatMessages.map((msg, i) => (
+              {draftBlocks.length > 0 ? (
+                <Text
+                  variant="muted"
+                  style={{
+                    textAlign: 'center',
+                    padding: 'var(--mantine-spacing-md) 0',
+                    fontFamily: 'var(--mantine-font-family)',
+                  }}
+                >
+                  Here {draftBlocks.length === 1 ? 'is 1 block' : `are ${draftBlocks.length} blocks`} based on your input.
+                </Text>
+              ) : (
+                chatMessages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className="flex max-w-[85%] flex-col gap-1 sm:max-w-[75%]">
                     <div
@@ -919,7 +931,8 @@ export default function PromptBuilderPage() {
                     </span>
                   </div>
                 </div>
-              ))}
+              ))
+              )}
 
               {/* Block confirmation cards */}
               {(() => { console.log('[render] draftBlocks.length:', draftBlocks.length); return null })()}
