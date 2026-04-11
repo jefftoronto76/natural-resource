@@ -54,9 +54,7 @@ interface ExistingBlock {
 interface DraftCardMeta {
   blockName: string
   type: BlockType | ''
-  topicId: string
-  newTopicMode: boolean
-  newTopicName: string
+  topicName: string
   isDefault: boolean
   saveError: string | null
   isSaving: boolean
@@ -422,27 +420,15 @@ export default function PromptBuilderPage() {
       if (drafts.length > 0) {
         setDraftBlocks(drafts)
         console.log('[setDraftBlocks] drafts:', JSON.stringify(drafts.map(d => ({ title: d.title, type: d.suggestedType }))))
-        setDraftMetas(drafts.map(d => {
-          const draftType = d.suggestedType ?? ''
-          let resolvedTopicId = ''
-          if (d.suggestedTopic && draftType) {
-            const match = allTopics.find(
-              t => t.type === draftType && t.name.toLowerCase() === d.suggestedTopic!.toLowerCase()
-            )
-            if (match) resolvedTopicId = match.id
-          }
-          return {
-            blockName: d.title,
-            type: draftType,
-            topicId: resolvedTopicId,
-            newTopicMode: false,
-            newTopicName: '',
-            isDefault: false,
-            saveError: null,
-            isSaving: false,
-            warning: d.warning ?? null,
-          }
-        }))
+        setDraftMetas(drafts.map(d => ({
+          blockName: d.title,
+          type: d.suggestedType ?? '',
+          topicName: d.suggestedTopic ?? '',
+          isDefault: false,
+          saveError: null,
+          isSaving: false,
+          warning: d.warning ?? null,
+        })))
       }
     } catch (err) {
       console.error('[chat] request failed:', err)
@@ -481,7 +467,6 @@ export default function PromptBuilderPage() {
 
     const missing: string[] = []
     if (!meta.type) missing.push('type')
-    if (!meta.topicId) missing.push('topic')
     if (!meta.blockName.trim()) missing.push('block name')
 
     if (missing.length > 0) {
@@ -491,12 +476,34 @@ export default function PromptBuilderPage() {
 
     updateDraftMeta(index, { saveError: null, isSaving: true })
     try {
+      // Resolve topic: find existing or create new
+      let topicId = ''
+      if (meta.topicName.trim() && meta.type) {
+        const existing = allTopics.find(
+          t => t.type === meta.type && t.name.toLowerCase() === meta.topicName.trim().toLowerCase()
+        )
+        if (existing) {
+          topicId = existing.id
+        } else {
+          const topicRes = await fetch('/api/admin/topics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: meta.topicName.trim(), type: meta.type }),
+          })
+          if (topicRes.ok) {
+            const newTopic: Topic = await topicRes.json()
+            setAllTopics(prev => [...prev, newTopic])
+            topicId = newTopic.id
+          }
+        }
+      }
+
       const res = await fetch('/api/admin/blocks/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: meta.type,
-          topic_id: meta.topicId,
+          topic_id: topicId || null,
           title: meta.blockName.trim(),
           body: draft.content,
           source_id: contentId,
@@ -526,26 +533,6 @@ export default function PromptBuilderPage() {
     }
   }
 
-  async function handleConfirmNewTopicForCard(index: number) {
-    const meta = draftMetas[index]
-    if (!meta) return
-    const name = meta.newTopicName.trim()
-    if (!name) return
-
-    try {
-      const res = await fetch('/api/admin/topics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, type: meta.type }),
-      })
-      if (!res.ok) return
-      const newTopic: Topic = await res.json()
-      setAllTopics(prev => [...prev, newTopic])
-      updateDraftMeta(index, { topicId: newTopic.id, newTopicMode: false, newTopicName: '' })
-    } catch (err) {
-      console.error('[confirmNewTopicForCard] failed:', err)
-    }
-  }
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
@@ -945,7 +932,6 @@ export default function PromptBuilderPage() {
               {draftBlocks.map((draft, cardIndex) => {
                 const meta = draftMetas[cardIndex]
                 if (!meta) return null
-                const cardTopics = allTopics.filter(t => t.type === meta.type)
                 return (
                   <Card key={cardIndex} variant="outlined">
                     <Stack gap="sm">
@@ -968,57 +954,17 @@ export default function PromptBuilderPage() {
                           placeholder="Select a type..."
                           data={TYPES}
                           value={meta.type || null}
-                          onChange={v => updateDraftMeta(cardIndex, { type: (v ?? '') as BlockType | '', topicId: '' })}
+                          onChange={v => updateDraftMeta(cardIndex, { type: (v ?? '') as BlockType | '' })}
                           allowDeselect={false}
                           size="sm"
                         />
-                        <Stack gap={6}>
-                          {meta.type ? (
-                            topicsLoading ? (
-                              <Text variant="muted" className="text-xs">Loading topics...</Text>
-                            ) : (
-                              <Select
-                                label="Topic"
-                                placeholder="Select a topic..."
-                                data={[
-                                  ...cardTopics.map(t => ({ value: t.id, label: t.name })),
-                                  { value: '__new__', label: 'New topic...' },
-                                ]}
-                                value={meta.newTopicMode ? '__new__' : (meta.topicId || null)}
-                                onChange={v => {
-                                  if (v === '__new__') {
-                                    updateDraftMeta(cardIndex, { newTopicMode: true, newTopicName: '' })
-                                  } else {
-                                    updateDraftMeta(cardIndex, { newTopicMode: false, topicId: v ?? '' })
-                                  }
-                                }}
-                                allowDeselect={false}
-                                size="sm"
-                              />
-                            )
-                          ) : (
-                            <Select label="Topic" placeholder="Select a type first..." data={[]} disabled size="sm" />
-                          )}
-                          {meta.newTopicMode && (
-                            <Group gap="xs" wrap="nowrap">
-                              <TextInput
-                                autoFocus
-                                value={meta.newTopicName}
-                                onChange={e => updateDraftMeta(cardIndex, { newTopicName: e.currentTarget.value })}
-                                onKeyDown={e => { if (e.key === 'Enter') handleConfirmNewTopicForCard(cardIndex) }}
-                                placeholder="Topic name..."
-                                style={{ flex: 1, minWidth: 0 }}
-                                size="sm"
-                              />
-                              <Button size="sm" variant="primary" onClick={() => handleConfirmNewTopicForCard(cardIndex)}>
-                                Add
-                              </Button>
-                              <Button size="sm" variant="ghost" onClick={() => updateDraftMeta(cardIndex, { newTopicMode: false, newTopicName: '' })}>
-                                Cancel
-                              </Button>
-                            </Group>
-                          )}
-                        </Stack>
+                        <TextInput
+                          label="Topic"
+                          value={meta.topicName}
+                          onChange={e => updateDraftMeta(cardIndex, { topicName: e.currentTarget.value })}
+                          placeholder="e.g. About, Services..."
+                          size="sm"
+                        />
                       </SimpleGrid>
                       {isPlatformAdmin && (
                         <Checkbox
