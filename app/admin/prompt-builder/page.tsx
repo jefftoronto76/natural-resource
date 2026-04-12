@@ -389,10 +389,11 @@ export default function PromptBuilderPage() {
     }
 
     // Extract closing message — text after the last matched JSON object.
+    // Strip leading markdown artifacts (backticks, dashes, whitespace).
     let closingMessage: string | null = null
     if (matched.length > 0) {
       const lastEnd = matched[matched.length - 1].end
-      const trailing = text.slice(lastEnd).trim()
+      const trailing = text.slice(lastEnd).replace(/^[\s`\-]+/, '').trim()
       closingMessage = trailing.length > 0 ? trailing : null
     }
 
