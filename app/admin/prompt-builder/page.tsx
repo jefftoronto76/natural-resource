@@ -1037,6 +1037,27 @@ export default function PromptBuilderPage() {
                 )
               })}
 
+              {/* AI closing message — shown below the last card when drafts exist */}
+              {draftBlocks.length > 0 && (() => {
+                const lastAssistant = [...chatMessages].reverse().find(m => m.role === 'assistant')
+                const closing = lastAssistant?.content.trim()
+                if (!closing) return null
+                return (
+                  <Text
+                    variant="muted"
+                    style={{
+                      textAlign: 'center',
+                      padding: 'var(--mantine-spacing-sm) var(--mantine-spacing-md)',
+                      fontFamily: 'var(--mantine-font-family)',
+                      fontSize: 'var(--mantine-font-size-sm)',
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {closing}
+                  </Text>
+                )
+              })()}
+
               {/* Exchange limit message */}
               {isAtLimit && draftBlocks.length === 0 && (
                 <Card variant="outlined" style={{ borderColor: 'var(--mantine-color-red-2)', backgroundColor: 'var(--mantine-color-red-0)' }}>
