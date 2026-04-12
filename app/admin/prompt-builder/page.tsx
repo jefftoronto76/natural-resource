@@ -105,6 +105,7 @@ export default function PromptBuilderPage() {
   const [chatLoading, setChatLoading] = useState(false)
   const [draftBlocks, setDraftBlocks] = useState<DraftBlock[]>([])
   const [draftMetas, setDraftMetas] = useState<DraftCardMeta[]>([])
+  const [closingMessage, setClosingMessage] = useState<string | null>(null)
   const [contentId, setContentId] = useState<string | null>(null)
   const [fileUploading, setFileUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -216,6 +217,7 @@ export default function PromptBuilderPage() {
     setChatLoading(false)
     setDraftBlocks([])
     setDraftMetas([])
+    setClosingMessage(null)
     setContentId(null)
     setFile(null)
     setFileUploading(false)
@@ -326,7 +328,7 @@ export default function PromptBuilderPage() {
     }
   }
 
-  function parseAllDoneJson(text: string): { displayText: string; drafts: DraftBlock[] } {
+  function parseAllDoneJson(text: string): { displayText: string; drafts: DraftBlock[]; closingMessage: string | null } {
     const drafts: DraftBlock[] = []
     let displayText = text
 
@@ -370,16 +372,25 @@ export default function PromptBuilderPage() {
       } catch { /* not valid JSON — skip */ }
     }
 
+    // Extract closing message — text after the last matched JSON object.
+    let closingMessage: string | null = null
+    if (matched.length > 0) {
+      const lastEnd = matched[matched.length - 1].end
+      const trailing = text.slice(lastEnd).trim()
+      closingMessage = trailing.length > 0 ? trailing : null
+    }
+
     // Strip matched JSON from display text (reverse order to preserve indices)
     for (let i = matched.length - 1; i >= 0; i--) {
       displayText = displayText.slice(0, matched[i].start) + displayText.slice(matched[i].end)
     }
 
-    return { displayText: displayText.trim(), drafts }
+    return { displayText: displayText.trim(), drafts, closingMessage }
   }
 
   async function sendChatMessage(messages: ChatMessage[], hiddenPrompt?: string) {
     setChatLoading(true)
+    setClosingMessage(null)
     const placeholderMsg: ChatMessage = { role: 'assistant', content: '', timestamp: Date.now() }
     setChatMessages([...messages, placeholderMsg])
 
@@ -414,9 +425,10 @@ export default function PromptBuilderPage() {
         setChatMessages([...messages, { role: 'assistant', content: displayText, timestamp: placeholderMsg.timestamp }])
       })
 
-      const { displayText, drafts } = parseAllDoneJson(finalText)
+      const { displayText, drafts, closingMessage: parsedClosing } = parseAllDoneJson(finalText)
       console.log('[parseAllDoneJson] finalText length:', finalText.length, 'drafts found:', drafts.length, 'finalText tail:', finalText.slice(-300))
       setChatMessages([...messages, { role: 'assistant', content: displayText, timestamp: placeholderMsg.timestamp }])
+      setClosingMessage(parsedClosing)
       if (drafts.length > 0) {
         setDraftBlocks(drafts)
         console.log('[setDraftBlocks] drafts:', JSON.stringify(drafts.map(d => ({ title: d.title, type: d.suggestedType }))))
@@ -445,6 +457,7 @@ export default function PromptBuilderPage() {
     setChatInput('')
     setDraftBlocks([])
     setDraftMetas([])
+    setClosingMessage(null)
     const userMsg: ChatMessage = { role: 'user', content: text, timestamp: Date.now() }
     const updated = [...chatMessages, userMsg]
     await sendChatMessage(updated)
@@ -1038,25 +1051,20 @@ export default function PromptBuilderPage() {
               })}
 
               {/* AI closing message — shown below the last card when drafts exist */}
-              {draftBlocks.length > 0 && (() => {
-                const lastAssistant = [...chatMessages].reverse().find(m => m.role === 'assistant')
-                const closing = lastAssistant?.content.trim()
-                if (!closing) return null
-                return (
-                  <Text
-                    variant="muted"
-                    style={{
-                      textAlign: 'center',
-                      padding: 'var(--mantine-spacing-sm) var(--mantine-spacing-md)',
-                      fontFamily: 'var(--mantine-font-family)',
-                      fontSize: 'var(--mantine-font-size-sm)',
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    {closing}
-                  </Text>
-                )
-              })()}
+              {draftBlocks.length > 0 && closingMessage && (
+                <Text
+                  variant="muted"
+                  style={{
+                    textAlign: 'center',
+                    padding: 'var(--mantine-spacing-sm) var(--mantine-spacing-md)',
+                    fontFamily: 'var(--mantine-font-family)',
+                    fontSize: 'var(--mantine-font-size-sm)',
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {closingMessage}
+                </Text>
+              )}
 
               {/* Exchange limit message */}
               {isAtLimit && draftBlocks.length === 0 && (
