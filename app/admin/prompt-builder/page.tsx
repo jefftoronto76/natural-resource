@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu, Progress, Skeleton } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu, Progress, Skeleton, Alert } from '@mantine/core'
 import {
   IconFile,
   IconBrandGoogleDrive,
@@ -1011,6 +1011,13 @@ export default function PromptBuilderPage() {
                       <Text variant="muted" style={{ whiteSpace: 'pre-wrap', fontSize: 'var(--mantine-font-size-sm)', lineHeight: 1.6 }}>
                         {draft.content}
                       </Text>
+                      {meta.warning && (
+                        <Alert color="yellow" variant="light" radius="sm" p="sm">
+                          <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', color: 'var(--mantine-color-yellow-9)' }}>
+                            {meta.warning}
+                          </Text>
+                        </Alert>
+                      )}
                       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
                         <TextInput
                           label="Block name"
@@ -1043,11 +1050,6 @@ export default function PromptBuilderPage() {
                           onChange={(e) => updateDraftMeta(cardIndex, { isDefault: e.currentTarget.checked })}
                           size="sm"
                         />
-                      )}
-                      {meta.warning && (
-                        <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', color: 'var(--mantine-color-yellow-7)' }}>
-                          {meta.warning}
-                        </Text>
                       )}
                       {meta.saveError && (
                         <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)', color: 'var(--mantine-color-red-6)' }}>

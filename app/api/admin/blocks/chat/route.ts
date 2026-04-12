@@ -50,6 +50,7 @@ Your process:
 4. Refine based on feedback, then commit to a final version.
 5. For each block you draft, output the block prose followed immediately by its JSON object on the next line. One JSON object per block, output immediately when drafted — do not wait for confirmation.
 {"done":true,"title":"[block title]","content":"[full block text]","type":"[suggested type]","topic":"[suggested topic]"}
+When relevant, include an optional "warning" field with one concise sentence describing an issue the owner should know about — for example: overlap with an existing block, missing context, or a potential conflict. Format: {"done":true,"title":"...","content":"...","type":"...","topic":"...","warning":"One concise sentence describing the issue."}. Omit the field entirely if no warning applies.
 6. After the last JSON object, output a closing message of 30 words or fewer. Confirm what was built and invite the owner to save, edit, or ask for changes. Do not repeat or summarize block content. Conversational, not formal.
 
 Rules:
