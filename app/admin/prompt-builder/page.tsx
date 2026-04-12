@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu, Progress } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu, Progress, Skeleton } from '@mantine/core'
 import {
   IconFile,
   IconBrandGoogleDrive,
@@ -886,6 +886,47 @@ export default function PromptBuilderPage() {
                 >
                   Here {draftBlocks.length === 1 ? 'is 1 block' : `are ${draftBlocks.length} blocks`} based on your input.
                 </Text>
+              ) : chatLoading && chatMessages.some(m => m.role === 'user') ? (
+                <>
+                  <Text
+                    variant="muted"
+                    style={{
+                      textAlign: 'center',
+                      padding: 'var(--mantine-spacing-sm) 0',
+                      fontFamily: 'var(--mantine-font-family)',
+                    }}
+                  >
+                    Drafting blocks...
+                  </Text>
+                  {[0, 1, 2].map(i => (
+                    <Card key={`skeleton-${i}`} variant="outlined">
+                      <Stack gap="sm">
+                        <Skeleton height={10} width={90} radius="sm" />
+                        <Skeleton height={14} radius="sm" />
+                        <Skeleton height={14} width="85%" radius="sm" />
+                        <Skeleton height={14} width="70%" radius="sm" />
+                        <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+                          <Stack gap={4}>
+                            <Skeleton height={10} width={60} radius="sm" />
+                            <Skeleton height={36} radius="sm" />
+                          </Stack>
+                          <Stack gap={4}>
+                            <Skeleton height={10} width={40} radius="sm" />
+                            <Skeleton height={36} radius="sm" />
+                          </Stack>
+                          <Stack gap={4}>
+                            <Skeleton height={10} width={50} radius="sm" />
+                            <Skeleton height={36} radius="sm" />
+                          </Stack>
+                        </SimpleGrid>
+                        <Group gap="xs">
+                          <Skeleton height={32} width={100} radius="sm" />
+                          <Skeleton height={32} width={80} radius="sm" />
+                        </Group>
+                      </Stack>
+                    </Card>
+                  ))}
+                </>
               ) : (
                 chatMessages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -928,7 +969,6 @@ export default function PromptBuilderPage() {
               )}
 
               {/* Block confirmation cards */}
-              {(() => { console.log('[render] draftBlocks.length:', draftBlocks.length); return null })()}
               {draftBlocks.map((draft, cardIndex) => {
                 const meta = draftMetas[cardIndex]
                 if (!meta) return null
