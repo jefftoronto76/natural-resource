@@ -106,6 +106,7 @@ export default function PromptBuilderPage() {
   const [draftBlocks, setDraftBlocks] = useState<DraftBlock[]>([])
   const [draftMetas, setDraftMetas] = useState<DraftCardMeta[]>([])
   const [closingMessage, setClosingMessage] = useState<string | null>(null)
+  const [loadingStatusIndex, setLoadingStatusIndex] = useState(0)
   const [contentId, setContentId] = useState<string | null>(null)
   const [fileUploading, setFileUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -171,6 +172,21 @@ export default function PromptBuilderPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMessages, chatLoading])
+
+  // Cycle through timed status messages while loading skeleton cards.
+  // Stays on the last message once reached. Resets when loading stops.
+  useEffect(() => {
+    if (!chatLoading) {
+      setLoadingStatusIndex(0)
+      return
+    }
+    const t1 = setTimeout(() => setLoadingStatusIndex(1), 4000)
+    const t2 = setTimeout(() => setLoadingStatusIndex(2), 8000)
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+    }
+  }, [chatLoading])
 
   // Auto-trigger Composer after a successful upload.
   // Runs in a fresh render cycle so all upload state (uploadedRaw, file=null,
@@ -909,9 +925,9 @@ export default function PromptBuilderPage() {
                       fontFamily: 'var(--mantine-font-family)',
                     }}
                   >
-                    Drafting blocks...
+                    {['Reviewing supplied content...', 'Analyzing block options...', 'Creating blocks...'][loadingStatusIndex]}
                   </Text>
-                  {[0, 1, 2].map(i => (
+                  {[0, 1].map(i => (
                     <Card key={`skeleton-${i}`} variant="outlined">
                       <Stack gap="sm">
                         <Skeleton height={10} width={90} radius="sm" />
