@@ -69,6 +69,18 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const allSelected = items.length > 0 && selectedCount === items.length
   const someSelected = selectedCount > 0 && selectedCount < items.length
 
+  // Order number within type group — sequential per type in current render order.
+  // Walks items in place so disable/delete mutations renumber gaps automatically.
+  const orderMap = new Map<string, number>()
+  {
+    const counters = new Map<string, number>()
+    for (const b of items) {
+      const next = (counters.get(b.type) ?? 0) + 1
+      counters.set(b.type, next)
+      orderMap.set(b.id, next)
+    }
+  }
+
   function toggleSelect(id: string) {
     setSelectedIds(prev => {
       const next = new Set(prev)
@@ -283,7 +295,18 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                       />
                     </Table.Td>
                     <Table.Td>
-                      <Text variant="label">{block.title}</Text>
+                      <Group gap="xs" wrap="nowrap">
+                        <Text
+                          variant="muted"
+                          style={{
+                            fontFamily: 'var(--mantine-font-family-monospace)',
+                            fontSize: 'var(--mantine-font-size-xs)',
+                          }}
+                        >
+                          #{orderMap.get(block.id) ?? ''}
+                        </Text>
+                        <Text variant="label">{block.title}</Text>
+                      </Group>
                     </Table.Td>
                     <Table.Td>
                       <Badge
@@ -420,7 +443,18 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                   {block.status === 'active' ? 'Active' : 'Disabled'}
                 </Badge>
               </Group>
-              <Text variant="label" style={{ marginTop: 4 }}>{block.title}</Text>
+              <Group gap="xs" wrap="nowrap" style={{ marginTop: 4 }}>
+                <Text
+                  variant="muted"
+                  style={{
+                    fontFamily: 'var(--mantine-font-family-monospace)',
+                    fontSize: 'var(--mantine-font-size-xs)',
+                  }}
+                >
+                  #{orderMap.get(block.id) ?? ''}
+                </Text>
+                <Text variant="label">{block.title}</Text>
+              </Group>
               <Text variant="muted">{block.topics?.name ?? '—'}</Text>
               {isEditing ? (
                 <Stack gap="sm" mt="sm">
