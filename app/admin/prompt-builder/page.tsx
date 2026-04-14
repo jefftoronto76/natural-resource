@@ -213,7 +213,14 @@ export default function PromptBuilderPage() {
       return
     }
     const trigger = choice === 'summarize'
-      ? 'The owner wants a plain-language summary of their current prompt. Based on the existing blocks listed above, write a concise summary (3-5 sentences) of what Sage is currently configured to do. Do NOT output the done JSON. Do NOT draft any new blocks.'
+      ? `The owner wants a deep summary of their current prompt. Based on the existing blocks listed above, produce an analysis that covers:
+
+1. Coverage — list which block types are represented (identity, knowledge, guardrail, process, escalation) and summarize what each covers in plain language.
+2. Gaps — identify what's missing or has weak coverage. Which block types are absent, and what areas need more depth?
+3. Overlaps and conflicts — flag any blocks that duplicate each other, contradict each other, or create ambiguity.
+4. Next builds — suggest 2-3 specific blocks the owner should build next to strengthen the prompt.
+
+Do NOT output the done JSON. Do NOT draft any new blocks. This is analysis only.`
       : 'The owner wants to know how to improve their current prompt. Based on the existing blocks listed above, identify gaps (missing block types, weak coverage, potential conflicts) and suggest 2-3 specific improvements. Do NOT output the done JSON. Do NOT draft any new blocks.'
     sendChatMessage([], trigger)
   }
