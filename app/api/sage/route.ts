@@ -2,17 +2,36 @@ import { streamText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { DEFAULT_SYSTEM_PROMPT } from '@/lib/sage-prompt'
+import { getTenantFromRequest } from '@/lib/get-tenant-from-request'
 
-async function getSystemPrompt(): Promise<string> {
+async function getSystemPrompt(tenantId: string | null): Promise<string> {
+  if (!tenantId) {
+    console.log('[sage/route] no tenant_id — using DEFAULT_SYSTEM_PROMPT')
+    return DEFAULT_SYSTEM_PROMPT
+  }
   try {
-    const { data } = await getAdminClient()
+    const { data, error } = await getAdminClient()
       .from('master_prompt')
       .select('content')
+      .eq('tenant_id', tenantId)
       .order('version', { ascending: false })
       .limit(1)
       .maybeSingle()
-    return data?.content || DEFAULT_SYSTEM_PROMPT
-  } catch {
+
+    if (error) {
+      console.error('[sage/route] master_prompt query failed:', error.message)
+      return DEFAULT_SYSTEM_PROMPT
+    }
+
+    if (!data?.content) {
+      console.log('[sage/route] no master_prompt row for tenant_id:', tenantId, '— falling back to DEFAULT_SYSTEM_PROMPT')
+      return DEFAULT_SYSTEM_PROMPT
+    }
+
+    console.log('[sage/route] using master_prompt for tenant_id:', tenantId)
+    return data.content
+  } catch (err) {
+    console.error('[sage/route] master_prompt query threw:', err instanceof Error ? err.message : err)
     return DEFAULT_SYSTEM_PROMPT
   }
 }
@@ -22,6 +41,9 @@ export async function POST(req: Request) {
   if (!apiKey) {
     return new Response('ANTHROPIC_API_KEY is not configured', { status: 500 })
   }
+
+  const tenantId = await getTenantFromRequest(req)
+  console.log('[sage/route] resolved tenant_id:', tenantId)
 
   let body: { messages: { role: string; content: string }[] }
   try {
@@ -54,7 +76,7 @@ export async function POST(req: Request) {
     }
   }
 
-  const systemPrompt = await getSystemPrompt()
+  const systemPrompt = await getSystemPrompt(tenantId)
 
   try {
     const result = await streamText({
