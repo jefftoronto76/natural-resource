@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu, Progress, Skeleton, Alert, Button as MantineButton } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu, Progress, Skeleton, Alert, Button as MantineButton, Tooltip } from '@mantine/core'
 import {
   IconFile,
   IconBrandGoogleDrive,
@@ -212,16 +212,18 @@ export default function PromptBuilderPage() {
       textareaRef.current?.focus()
       return
     }
-    const trigger = choice === 'summarize'
-      ? `The owner wants a deep summary of their current prompt. Based on the existing blocks listed above, produce an analysis that covers:
-
-1. Coverage — list which block types are represented (identity, knowledge, guardrail, process, escalation) and summarize what each covers in plain language.
-2. Gaps — identify what's missing or has weak coverage. Which block types are absent, and what areas need more depth?
-3. Overlaps and conflicts — flag any blocks that duplicate each other, contradict each other, or create ambiguity.
-4. Next builds — suggest 2-3 specific blocks the owner should build next to strengthen the prompt.
-
-Do NOT output the done JSON. Do NOT draft any new blocks. This is analysis only.`
-      : 'The owner wants to know how to improve their current prompt. Based on the existing blocks listed above, identify gaps (missing block types, weak coverage, potential conflicts) and suggest 2-3 specific improvements. Do NOT output the done JSON. Do NOT draft any new blocks.'
+    let trigger: string
+    if (choice === 'summarize') {
+      const hasCustom = existingBlocks.some(b => !b.is_default)
+      if (hasCustom) {
+        const types = [...new Set(existingBlocks.map(b => b.type))]
+        trigger = `The owner has ${existingBlocks.length} existing blocks covering: ${types.join(', ')}. Write a short opening message summarizing what's covered, identifying any missing block types, and suggesting what to build next. Do NOT output the done JSON. Do NOT draft any new blocks.`
+      } else {
+        trigger = 'The owner only has default starter blocks — no custom blocks yet. Write a short opening message acknowledging the foundation is set and suggesting they customize or add blocks specific to their business. Do NOT output the done JSON. Do NOT draft any new blocks.'
+      }
+    } else {
+      trigger = 'The owner wants to know how to improve their current prompt. Based on the existing blocks listed above, identify gaps (missing block types, weak coverage, potential conflicts) and suggest 2-3 specific improvements. Do NOT output the done JSON. Do NOT draft any new blocks.'
+    }
     sendChatMessage([], trigger)
   }
 
@@ -862,24 +864,46 @@ Do NOT output the done JSON. Do NOT draft any new blocks. This is analysis only.
                 Welcome back{clerkUser?.firstName ? `, ${clerkUser.firstName}` : ''}.
               </p>
               <Stack gap="xs" style={{ width: '100%', maxWidth: 400, marginBottom: 24 }}>
-                <MantineButton
-                  variant="light"
-                  color="green"
-                  size="md"
-                  fullWidth
-                  onClick={() => handleOpeningChoice('summarize')}
+                <Tooltip
+                  label="Add blocks first to use this option."
+                  disabled={existingBlocks.length > 0}
+                  events={{ hover: true, focus: true, touch: true }}
                 >
-                  Summarize my prompt
-                </MantineButton>
-                <MantineButton
-                  variant="light"
-                  color="green"
-                  size="md"
-                  fullWidth
-                  onClick={() => handleOpeningChoice('opportunities')}
+                  <MantineButton
+                    variant="light"
+                    color="green"
+                    size="md"
+                    fullWidth
+                    disabled={existingBlocks.length === 0}
+                    data-disabled={existingBlocks.length === 0 || undefined}
+                    onClick={(e) => {
+                      if (existingBlocks.length === 0) { e.preventDefault(); return }
+                      handleOpeningChoice('summarize')
+                    }}
+                  >
+                    Summarize my prompt
+                  </MantineButton>
+                </Tooltip>
+                <Tooltip
+                  label="Add blocks first to use this option."
+                  disabled={existingBlocks.length > 0}
+                  events={{ hover: true, focus: true, touch: true }}
                 >
-                  Identify opportunities to improve
-                </MantineButton>
+                  <MantineButton
+                    variant="light"
+                    color="green"
+                    size="md"
+                    fullWidth
+                    disabled={existingBlocks.length === 0}
+                    data-disabled={existingBlocks.length === 0 || undefined}
+                    onClick={(e) => {
+                      if (existingBlocks.length === 0) { e.preventDefault(); return }
+                      handleOpeningChoice('opportunities')
+                    }}
+                  >
+                    Identify opportunities to improve
+                  </MantineButton>
+                </Tooltip>
                 <MantineButton
                   variant="light"
                   color="green"
