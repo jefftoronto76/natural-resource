@@ -14,6 +14,7 @@ import {
   Textarea,
   Modal,
   Button,
+  Checkbox,
 } from '@mantine/core'
 import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { Text } from '@/components/admin/primitives/Text'
@@ -59,6 +60,78 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const [savingId, setSavingId] = useState<string | null>(null)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkInFlight, setBulkInFlight] = useState(false)
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+
+  const selectedCount = selectedIds.size
+  const allSelected = items.length > 0 && selectedCount === items.length
+  const someSelected = selectedCount > 0 && selectedCount < items.length
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === items.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(items.map(b => b.id)))
+    }
+  }
+
+  async function handleBulkStatusChange(value: string | null) {
+    if (value !== 'active' && value !== 'disabled') return
+    const ids = Array.from(selectedIds)
+    console.log('[BlocksTable] bulk status change:', { count: ids.length, status: value })
+    setBulkInFlight(true)
+    const succeeded: string[] = []
+    for (const id of ids) {
+      console.log('[BlocksTable] bulk PATCH dispatch:', { id, status: value })
+      const ok = await patchBlock(id, { status: value })
+      if (ok) {
+        console.log('[BlocksTable] bulk PATCH success:', { id, status: value })
+        succeeded.push(id)
+      } else {
+        console.error('[BlocksTable] bulk PATCH failure:', { id, status: value })
+      }
+    }
+    if (succeeded.length > 0) {
+      const updatedSet = new Set(succeeded)
+      setItems(prev => prev.map(b => (updatedSet.has(b.id) ? { ...b, status: value } : b)))
+    }
+    setSelectedIds(new Set())
+    setBulkInFlight(false)
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds)
+    console.log('[BlocksTable] bulk delete:', { count: ids.length })
+    setBulkInFlight(true)
+    const succeeded: string[] = []
+    for (const id of ids) {
+      console.log('[BlocksTable] bulk DELETE dispatch:', { id })
+      const ok = await patchBlock(id, { status: 'deleted' })
+      if (ok) {
+        console.log('[BlocksTable] bulk DELETE success:', { id })
+        succeeded.push(id)
+      } else {
+        console.error('[BlocksTable] bulk DELETE failure:', { id })
+      }
+    }
+    if (succeeded.length > 0) {
+      const removedSet = new Set(succeeded)
+      setItems(prev => prev.filter(b => !removedSet.has(b.id)))
+    }
+    setSelectedIds(new Set())
+    setBulkInFlight(false)
+    setBulkDeleteOpen(false)
+  }
 
   async function patchBlock(id: string, updates: { status?: BlockStatus; body?: string }): Promise<boolean> {
     try {
@@ -126,11 +199,58 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
 
   return (
     <>
+      {/* Bulk action bar */}
+      {selectedCount > 0 && (
+        <Paper
+          p="sm"
+          mb="md"
+          radius="sm"
+          withBorder
+          style={{ backgroundColor: 'var(--mantine-color-gray-0)' }}
+        >
+          <Group gap="sm" wrap="nowrap">
+            <Text variant="label" style={{ flex: 1, minWidth: 0 }}>
+              {selectedCount} selected
+            </Text>
+            <Select
+              data={STATUS_OPTIONS}
+              placeholder="Set status..."
+              value={null}
+              onChange={handleBulkStatusChange}
+              size="xs"
+              allowDeselect={false}
+              disabled={bulkInFlight}
+              style={{ width: 140 }}
+              aria-label="Bulk status"
+            />
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              size="md"
+              onClick={() => setBulkDeleteOpen(true)}
+              disabled={bulkInFlight}
+              aria-label="Delete selected"
+            >
+              <IconTrash size={16} />
+            </ActionIcon>
+          </Group>
+        </Paper>
+      )}
+
       {/* Desktop: Table */}
       <Box visibleFrom="md">
         <Table striped highlightOnHover verticalSpacing="sm">
           <Table.Thead>
             <Table.Tr>
+              <Table.Th style={{ width: 40 }}>
+                <Checkbox
+                  checked={allSelected}
+                  indeterminate={someSelected}
+                  onChange={toggleSelectAll}
+                  disabled={bulkInFlight}
+                  aria-label="Select all blocks"
+                />
+              </Table.Th>
               <Table.Th>Title</Table.Th>
               <Table.Th>Type</Table.Th>
               <Table.Th>Topic</Table.Th>
@@ -145,6 +265,14 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
               return (
                 <Fragment key={block.id}>
                   <Table.Tr>
+                    <Table.Td>
+                      <Checkbox
+                        checked={selectedIds.has(block.id)}
+                        onChange={() => toggleSelect(block.id)}
+                        disabled={bulkInFlight}
+                        aria-label={`Select ${block.title}`}
+                      />
+                    </Table.Td>
                     <Table.Td>
                       <Text variant="label">{block.title}</Text>
                     </Table.Td>
@@ -208,7 +336,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                   </Table.Tr>
                   {isEditing && (
                     <Table.Tr>
-                      <Table.Td colSpan={5}>
+                      <Table.Td colSpan={6}>
                         <Stack gap="sm" p="sm">
                           <Textarea
                             value={editBody}
@@ -257,14 +385,23 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
           return (
             <Paper key={block.id} p="md" withBorder radius="sm">
               <Group justify="space-between" mb={4} wrap="nowrap">
-                <Badge
-                  variant="light"
-                  color={TYPE_COLORS[block.type] ?? 'gray'}
-                  size="sm"
-                  radius="sm"
-                >
-                  {TYPE_LABELS[block.type] ?? block.type}
-                </Badge>
+                <Group gap="xs" wrap="nowrap">
+                  <Checkbox
+                    checked={selectedIds.has(block.id)}
+                    onChange={() => toggleSelect(block.id)}
+                    disabled={bulkInFlight}
+                    aria-label={`Select ${block.title}`}
+                    size="sm"
+                  />
+                  <Badge
+                    variant="light"
+                    color={TYPE_COLORS[block.type] ?? 'gray'}
+                    size="sm"
+                    radius="sm"
+                  >
+                    {TYPE_LABELS[block.type] ?? block.type}
+                  </Badge>
+                </Group>
                 <Badge
                   variant="light"
                   color={block.status === 'active' ? 'green' : 'gray'}
@@ -374,6 +511,41 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
               size="sm"
               onClick={handleConfirmDelete}
               loading={deleting}
+            >
+              Delete
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Bulk delete confirmation modal */}
+      <Modal
+        opened={bulkDeleteOpen}
+        onClose={() => { if (!bulkInFlight) setBulkDeleteOpen(false) }}
+        title={`Delete ${selectedCount} block${selectedCount === 1 ? '' : 's'}?`}
+        centered
+        size="sm"
+      >
+        <Stack gap="md">
+          <Text variant="muted">
+            Delete {selectedCount} block{selectedCount === 1 ? '' : 's'}? This cannot be undone.
+          </Text>
+          <Group gap="xs" justify="flex-end">
+            <Button
+              variant="subtle"
+              color="gray"
+              size="sm"
+              onClick={() => setBulkDeleteOpen(false)}
+              disabled={bulkInFlight}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="filled"
+              color="red"
+              size="sm"
+              onClick={handleBulkDelete}
+              loading={bulkInFlight}
             >
               Delete
             </Button>
