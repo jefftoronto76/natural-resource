@@ -18,6 +18,7 @@ import {
 } from '@mantine/core'
 import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { Text } from '@/components/admin/primitives/Text'
+import { PromptFullnessMeter } from '@/components/admin/primitives/PromptFullnessMeter'
 
 const TYPE_COLORS: Record<string, string> = {
   identity: 'violet',
@@ -189,16 +190,24 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     setDeleteTargetId(null)
   }
 
-  if (!items.length) {
-    return (
-      <Center h={200}>
-        <Text variant="muted">No blocks yet.</Text>
-      </Center>
-    )
-  }
+  const activeBodies = items
+    .filter(b => b.status === 'active')
+    .map(b => b.body ?? '')
 
   return (
     <>
+      {/* Prompt fullness meter — always visible */}
+      <Box mb="md">
+        <PromptFullnessMeter bodies={activeBodies} />
+      </Box>
+
+      {items.length === 0 ? (
+        <Center h={200}>
+          <Text variant="muted">No blocks yet.</Text>
+        </Center>
+      ) : null}
+
+      {items.length > 0 && <>
       {/* Bulk action bar */}
       {selectedCount > 0 && (
         <Paper
@@ -482,6 +491,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
           )
         })}
       </Stack>
+      </>}
 
       {/* Delete confirmation modal */}
       <Modal
