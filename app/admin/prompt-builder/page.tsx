@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 
-import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu, Progress, Skeleton, Alert } from '@mantine/core'
+import { Select, TextInput, Textarea, Collapse, ActionIcon, Checkbox, Stack, Group, Badge, SimpleGrid, Menu, Progress, Skeleton, Alert, Button as MantineButton } from '@mantine/core'
 import {
   IconFile,
   IconBrandGoogleDrive,
@@ -117,8 +117,7 @@ export default function PromptBuilderPage() {
   const [copiedId, setCopiedId] = useState<number | null>(null)
   const [copiedAll, setCopiedAll] = useState(false)
   const [existingBlocks, setExistingBlocks] = useState<ExistingBlock[]>([])
-  const [blocksLoaded, setBlocksLoaded] = useState(false)
-  const hasOpeningSent = useRef(false)
+  const [hasOpeningChoice, setHasOpeningChoice] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -156,8 +155,6 @@ export default function PromptBuilderPage() {
         setExistingBlocks(data)
       } catch (err) {
         console.error('[fetchBlocks] failed:', err)
-      } finally {
-        setBlocksLoaded(true)
       }
     }
     fetchBlocks()
@@ -204,28 +201,22 @@ export default function PromptBuilderPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingAutoTrigger, uploadedRaw])
 
-  // Auto-send opening message after blocks load on mount.
-  // The trigger is hidden from the chat UI — only the AI response appears.
-  useEffect(() => {
-    if (!blocksLoaded || hasOpeningSent.current) return
-    hasOpeningSent.current = true
-
-    const hasCustom = existingBlocks.some(b => !b.is_default)
-    const allDefault = existingBlocks.length > 0 && !hasCustom
-
-    let trigger: string
-    if (existingBlocks.length === 0) {
-      trigger = 'The owner has no blocks yet. This is their first time in the Composer. Write a warm, concise opening message (2-3 sentences) that explains what blocks are, why they matter for Sage, and the three ways to create them: type a description, paste content, or upload a document. Do NOT output the done JSON.'
-    } else if (allDefault && !hasCustom) {
-      trigger = 'The owner only has default starter blocks — no custom blocks yet. Write a short opening message acknowledging the foundation is set and suggesting they customize or add blocks specific to their business. Do NOT output the done JSON.'
-    } else {
-      const types = [...new Set(existingBlocks.map(b => b.type))]
-      trigger = `The owner has ${existingBlocks.length} existing blocks covering: ${types.join(', ')}. Write a short opening message summarizing what's covered, identifying any missing block types, and suggesting what to build next. Do NOT output the done JSON.`
+  function handleOpeningChoice(choice: 'summarize' | 'opportunities' | 'new') {
+    setHasOpeningChoice(true)
+    if (choice === 'new') {
+      setChatMessages([{
+        role: 'assistant',
+        content: "Sounds great — to get started, just type in what you're thinking for the block.",
+        timestamp: Date.now(),
+      }])
+      textareaRef.current?.focus()
+      return
     }
-
+    const trigger = choice === 'summarize'
+      ? 'The owner wants a plain-language summary of their current prompt. Based on the existing blocks listed above, write a concise summary (3-5 sentences) of what Sage is currently configured to do. Do NOT output the done JSON. Do NOT draft any new blocks.'
+      : 'The owner wants to know how to improve their current prompt. Based on the existing blocks listed above, identify gaps (missing block types, weak coverage, potential conflicts) and suggest 2-3 specific improvements. Do NOT output the done JSON. Do NOT draft any new blocks.'
     sendChatMessage([], trigger)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blocksLoaded])
+  }
 
   function resetChat() {
     setChatMessages([])
@@ -846,21 +837,70 @@ export default function PromptBuilderPage() {
           {/* Top spacer — 38% of available height (golden ratio) */}
           <div style={{ flex: '0 0 38%' }} />
 
-          <p
-            className="select-none text-center"
-            style={{
-              fontFamily: 'var(--mantine-font-family-headings)',
-              fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)',
-              color: 'var(--mantine-color-gray-6)',
-              fontWeight: 500,
-              letterSpacing: '-0.02em',
-              maxWidth: '400px',
-              lineHeight: 1.4,
-              marginBottom: '20px',
-            }}
-          >
-            What would you like to add to your prompt?
-          </p>
+          {!hasOpeningChoice ? (
+            <>
+              <p
+                className="select-none text-center"
+                style={{
+                  fontFamily: 'var(--mantine-font-family-headings)',
+                  fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)',
+                  color: 'var(--mantine-color-gray-6)',
+                  fontWeight: 500,
+                  letterSpacing: '-0.02em',
+                  maxWidth: '400px',
+                  lineHeight: 1.4,
+                  marginBottom: '20px',
+                }}
+              >
+                Welcome back{clerkUser?.firstName ? `, ${clerkUser.firstName}` : ''}.
+              </p>
+              <Stack gap="xs" style={{ width: '100%', maxWidth: 400, marginBottom: 24 }}>
+                <MantineButton
+                  variant="light"
+                  color="green"
+                  size="md"
+                  fullWidth
+                  onClick={() => handleOpeningChoice('summarize')}
+                >
+                  Summarize my prompt
+                </MantineButton>
+                <MantineButton
+                  variant="light"
+                  color="green"
+                  size="md"
+                  fullWidth
+                  onClick={() => handleOpeningChoice('opportunities')}
+                >
+                  Identify opportunities to improve
+                </MantineButton>
+                <MantineButton
+                  variant="light"
+                  color="green"
+                  size="md"
+                  fullWidth
+                  onClick={() => handleOpeningChoice('new')}
+                >
+                  Create a new block
+                </MantineButton>
+              </Stack>
+            </>
+          ) : (
+            <p
+              className="select-none text-center"
+              style={{
+                fontFamily: 'var(--mantine-font-family-headings)',
+                fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)',
+                color: 'var(--mantine-color-gray-6)',
+                fontWeight: 500,
+                letterSpacing: '-0.02em',
+                maxWidth: '400px',
+                lineHeight: 1.4,
+                marginBottom: '20px',
+              }}
+            >
+              What would you like to add to your prompt?
+            </p>
+          )}
           {composerContainer}
           <div className="mt-2">
             {metadataSection}
