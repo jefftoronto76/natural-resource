@@ -11,6 +11,7 @@ import {
   IconBox,
   IconScreenshot,
   IconCheck,
+  IconPencil,
 } from '@tabler/icons-react'
 import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/admin/primitives/Button'
@@ -105,6 +106,8 @@ export default function PromptBuilderPage() {
   const [chatLoading, setChatLoading] = useState(false)
   const [draftBlocks, setDraftBlocks] = useState<DraftBlock[]>([])
   const [draftMetas, setDraftMetas] = useState<DraftCardMeta[]>([])
+  const [editingCardIndex, setEditingCardIndex] = useState<number | null>(null)
+  const [editingCardBody, setEditingCardBody] = useState('')
   const [closingMessage, setClosingMessage] = useState<string | null>(null)
   const [loadingStatusIndex, setLoadingStatusIndex] = useState(0)
   const [contentId, setContentId] = useState<string | null>(null)
@@ -233,6 +236,8 @@ export default function PromptBuilderPage() {
     setChatLoading(false)
     setDraftBlocks([])
     setDraftMetas([])
+    setEditingCardIndex(null)
+    setEditingCardBody('')
     setClosingMessage(null)
     setContentId(null)
     setFile(null)
@@ -474,6 +479,8 @@ export default function PromptBuilderPage() {
     setChatInput('')
     setDraftBlocks([])
     setDraftMetas([])
+    setEditingCardIndex(null)
+    setEditingCardBody('')
     setClosingMessage(null)
     const userMsg: ChatMessage = { role: 'user', content: text, timestamp: Date.now() }
     const updated = [...chatMessages, userMsg]
@@ -488,6 +495,28 @@ export default function PromptBuilderPage() {
   function removeDraft(index: number) {
     setDraftBlocks(prev => prev.filter((_, i) => i !== index))
     setDraftMetas(prev => prev.filter((_, i) => i !== index))
+    if (editingCardIndex === index) {
+      setEditingCardIndex(null)
+      setEditingCardBody('')
+    }
+  }
+
+  function handleEditCard(index: number) {
+    const draft = draftBlocks[index]
+    if (!draft) return
+    setEditingCardIndex(index)
+    setEditingCardBody(draft.content)
+  }
+
+  function handleCancelEditCard() {
+    setEditingCardIndex(null)
+    setEditingCardBody('')
+  }
+
+  function handleSaveEditCard(index: number) {
+    setDraftBlocks(prev => prev.map((d, i) => (i === index ? { ...d, content: editingCardBody } : d)))
+    setEditingCardIndex(null)
+    setEditingCardBody('')
   }
 
   async function handleSaveBlock(index: number) {
@@ -1073,15 +1102,56 @@ export default function PromptBuilderPage() {
               {draftBlocks.map((draft, cardIndex) => {
                 const meta = draftMetas[cardIndex]
                 if (!meta) return null
+                const isEditingCard = editingCardIndex === cardIndex
                 return (
                   <Card key={cardIndex} variant="outlined">
                     <Stack gap="sm">
-                      <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Block ready{draftBlocks.length > 1 ? ` (${cardIndex + 1} of ${draftBlocks.length})` : ''}
-                      </Text>
-                      <Text variant="muted" style={{ whiteSpace: 'pre-wrap', fontSize: 'var(--mantine-font-size-sm)', lineHeight: 1.6 }}>
-                        {draft.content}
-                      </Text>
+                      <Group justify="space-between" wrap="nowrap">
+                        <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Block ready{draftBlocks.length > 1 ? ` (${cardIndex + 1} of ${draftBlocks.length})` : ''}
+                        </Text>
+                        {!isEditingCard && (
+                          <ActionIcon
+                            variant="subtle"
+                            color="gray"
+                            size="sm"
+                            onClick={() => handleEditCard(cardIndex)}
+                            aria-label="Edit block content"
+                          >
+                            <IconPencil size={14} />
+                          </ActionIcon>
+                        )}
+                      </Group>
+                      {isEditingCard ? (
+                        <Stack gap="xs">
+                          <Textarea
+                            value={editingCardBody}
+                            onChange={e => setEditingCardBody(e.currentTarget.value)}
+                            autosize
+                            minRows={4}
+                            maxRows={16}
+                            size="sm"
+                            styles={{
+                              input: {
+                                fontSize: 'var(--mantine-font-size-sm)',
+                                lineHeight: 1.6,
+                              },
+                            }}
+                          />
+                          <Group gap="xs">
+                            <Button variant="primary" size="sm" onClick={() => handleSaveEditCard(cardIndex)}>
+                              Save
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={handleCancelEditCard}>
+                              Cancel
+                            </Button>
+                          </Group>
+                        </Stack>
+                      ) : (
+                        <Text variant="muted" style={{ whiteSpace: 'pre-wrap', fontSize: 'var(--mantine-font-size-sm)', lineHeight: 1.6 }}>
+                          {draft.content}
+                        </Text>
+                      )}
                       {meta.warning && (
                         <Alert color="yellow" variant="light" radius="sm" p="sm">
                           <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-xs)', color: 'var(--mantine-color-yellow-9)' }}>
