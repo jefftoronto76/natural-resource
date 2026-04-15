@@ -16,13 +16,27 @@ Your entire response must be a single raw JSON object. Do not use markdown. Do n
 Use exactly this format:
 {"ok": true, "issues": []}
 or
-{"ok": false, "issues": ["short description of issue 1", "short description of issue 2"]}
+{"ok": false, "issues": [{"description": "short description of the issue", "offendingText": "exact verbatim substring from the block or null"}]}
 
-Issues must be concise (under 20 words each). Only flag real problems — do not invent concerns.`
+Rules for issues:
+- Each description must be concise (under 20 words)
+- offendingText must be copied verbatim from the block — it will be used for an exact string match removal
+- Only set offendingText when a specific passage is the problem; set it to null for structural or whole-block concerns
+- Only flag real problems — do not invent concerns`
+
+interface CheckIssueRaw {
+  description?: unknown
+  offendingText?: unknown
+}
+
+interface CheckIssue {
+  description: string
+  offendingText: string | null
+}
 
 interface CheckResult {
   ok: boolean
-  issues: string[]
+  issues: CheckIssue[]
 }
 
 export async function POST(req: Request) {
@@ -52,13 +66,42 @@ export async function POST(req: Request) {
       model: anthropic('claude-sonnet-4-6'),
       system: META_PROMPT,
       prompt: `Block to review:\n---\n${blockBody}\n---`,
-      maxTokens: 500,
+      maxTokens: 700,
     })
 
     const clean = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
-    const parsed = JSON.parse(clean) as CheckResult
-    console.log('[prompt/compile/check] result:', { ok: parsed.ok, issueCount: parsed.issues?.length ?? 0 })
-    return NextResponse.json(parsed)
+    const parsed = JSON.parse(clean) as { ok?: unknown; issues?: unknown }
+
+    const okFlag = parsed.ok === true
+    const rawIssues = Array.isArray(parsed.issues) ? (parsed.issues as CheckIssueRaw[]) : []
+
+    // Normalize and validate: offendingText must be a real substring of the
+    // block body. If the LLM paraphrased or hallucinated, null it out so the
+    // UI knows not to show a Remove button.
+    const issues: CheckIssue[] = rawIssues
+      .map(raw => {
+        const description = typeof raw.description === 'string' ? raw.description.trim() : ''
+        if (!description) return null
+        let offendingText: string | null = null
+        if (typeof raw.offendingText === 'string' && raw.offendingText.trim().length > 0) {
+          const candidate = raw.offendingText
+          if (blockBody.includes(candidate)) {
+            offendingText = candidate
+          } else {
+            console.warn('[prompt/compile/check] offendingText not found verbatim — nulling:', candidate.slice(0, 60))
+          }
+        }
+        return { description, offendingText }
+      })
+      .filter((i): i is CheckIssue => i !== null)
+
+    const result: CheckResult = { ok: okFlag && issues.length === 0, issues }
+    console.log('[prompt/compile/check] result:', {
+      ok: result.ok,
+      issueCount: result.issues.length,
+      withOffendingText: result.issues.filter(i => i.offendingText !== null).length,
+    })
+    return NextResponse.json(result)
   } catch (err) {
     console.error('[prompt/compile/check] check failed:', err instanceof Error ? err.message : err)
     // Fail open — don't block the save flow on a check error.

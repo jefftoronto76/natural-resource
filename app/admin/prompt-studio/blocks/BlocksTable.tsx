@@ -39,6 +39,16 @@ const TYPE_LABELS: Record<string, string> = {
 
 type BlockStatus = 'active' | 'disabled' | 'deleted'
 
+interface CheckIssue {
+  description: string
+  offendingText: string | null
+}
+
+interface CheckResult {
+  ok: boolean
+  issues: CheckIssue[]
+}
+
 export interface BlockRow {
   id: string
   title: string
@@ -65,7 +75,8 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkInFlight, setBulkInFlight] = useState(false)
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
-  const [safetyFlags, setSafetyFlags] = useState<Record<string, string>>({})
+  const [checkingId, setCheckingId] = useState<string | null>(null)
+  const [issuesMap, setIssuesMap] = useState<Record<string, CheckIssue[]>>({})
 
   const selectedCount = selectedIds.size
   const allSelected = items.length > 0 && selectedCount === items.length
@@ -166,11 +177,20 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   }
 
   function handleCancelEdit() {
+    const id = editingId
     setEditingId(null)
     setEditBody('')
+    if (id) {
+      setIssuesMap(prev => {
+        if (!(id in prev)) return prev
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
+    }
   }
 
-  async function runSafetyCheck(id: string, body: string) {
+  async function runSafetyCheck(id: string, body: string): Promise<CheckResult> {
     console.log('[BlocksTable] safety check dispatch:', { id })
     try {
       const res = await fetch('/api/admin/prompt/compile/check', {
@@ -180,47 +200,95 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
       })
       if (!res.ok) {
         console.error('[BlocksTable] safety check HTTP error:', res.status)
-        return
+        return { ok: true, issues: [] }
       }
-      const data: { ok?: boolean; issues?: string[] } = await res.json()
-      console.log('[BlocksTable] safety check result:', { id, ok: data.ok, issueCount: data.issues?.length ?? 0 })
-      if (data.ok === false && data.issues && data.issues.length > 0) {
-        setSafetyFlags(prev => ({ ...prev, [id]: data.issues!.join(' · ') }))
-      } else {
-        // Clean — clear any existing flag for this block
-        setSafetyFlags(prev => {
-          if (!(id in prev)) return prev
-          const next = { ...prev }
-          delete next[id]
-          return next
-        })
+      const data: CheckResult = await res.json()
+      console.log('[BlocksTable] safety check result:', {
+        id,
+        ok: data.ok,
+        issueCount: data.issues?.length ?? 0,
+      })
+      return {
+        ok: data.ok === true,
+        issues: Array.isArray(data.issues) ? data.issues : [],
       }
     } catch (err) {
       console.error('[BlocksTable] safety check failed:', err)
+      // Fail open — don't block the save flow on a check error.
+      return { ok: true, issues: [] }
     }
   }
 
-  function dismissSafetyFlag(id: string) {
-    setSafetyFlags(prev => {
+  async function handleCheckAndSave(id: string) {
+    console.log('[BlocksTable] check & save start:', { id })
+    // Clear stale issues from any previous check before re-running
+    setIssuesMap(prev => {
       if (!(id in prev)) return prev
       const next = { ...prev }
       delete next[id]
       return next
     })
-  }
+    setCheckingId(id)
+    const result = await runSafetyCheck(id, editBody)
+    setCheckingId(null)
 
-  async function handleSaveEdit(id: string) {
+    if (!result.ok && result.issues.length > 0) {
+      console.log('[BlocksTable] check flagged issues, keeping edit row open:', { id, count: result.issues.length })
+      setIssuesMap(prev => ({ ...prev, [id]: result.issues }))
+      return
+    }
+
+    // Clean — proceed to PATCH and close the row.
+    console.log('[BlocksTable] check clean, dispatching PATCH:', { id })
     setSavingId(id)
-    const newBody = editBody
-    const ok = await patchBlock(id, { body: newBody })
+    const ok = await patchBlock(id, { body: editBody })
     if (ok) {
-      setItems(prev => prev.map(b => (b.id === id ? { ...b, body: newBody } : b)))
+      console.log('[BlocksTable] save success, closing edit row:', { id })
+      setItems(prev => prev.map(b => (b.id === id ? { ...b, body: editBody } : b)))
       setEditingId(null)
       setEditBody('')
-      // Fire-and-forget safety check — result updates the flag inline.
-      runSafetyCheck(id, newBody)
+    } else {
+      console.error('[BlocksTable] save failed:', { id })
     }
     setSavingId(null)
+  }
+
+  async function handleSaveAnyway(id: string) {
+    console.log('[BlocksTable] save anyway (bypass check):', { id })
+    setSavingId(id)
+    const ok = await patchBlock(id, { body: editBody })
+    if (ok) {
+      console.log('[BlocksTable] save anyway success, closing edit row:', { id })
+      setItems(prev => prev.map(b => (b.id === id ? { ...b, body: editBody } : b)))
+      setEditingId(null)
+      setEditBody('')
+      setIssuesMap(prev => {
+        if (!(id in prev)) return prev
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
+    } else {
+      console.error('[BlocksTable] save anyway failed:', { id })
+    }
+    setSavingId(null)
+  }
+
+  function handleRemoveOffending(id: string, offendingText: string) {
+    console.log('[BlocksTable] remove offending text:', { id, length: offendingText.length })
+    setEditBody(prev => prev.replace(offendingText, ''))
+    // Drop this issue and any duplicates referencing the same offendingText.
+    setIssuesMap(prev => {
+      const current = prev[id]
+      if (!current) return prev
+      const filtered = current.filter(i => i.offendingText !== offendingText)
+      if (filtered.length === 0) {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      }
+      return { ...prev, [id]: filtered }
+    })
   }
 
   async function handleConfirmDelete() {
@@ -315,6 +383,9 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
             {items.map((block) => {
               const isEditing = editingId === block.id
               const isSaving = savingId === block.id
+              const isChecking = checkingId === block.id
+              const issues = issuesMap[block.id] ?? []
+              const hasIssues = issues.length > 0
               return (
                 <Fragment key={block.id}>
                   <Table.Tr>
@@ -398,46 +469,87 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                             minRows={4}
                             maxRows={12}
                             size="sm"
+                            disabled={isChecking || isSaving}
                           />
+                          {hasIssues && (
+                            <Alert
+                              color="yellow"
+                              variant="light"
+                              radius="sm"
+                              title="Safety check flagged this block"
+                            >
+                              <Stack gap="xs">
+                                {issues.map((issue, i) => (
+                                  <Stack key={i} gap={4}>
+                                    <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+                                      {issue.description}
+                                    </Text>
+                                    {issue.offendingText && (
+                                      <Group gap="xs" wrap="nowrap" align="flex-start">
+                                        <Text
+                                          variant="muted"
+                                          style={{
+                                            fontFamily: 'var(--mantine-font-family-monospace)',
+                                            fontSize: 'var(--mantine-font-size-xs)',
+                                            backgroundColor: 'var(--mantine-color-yellow-0)',
+                                            padding: '2px 6px',
+                                            borderRadius: 'var(--mantine-radius-sm)',
+                                            flex: 1,
+                                            minWidth: 0,
+                                            wordBreak: 'break-word',
+                                          }}
+                                        >
+                                          {issue.offendingText}
+                                        </Text>
+                                        <Button
+                                          variant="subtle"
+                                          color="yellow"
+                                          size="xs"
+                                          onClick={() => handleRemoveOffending(block.id, issue.offendingText!)}
+                                          disabled={isChecking || isSaving}
+                                        >
+                                          Remove
+                                        </Button>
+                                      </Group>
+                                    )}
+                                  </Stack>
+                                ))}
+                              </Stack>
+                            </Alert>
+                          )}
                           <Group gap="xs">
                             <Button
                               variant="filled"
                               color="green"
                               size="xs"
-                              onClick={() => handleSaveEdit(block.id)}
-                              loading={isSaving}
+                              onClick={() => handleCheckAndSave(block.id)}
+                              loading={isChecking || isSaving}
                             >
-                              Save
+                              {isChecking ? 'Checking...' : isSaving ? 'Saving...' : 'Check & Save'}
                             </Button>
+                            {hasIssues && (
+                              <Button
+                                variant="default"
+                                color="yellow"
+                                size="xs"
+                                onClick={() => handleSaveAnyway(block.id)}
+                                disabled={isChecking}
+                                loading={isSaving}
+                              >
+                                Save Anyway
+                              </Button>
+                            )}
                             <Button
                               variant="subtle"
                               color="gray"
                               size="xs"
                               onClick={handleCancelEdit}
-                              disabled={isSaving}
+                              disabled={isChecking || isSaving}
                             >
                               Cancel
                             </Button>
                           </Group>
                         </Stack>
-                      </Table.Td>
-                    </Table.Tr>
-                  )}
-                  {safetyFlags[block.id] && (
-                    <Table.Tr>
-                      <Table.Td colSpan={6}>
-                        <Alert
-                          color="yellow"
-                          variant="light"
-                          radius="sm"
-                          withCloseButton
-                          onClose={() => dismissSafetyFlag(block.id)}
-                          title="Safety check flagged this block"
-                        >
-                          <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
-                            {safetyFlags[block.id]}
-                          </Text>
-                        </Alert>
                       </Table.Td>
                     </Table.Tr>
                   )}
@@ -453,6 +565,9 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
         {items.map((block) => {
           const isEditing = editingId === block.id
           const isSaving = savingId === block.id
+          const isChecking = checkingId === block.id
+          const issues = issuesMap[block.id] ?? []
+          const hasIssues = issues.length > 0
           return (
             <Paper key={block.id} p="md" withBorder radius="sm">
               <Group justify="space-between" mb={4} wrap="nowrap">
@@ -493,23 +608,81 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                     minRows={4}
                     maxRows={12}
                     size="sm"
+                    disabled={isChecking || isSaving}
                   />
+                  {hasIssues && (
+                    <Alert
+                      color="yellow"
+                      variant="light"
+                      radius="sm"
+                      title="Safety check flagged this block"
+                    >
+                      <Stack gap="xs">
+                        {issues.map((issue, i) => (
+                          <Stack key={i} gap={4}>
+                            <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+                              {issue.description}
+                            </Text>
+                            {issue.offendingText && (
+                              <Stack gap={4}>
+                                <Text
+                                  variant="muted"
+                                  style={{
+                                    fontFamily: 'var(--mantine-font-family-monospace)',
+                                    fontSize: 'var(--mantine-font-size-xs)',
+                                    backgroundColor: 'var(--mantine-color-yellow-0)',
+                                    padding: '2px 6px',
+                                    borderRadius: 'var(--mantine-radius-sm)',
+                                    wordBreak: 'break-word',
+                                  }}
+                                >
+                                  {issue.offendingText}
+                                </Text>
+                                <Button
+                                  variant="subtle"
+                                  color="yellow"
+                                  size="xs"
+                                  onClick={() => handleRemoveOffending(block.id, issue.offendingText!)}
+                                  disabled={isChecking || isSaving}
+                                  style={{ alignSelf: 'flex-start' }}
+                                >
+                                  Remove
+                                </Button>
+                              </Stack>
+                            )}
+                          </Stack>
+                        ))}
+                      </Stack>
+                    </Alert>
+                  )}
                   <Group gap="xs">
                     <Button
                       variant="filled"
                       color="green"
                       size="xs"
-                      onClick={() => handleSaveEdit(block.id)}
-                      loading={isSaving}
+                      onClick={() => handleCheckAndSave(block.id)}
+                      loading={isChecking || isSaving}
                     >
-                      Save
+                      {isChecking ? 'Checking...' : isSaving ? 'Saving...' : 'Check & Save'}
                     </Button>
+                    {hasIssues && (
+                      <Button
+                        variant="default"
+                        color="yellow"
+                        size="xs"
+                        onClick={() => handleSaveAnyway(block.id)}
+                        disabled={isChecking}
+                        loading={isSaving}
+                      >
+                        Save Anyway
+                      </Button>
+                    )}
                     <Button
                       variant="subtle"
                       color="gray"
                       size="xs"
                       onClick={handleCancelEdit}
-                      disabled={isSaving}
+                      disabled={isChecking || isSaving}
                     >
                       Cancel
                     </Button>
@@ -548,21 +721,6 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                     <IconTrash size={16} />
                   </ActionIcon>
                 </Group>
-              )}
-              {safetyFlags[block.id] && (
-                <Alert
-                  color="yellow"
-                  variant="light"
-                  radius="sm"
-                  mt="sm"
-                  withCloseButton
-                  onClose={() => dismissSafetyFlag(block.id)}
-                  title="Safety check flagged this block"
-                >
-                  <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
-                    {safetyFlags[block.id]}
-                  </Text>
-                </Alert>
               )}
             </Paper>
           )
