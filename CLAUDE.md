@@ -189,6 +189,13 @@ header.
 | `/api/admin/blocks/save` | POST | Creates a new block from the Composer draft confirmation flow. |
 | `/api/admin/blocks/chat` | POST | Streaming chat route for the Composer. Accepts `{ type, topic, content, messages, documentContext?, existingBlocks? }`. Returns a Vercel AI SDK data stream. |
 
+### Sage Parameters
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/admin/sage-parameters` | GET | Returns all `sage_parameters` rows (`id, tenant_id, key, value, label, updated_at`) for the authenticated tenant, ordered by `key`. 401 when `getAuthContext()` fails. |
+| `/api/admin/sage-parameters` | PATCH | Upserts a single parameter for the authenticated tenant. Accepts `{ key, value, label }` (all strings). Upsert uses `onConflict: 'tenant_id, key'` and stamps `updated_at` on write. 401 when `getAuthContext()` fails, 400 on invalid body. |
+
 ### Content / Assets
 
 | Route | Method | Purpose |
