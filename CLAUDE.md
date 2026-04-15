@@ -99,6 +99,8 @@ starts.
 - **Styling:** Tailwind (public site), Mantine v7 (admin interface)
   — v7 is intentional. v9 requires React canary APIs not in React 19 stable.
   Do not upgrade Mantine without explicit instruction from Jeff.
+  Companion packages: `@mantine/notifications@7.17.8` (toast notifications,
+  wired into `app/admin/layout.tsx` via `<Notifications />`).
 - **Database:** Supabase (Postgres + Row Level Security + Realtime)
 - **Auth:** Clerk
 - **AI:** Anthropic API (`claude-sonnet-4-6`) + Vercel AI SDK (streaming + fallback)
@@ -142,6 +144,68 @@ starts.
 
 ---
 
+## Shared Primitives
+
+Reusable admin-side components in `/components/admin/primitives/`:
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `PromptFullnessMeter` | `PromptFullnessMeter.tsx` | Takes `bodies: string[]`, sums character counts, approximates tokens as `ceil(chars/4)`, renders a Mantine `Progress` bar with a monospace label. Color thresholds: green under 3000 tokens, yellow 3000–4000, red over 4000. Used on the Blocks page (reactive to the client-side items state) and the Prompt page (server-fetched on mount). |
+
+---
+
+## Utilities
+
+Shared helpers in `src/lib/`:
+
+| Helper | File | Purpose |
+|--------|------|---------|
+| `getAuthContext` | `get-auth-context.ts` | Resolves the current Clerk user to their Supabase `owner_id` and `tenant_id` via the `users.clerk_id` → `tenant_users.user_id` lookup. Throws `Unauthorized` / `User not found` / `Tenant not found` on failure. Used by every authenticated admin API route for tenant scoping. |
+| `getTenantFromRequest` | `get-tenant-from-request.ts` | Resolves `tenant_id` from the `Host` header of an anonymous public request. Strips subdomains to the root domain (e.g. `app.jefflougheed.ca` → `jefflougheed.ca`), filters dev hosts (localhost, `*.local`, `127.0.0.1`), queries `tenants.domain` for a match. Returns `tenant_id` string or `null`. Used by `/api/sage/route.ts` for anonymous visitor chat — falls back to `DEFAULT_SYSTEM_PROMPT` on null. |
+
+---
+
+## API Routes
+
+Admin routes all call `getAuthContext()` first and scope Supabase
+queries by `tenant_id`. Public routes resolve tenant via the Host
+header.
+
+### Prompt compilation
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/admin/prompt/compile` | POST | Compiles all active blocks for the authenticated tenant into the master prompt. Orders by compile sequence (guardrail → identity → process → knowledge → escalation), then by `order` column ascending within each type. Joins bodies with double newlines. Archives the previous `master_prompt` row to `master_prompt_history` and increments the version. Returns `{ success, version, tokenCount, content, updatedAt }`. |
+| `/api/admin/prompt/compile/check` | POST | LLM-based safety review of a single block body. Takes `{ body: string }`, returns `{ ok: boolean, issues: [{ description: string, offendingText: string \| null }] }`. Server-side verbatim guard: every returned `offendingText` is validated against `body.includes()` and nulled if not a real substring. Fails open to `{ ok: true, issues: [] }` on any error so the save flow is never blocked. |
+| `/api/admin/prompt/save` | POST | Manual save path for the master prompt (legacy). Takes `{ prompt, checkResult }`, tenant-scoped, archives previous version to history, increments version. |
+| `/api/admin/prompt/check` | POST | Safety check for an entire system prompt (legacy, used by the old prompt save flow). Returns `{ pass, issues }`. |
+
+### Blocks
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/admin/blocks` | GET | Returns active blocks (`id, title, type, body, is_default`) for the authenticated tenant. Filters `active = true`, ordered by type then title. Used for the Composer's existing-blocks context. |
+| `/api/admin/blocks/[id]` | PATCH | Updates block `status` or `body`. Validates status against `'active' \| 'disabled' \| 'deleted'`. Keeps the legacy `active` boolean in sync with `status` so the Composer GET doesn't surface disabled or deleted blocks. Tenant-scoped via `.eq('tenant_id', authCtx.tenant_id)`. |
+| `/api/admin/blocks/save` | POST | Creates a new block from the Composer draft confirmation flow. |
+| `/api/admin/blocks/chat` | POST | Streaming chat route for the Composer. Accepts `{ type, topic, content, messages, documentContext?, existingBlocks? }`. Returns a Vercel AI SDK data stream. |
+
+### Content / Assets
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/admin/assets/upload` | POST | Multipart upload for documents (PDF, DOCX, TXT). Extracts text via Anthropic (PDF) or mammoth (DOCX) or direct Buffer read (TXT), inserts a `content` row with `type: 'document'`, uploads the original binary to the Supabase Storage `assets` bucket at `{tenant_id}/{content_id}/{filename}`, and updates the content record with the storage path. |
+| `/api/admin/content` | POST | Creates a content row from structured input. |
+| `/api/admin/content/[id]` | GET | Returns a single content record by id, tenant-scoped. Used to fetch uploaded document raw text. |
+| `/api/admin/topics` | GET, POST | Lists and creates topics for the authenticated tenant. |
+
+### Public
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/sage` | POST | Public visitor chat. Resolves tenant via `getTenantFromRequest(req)`, reads the highest-version `master_prompt` row for that tenant, streams the Anthropic response. Falls back to `DEFAULT_SYSTEM_PROMPT` when no tenant is resolved or no master_prompt row exists. |
+
+---
+
 ## Database Schema
 
 All tables are multi-tenant. Every data access must respect `tenant_id`.
@@ -149,7 +213,7 @@ Row Level Security is enforced at the Supabase layer.
 
 | Table | Key Columns |
 |-------|-------------|
-| `tenants` | id, parent_id, name, slug, type, settings |
+| `tenants` | id, parent_id, name, slug, type, settings, domain (text) |
 | `tenant_users` | tenant_id, user_id, role |
 | `users` | id, clerk_id, email, name |
 | `blocks` | id, topic_id, owner_id, tenant_id, type, title, body, active, status (text default 'active': 'active' \| 'disabled' \| 'deleted'), order, is_default (bool default false), default_edited_at (timestamptz), default_edited_by (uuid references users(id)), default_action (text: 'edited' \| 'deleted'), default_acknowledged (bool default false), default_acknowledged_at (timestamptz) |
@@ -158,8 +222,18 @@ Row Level Security is enforced at the Supabase layer.
 | `chat_sessions` | id, tenant_id, visitor_name, messages, status, message_count, session_type (text default 'prospect': 'prospect' \| 'composer' \| 'client'), session_subtype (text nullable: 'block' \| 'wizard'), block_id (uuid references blocks(id)) |
 | `chat_corrections` | id, session_id, tenant_id, block_id, jeff_note |
 | `do_not_engage` | id, owner_id, tenant_id, content, version |
-| `master_prompt` | id, tenant_id, content, version, safety_check_result |
+| `master_prompt` | id, tenant_id, content, version, safety_check_result, updated_at (timestamptz), last_safety_check (timestamptz) |
 | `master_prompt_history` | id, prompt_id, tenant_id, content, version |
+
+**Deployment note — tenant_id backfill required**: `master_prompt` and
+`master_prompt_history` rows must have `tenant_id` populated before
+tenant-scoped reads return data. Routes that scope by `tenant_id`
+(notably `/api/sage/route.ts`, `/api/admin/prompt/save/route.ts`, and
+`/api/admin/prompt/compile/route.ts`) will silently fall back to
+`DEFAULT_SYSTEM_PROMPT` (Sage public chat) or treat the tenant as
+having no existing prompt (admin save/compile) if existing rows were
+inserted before the column was enforced. Backfill existing rows on
+deploy.
 
 ### Block Types
 
@@ -170,6 +244,13 @@ Row Level Security is enforced at the Supabase layer.
 | `guardrail` | Rules and constraints on Sage's behavior |
 | `process` | Step-by-step instructions for how Sage should handle situations |
 | `escalation` | When and how to route to a human or off-ramp |
+
+**Compile order**: Types are compiled into the master prompt in this
+fixed order: guardrail (1st), identity (2nd), process (3rd), knowledge
+(4th), escalation (5th). Within each type, blocks are ordered by the
+`order` column ascending. This order is enforced in
+`/api/admin/prompt/compile` and encoded in `BlocksTable.tsx`
+`TYPE_LABELS` — do not change without updating both.
 
 ---
 
