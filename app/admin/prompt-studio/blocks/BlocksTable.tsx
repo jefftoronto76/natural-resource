@@ -485,7 +485,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                                       {issue.description}
                                     </Text>
                                     {issue.offendingText && (
-                                      <Group gap="xs" wrap="nowrap" align="flex-start">
+                                      <Stack gap={4}>
                                         <Text
                                           variant="muted"
                                           style={{
@@ -494,8 +494,6 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                                             backgroundColor: 'var(--mantine-color-yellow-0)',
                                             padding: '2px 6px',
                                             borderRadius: 'var(--mantine-radius-sm)',
-                                            flex: 1,
-                                            minWidth: 0,
                                             wordBreak: 'break-word',
                                           }}
                                         >
@@ -507,10 +505,11 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                                           size="xs"
                                           onClick={() => handleRemoveOffending(block.id, issue.offendingText!)}
                                           disabled={isChecking || isSaving}
+                                          style={{ alignSelf: 'flex-start' }}
                                         >
                                           Remove
                                         </Button>
-                                      </Group>
+                                      </Stack>
                                     )}
                                   </Stack>
                                 ))}
