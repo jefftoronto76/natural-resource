@@ -152,6 +152,12 @@ Reusable admin-side components in `/components/admin/primitives/`:
 |-----------|------|---------|
 | `PromptFullnessMeter` | `PromptFullnessMeter.tsx` | Takes `bodies: string[]`, sums character counts, approximates tokens as `ceil(chars/4)`, renders a Mantine `Progress` bar with a monospace label. Color thresholds: green under 3000 tokens, yellow 3000–4000, red over 4000. Used on the Blocks page (reactive to the client-side items state) and the Prompt page (server-fetched on mount). |
 
+### Page-local components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `SageParameters` | `app/admin/prompt-studio/prompt/SageParameters.tsx` | Mantine-based client component on the Prompt page. Fetches `/api/admin/sage-parameters` on mount, renders each parameter as a labeled `TextInput` + Save button, and a bottom "Add parameter" form (label + value + Add). Save and Add both PATCH `/api/admin/sage-parameters`; Add auto-generates `key` from the label (lowercase, non-alphanumerics collapsed to `_`). Surfaces success/error via `@mantine/notifications`. |
+
 ---
 
 ## Utilities
