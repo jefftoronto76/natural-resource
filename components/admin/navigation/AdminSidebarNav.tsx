@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 const NAV_ITEMS = [
   { label: 'Inbound Chats', href: '/admin' },
   { label: 'Prompt',   href: '/admin/prompt' },
+  { label: 'Settings', href: '/admin/settings' },
 ] as const;
 
 const PROMPT_STUDIO_ITEMS = [

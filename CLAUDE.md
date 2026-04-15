@@ -156,7 +156,7 @@ Reusable admin-side components in `/components/admin/primitives/`:
 
 | Component | File | Purpose |
 |-----------|------|---------|
-| `SageParameters` | `app/admin/prompt-studio/prompt/SageParameters.tsx` | Mantine-based client component on the Prompt page. Fetches `/api/admin/sage-parameters` on mount, renders each parameter as a labeled `TextInput` + Save button, and a bottom "Add parameter" form (label + value + Add). Save and Add both PATCH `/api/admin/sage-parameters`; Add auto-generates `key` from the label (lowercase, non-alphanumerics collapsed to `_`). Surfaces success/error via `@mantine/notifications`. |
+| `SageParameters` | `app/admin/settings/SageParameters.tsx` | Mantine-based client component rendered inside the Parameters section on the Settings page. Fetches `/api/admin/sage-parameters` on mount, renders each parameter as a labeled `TextInput` + Save button, and a bottom "Add parameter" form (label + value + Add). Save and Add both PATCH `/api/admin/sage-parameters`; Add auto-generates `key` from the label (lowercase, non-alphanumerics collapsed to `_`). Surfaces success/error via `@mantine/notifications`. Section heading and description are owned by the page, not the component. |
 
 ---
 

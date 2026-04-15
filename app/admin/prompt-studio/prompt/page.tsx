@@ -2,7 +2,6 @@ import { getAdminClient } from '@/lib/supabase-admin'
 import { getAuthContext } from '@/lib/get-auth-context'
 import { Text } from '@/components/admin/primitives/Text'
 import { PromptPreview } from './PromptPreview'
-import { SageParameters } from './SageParameters'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,15 +52,12 @@ export default async function PromptStudioPromptPage() {
         <Text variant="title">Prompt</Text>
       </div>
       <div className="flex-1 overflow-auto p-4 sm:p-6">
-        <div className="flex flex-col gap-6">
-          <PromptPreview
-            initialContent={initialContent}
-            initialVersion={initialVersion}
-            initialUpdatedAt={initialUpdatedAt}
-            initialBodies={initialBodies}
-          />
-          <SageParameters />
-        </div>
+        <PromptPreview
+          initialContent={initialContent}
+          initialVersion={initialVersion}
+          initialUpdatedAt={initialUpdatedAt}
+          initialBodies={initialBodies}
+        />
       </div>
     </div>
   )

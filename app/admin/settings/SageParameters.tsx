@@ -183,15 +183,6 @@ export function SageParameters() {
   return (
     <Paper radius="sm" p="md" withBorder style={{ backgroundColor: 'transparent' }}>
       <Stack gap="md">
-        <Stack gap={4}>
-          <Text variant="title" style={{ fontSize: 'var(--mantine-font-size-md)' }}>
-            Sage Parameters
-          </Text>
-          <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
-            Reusable values Sage can reference across blocks — URLs, handles, owner details.
-          </Text>
-        </Stack>
-
         {loading ? (
           <Stack gap="xs">
             <Skeleton height={40} radius="sm" />
