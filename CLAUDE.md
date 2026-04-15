@@ -160,6 +160,18 @@ Reusable admin-side components in `/components/admin/primitives/`:
 
 ---
 
+## Pages
+
+Admin page routes under `app/admin/`. Each page owns its route header
+and section scaffolding; data fetching lives in server components or
+page-local client components.
+
+| Page | File | Purpose |
+|------|------|---------|
+| Settings | `app/admin/settings/page.tsx` | Tenant configuration. Currently contains the Parameters section rendering the `SageParameters` component. |
+
+---
+
 ## Utilities
 
 Shared helpers in `src/lib/`:
@@ -237,6 +249,7 @@ Row Level Security is enforced at the Supabase layer.
 | `do_not_engage` | id, owner_id, tenant_id, content, version |
 | `master_prompt` | id, tenant_id, content, version, safety_check_result, updated_at (timestamptz), last_safety_check (timestamptz) |
 | `master_prompt_history` | id, prompt_id, tenant_id, content, version |
+| `sage_parameters` | id (uuid), tenant_id (uuid), key (text), value (text), label (text), updated_at (timestamptz). Unique constraint on (tenant_id, key). |
 
 **Deployment note — tenant_id backfill required**: `master_prompt` and
 `master_prompt_history` rows must have `tenant_id` populated before
