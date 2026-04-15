@@ -59,7 +59,19 @@ interface DraftCardMeta {
   isDefault: boolean
   saveError: string | null
   isSaving: boolean
+  isChecking: boolean
+  issues: CheckIssue[]
   warning: string | null
+}
+
+interface CheckIssue {
+  description: string
+  offendingText: string | null
+}
+
+interface CheckResult {
+  ok: boolean
+  issues: CheckIssue[]
 }
 
 const TYPES: { value: BlockType; label: string }[] = [
@@ -461,6 +473,8 @@ export default function PromptBuilderPage() {
           isDefault: false,
           saveError: null,
           isSaving: false,
+          isChecking: false,
+          issues: [],
           warning: d.warning ?? null,
         })))
       }
@@ -519,19 +533,35 @@ export default function PromptBuilderPage() {
     setEditingCardBody('')
   }
 
-  async function handleSaveBlock(index: number) {
-    const draft = draftBlocks[index]
-    const meta = draftMetas[index]
-    if (!draft || !meta || !ownerId) return
-
-    const missing: string[] = []
-    if (!meta.type) missing.push('type')
-    if (!meta.blockName.trim()) missing.push('block name')
-
-    if (missing.length > 0) {
-      updateDraftMeta(index, { saveError: `Missing required fields: ${missing.join(', ')}.` })
-      return
+  async function runCardSafetyCheck(body: string): Promise<CheckResult> {
+    console.log('[PromptBuilder] card safety check dispatch, length:', body.length)
+    try {
+      const res = await fetch('/api/admin/prompt/compile/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body }),
+      })
+      if (!res.ok) {
+        console.error('[PromptBuilder] card safety check HTTP error:', res.status)
+        return { ok: true, issues: [] }
+      }
+      const data: CheckResult = await res.json()
+      console.log('[PromptBuilder] card safety check result:', {
+        ok: data.ok,
+        issueCount: data.issues?.length ?? 0,
+      })
+      return {
+        ok: data.ok === true,
+        issues: Array.isArray(data.issues) ? data.issues : [],
+      }
+    } catch (err) {
+      console.error('[PromptBuilder] card safety check failed:', err)
+      return { ok: true, issues: [] }
     }
+  }
+
+  async function saveBlockToSupabase(index: number, draft: DraftBlock, meta: DraftCardMeta): Promise<boolean> {
+    if (!ownerId) return false
 
     updateDraftMeta(index, { saveError: null, isSaving: true })
     try {
@@ -557,6 +587,7 @@ export default function PromptBuilderPage() {
         }
       }
 
+      console.log('[PromptBuilder] card save dispatch:', { index, title: meta.blockName })
       const res = await fetch('/api/admin/blocks/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -574,10 +605,12 @@ export default function PromptBuilderPage() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null)
+        console.error('[PromptBuilder] card save failed:', data?.error ?? res.status)
         updateDraftMeta(index, { saveError: data?.error ?? 'Failed to save block.', isSaving: false })
-        return
+        return false
       }
 
+      console.log('[PromptBuilder] card save success:', { index })
       removeDraft(index)
 
       // If all drafts saved, inject continuation message
@@ -586,10 +619,74 @@ export default function PromptBuilderPage() {
         setSessionStartIndex(chatMessages.length + 1)
         textareaRef.current?.focus()
       }
+      return true
     } catch (err) {
-      console.error('[handleSaveBlock] request failed:', err)
+      console.error('[PromptBuilder] card save request failed:', err)
       updateDraftMeta(index, { saveError: 'Network error — could not reach the server.', isSaving: false })
+      return false
     }
+  }
+
+  async function handleCheckAndSaveBlock(index: number) {
+    const draft = draftBlocks[index]
+    const meta = draftMetas[index]
+    if (!draft || !meta || !ownerId) return
+
+    // Validate required fields before spending a check call
+    const missing: string[] = []
+    if (!meta.type) missing.push('type')
+    if (!meta.blockName.trim()) missing.push('block name')
+    if (missing.length > 0) {
+      updateDraftMeta(index, { saveError: `Missing required fields: ${missing.join(', ')}.` })
+      return
+    }
+
+    console.log('[PromptBuilder] check & save card:', { index })
+    // Clear stale issues and errors before running
+    updateDraftMeta(index, { isChecking: true, issues: [], saveError: null })
+    const result = await runCardSafetyCheck(draft.content)
+
+    if (!result.ok && result.issues.length > 0) {
+      console.log('[PromptBuilder] card check flagged issues, keeping card open:', { index, count: result.issues.length })
+      updateDraftMeta(index, { isChecking: false, issues: result.issues })
+      return
+    }
+
+    // Clean — proceed to save
+    console.log('[PromptBuilder] card check clean, dispatching save:', { index })
+    updateDraftMeta(index, { isChecking: false })
+    await saveBlockToSupabase(index, draft, meta)
+  }
+
+  async function handleSaveAnywayBlock(index: number) {
+    const draft = draftBlocks[index]
+    const meta = draftMetas[index]
+    if (!draft || !meta || !ownerId) return
+
+    const missing: string[] = []
+    if (!meta.type) missing.push('type')
+    if (!meta.blockName.trim()) missing.push('block name')
+    if (missing.length > 0) {
+      updateDraftMeta(index, { saveError: `Missing required fields: ${missing.join(', ')}.` })
+      return
+    }
+
+    console.log('[PromptBuilder] card save anyway (bypass check):', { index })
+    // Clear issues so they don't linger after the bypass save
+    updateDraftMeta(index, { issues: [], saveError: null })
+    await saveBlockToSupabase(index, draft, meta)
+  }
+
+  function handleRemoveOffendingFromCard(index: number, offendingText: string) {
+    console.log('[PromptBuilder] remove offending from card:', { index, length: offendingText.length })
+    setDraftBlocks(prev => prev.map((d, i) => (
+      i === index ? { ...d, content: d.content.replace(offendingText, '') } : d
+    )))
+    // Drop this issue and any duplicates referencing the same offendingText
+    setDraftMetas(prev => prev.map((m, i) => {
+      if (i !== index) return m
+      return { ...m, issues: m.issues.filter(iss => iss.offendingText !== offendingText) }
+    }))
   }
 
 
@@ -1103,6 +1200,8 @@ export default function PromptBuilderPage() {
                 const meta = draftMetas[cardIndex]
                 if (!meta) return null
                 const isEditingCard = editingCardIndex === cardIndex
+                const hasIssues = meta.issues.length > 0
+                const busy = meta.isChecking || meta.isSaving
                 return (
                   <Card key={cardIndex} variant="outlined">
                     <Stack gap="sm">
@@ -1159,6 +1258,51 @@ export default function PromptBuilderPage() {
                           </Text>
                         </Alert>
                       )}
+                      {hasIssues && (
+                        <Alert
+                          color="yellow"
+                          variant="light"
+                          radius="sm"
+                          title="Safety check flagged this block"
+                        >
+                          <Stack gap="xs">
+                            {meta.issues.map((issue, i) => (
+                              <Stack key={i} gap={4}>
+                                <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+                                  {issue.description}
+                                </Text>
+                                {issue.offendingText && (
+                                  <Stack gap={4}>
+                                    <Text
+                                      variant="muted"
+                                      style={{
+                                        fontFamily: 'var(--mantine-font-family-monospace)',
+                                        fontSize: 'var(--mantine-font-size-xs)',
+                                        backgroundColor: 'var(--mantine-color-yellow-0)',
+                                        padding: '2px 6px',
+                                        borderRadius: 'var(--mantine-radius-sm)',
+                                        wordBreak: 'break-word',
+                                      }}
+                                    >
+                                      {issue.offendingText}
+                                    </Text>
+                                    <MantineButton
+                                      variant="subtle"
+                                      color="yellow"
+                                      size="xs"
+                                      onClick={() => handleRemoveOffendingFromCard(cardIndex, issue.offendingText!)}
+                                      disabled={busy}
+                                      style={{ alignSelf: 'flex-start' }}
+                                    >
+                                      Remove
+                                    </MantineButton>
+                                  </Stack>
+                                )}
+                              </Stack>
+                            ))}
+                          </Stack>
+                        </Alert>
+                      )}
                       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
                         <TextInput
                           label="Block name"
@@ -1198,10 +1342,27 @@ export default function PromptBuilderPage() {
                         </Text>
                       )}
                       <Group gap="xs">
-                        <Button variant="primary" size="sm" onClick={() => handleSaveBlock(cardIndex)} disabled={meta.isSaving}>
-                          {meta.isSaving ? 'Saving...' : 'Save block'}
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleCheckAndSaveBlock(cardIndex)}
+                          disabled={busy}
+                        >
+                          {meta.isChecking ? 'Checking...' : meta.isSaving ? 'Saving...' : 'Check & Save'}
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => removeDraft(cardIndex)} disabled={meta.isSaving}>
+                        {hasIssues && (
+                          <MantineButton
+                            variant="default"
+                            color="yellow"
+                            size="sm"
+                            onClick={() => handleSaveAnywayBlock(cardIndex)}
+                            disabled={meta.isChecking}
+                            loading={meta.isSaving}
+                          >
+                            Save Anyway
+                          </MantineButton>
+                        )}
+                        <Button variant="ghost" size="sm" onClick={() => removeDraft(cardIndex)} disabled={busy}>
                           Discard
                         </Button>
                       </Group>
