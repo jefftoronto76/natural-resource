@@ -1,18 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { Button, Stack, Textarea, Group } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
+import { Stack, Textarea, Group, Alert } from '@mantine/core'
 import { Text } from '@/components/admin/primitives/Text'
 import { PromptFullnessMeter } from '@/components/admin/primitives/PromptFullnessMeter'
-
-interface CompileResponse {
-  success: boolean
-  version: number
-  tokenCount: number
-  content: string
-  updatedAt: string
-}
 
 export interface PromptPreviewProps {
   initialContent: string
@@ -38,54 +28,15 @@ export function PromptPreview({
   initialUpdatedAt,
   initialBodies,
 }: PromptPreviewProps) {
-  const [content, setContent] = useState(initialContent)
-  const [version, setVersion] = useState<number | null>(initialVersion)
-  const [updatedAt, setUpdatedAt] = useState<string | null>(initialUpdatedAt)
-  const [bodies, setBodies] = useState<string[]>(initialBodies)
-  const [publishing, setPublishing] = useState(false)
-
-  async function handlePublish() {
-    setPublishing(true)
-    try {
-      const res = await fetch('/api/admin/prompt/compile', { method: 'POST' })
-      if (!res.ok) {
-        const data = await res.json().catch(() => null)
-        const message = data?.error ?? 'Compile failed'
-        notifications.show({
-          color: 'red',
-          title: 'Publish failed',
-          message,
-        })
-        return
-      }
-      const data: CompileResponse = await res.json()
-      setContent(data.content)
-      setVersion(data.version)
-      setUpdatedAt(data.updatedAt)
-      // Refresh the meter's data from the new compiled content — treat the
-      // full content as a single body for token math. This matches the
-      // server-side token count exactly.
-      setBodies([data.content])
-      notifications.show({
-        color: 'green',
-        title: 'Prompt published',
-        message: `Version ${data.version}`,
-      })
-    } catch (err) {
-      console.error('[PromptPreview] publish failed:', err)
-      notifications.show({
-        color: 'red',
-        title: 'Publish failed',
-        message: 'Network error — could not reach the server.',
-      })
-    } finally {
-      setPublishing(false)
-    }
-  }
-
   return (
     <Stack gap="md">
-      <PromptFullnessMeter bodies={bodies} />
+      <Alert color="gray" variant="light" radius="sm">
+        <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+          This is your active prompt. To make changes, edit blocks in the Composer.
+        </Text>
+      </Alert>
+
+      <PromptFullnessMeter bodies={initialBodies} />
 
       <Group gap="md" wrap="wrap">
         <Text
@@ -95,7 +46,7 @@ export function PromptPreview({
             fontSize: 'var(--mantine-font-size-xs)',
           }}
         >
-          Version: {version ?? '—'}
+          Version: {initialVersion ?? '—'}
         </Text>
         <Text
           variant="muted"
@@ -104,12 +55,12 @@ export function PromptPreview({
             fontSize: 'var(--mantine-font-size-xs)',
           }}
         >
-          Last updated: {formatTimestamp(updatedAt)}
+          Last updated: {formatTimestamp(initialUpdatedAt)}
         </Text>
       </Group>
 
       <Textarea
-        value={content}
+        value={initialContent}
         readOnly
         autosize
         minRows={8}
@@ -123,17 +74,6 @@ export function PromptPreview({
           },
         }}
       />
-
-      <Group>
-        <Button
-          variant="filled"
-          color="green"
-          onClick={handlePublish}
-          loading={publishing}
-        >
-          Compile & Publish
-        </Button>
-      </Group>
     </Stack>
   )
 }

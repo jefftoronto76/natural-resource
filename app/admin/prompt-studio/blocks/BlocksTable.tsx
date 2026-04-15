@@ -15,6 +15,7 @@ import {
   Modal,
   Button,
   Checkbox,
+  Alert,
 } from '@mantine/core'
 import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { Text } from '@/components/admin/primitives/Text'
@@ -64,6 +65,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkInFlight, setBulkInFlight] = useState(false)
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const [safetyFlags, setSafetyFlags] = useState<Record<string, string>>({})
 
   const selectedCount = selectedIds.size
   const allSelected = items.length > 0 && selectedCount === items.length
@@ -168,13 +170,55 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     setEditBody('')
   }
 
+  async function runSafetyCheck(id: string, body: string) {
+    console.log('[BlocksTable] safety check dispatch:', { id })
+    try {
+      const res = await fetch('/api/admin/prompt/compile/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body }),
+      })
+      if (!res.ok) {
+        console.error('[BlocksTable] safety check HTTP error:', res.status)
+        return
+      }
+      const data: { ok?: boolean; issues?: string[] } = await res.json()
+      console.log('[BlocksTable] safety check result:', { id, ok: data.ok, issueCount: data.issues?.length ?? 0 })
+      if (data.ok === false && data.issues && data.issues.length > 0) {
+        setSafetyFlags(prev => ({ ...prev, [id]: data.issues!.join(' · ') }))
+      } else {
+        // Clean — clear any existing flag for this block
+        setSafetyFlags(prev => {
+          if (!(id in prev)) return prev
+          const next = { ...prev }
+          delete next[id]
+          return next
+        })
+      }
+    } catch (err) {
+      console.error('[BlocksTable] safety check failed:', err)
+    }
+  }
+
+  function dismissSafetyFlag(id: string) {
+    setSafetyFlags(prev => {
+      if (!(id in prev)) return prev
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }
+
   async function handleSaveEdit(id: string) {
     setSavingId(id)
-    const ok = await patchBlock(id, { body: editBody })
+    const newBody = editBody
+    const ok = await patchBlock(id, { body: newBody })
     if (ok) {
-      setItems(prev => prev.map(b => (b.id === id ? { ...b, body: editBody } : b)))
+      setItems(prev => prev.map(b => (b.id === id ? { ...b, body: newBody } : b)))
       setEditingId(null)
       setEditBody('')
+      // Fire-and-forget safety check — result updates the flag inline.
+      runSafetyCheck(id, newBody)
     }
     setSavingId(null)
   }
@@ -379,6 +423,24 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                       </Table.Td>
                     </Table.Tr>
                   )}
+                  {safetyFlags[block.id] && (
+                    <Table.Tr>
+                      <Table.Td colSpan={6}>
+                        <Alert
+                          color="yellow"
+                          variant="light"
+                          radius="sm"
+                          withCloseButton
+                          onClose={() => dismissSafetyFlag(block.id)}
+                          title="Safety check flagged this block"
+                        >
+                          <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+                            {safetyFlags[block.id]}
+                          </Text>
+                        </Alert>
+                      </Table.Td>
+                    </Table.Tr>
+                  )}
                 </Fragment>
               )
             })}
@@ -486,6 +548,21 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                     <IconTrash size={16} />
                   </ActionIcon>
                 </Group>
+              )}
+              {safetyFlags[block.id] && (
+                <Alert
+                  color="yellow"
+                  variant="light"
+                  radius="sm"
+                  mt="sm"
+                  withCloseButton
+                  onClose={() => dismissSafetyFlag(block.id)}
+                  title="Safety check flagged this block"
+                >
+                  <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+                    {safetyFlags[block.id]}
+                  </Text>
+                </Alert>
               )}
             </Paper>
           )
