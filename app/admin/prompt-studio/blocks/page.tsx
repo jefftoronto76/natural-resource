@@ -28,7 +28,7 @@ export default async function BlocksPage() {
 
   const { data: blocks, error } = await supabase
     .from('blocks')
-    .select('id, title, type, body, status, is_default, created_at, topics(name)')
+    .select('id, title, type, body, status, is_default, order, created_at, topics(name)')
     .eq('tenant_id', tenantId)
     .neq('status', 'deleted')
     .order('created_at', { ascending: false })

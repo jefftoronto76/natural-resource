@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Fragment } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import {
   Table,
   Badge,
@@ -16,6 +16,7 @@ import {
   Button,
   Checkbox,
   Alert,
+  NumberInput,
 } from '@mantine/core'
 import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { Text } from '@/components/admin/primitives/Text'
@@ -56,6 +57,7 @@ export interface BlockRow {
   body: string
   status: BlockStatus
   is_default: boolean
+  order: number | null
   created_at: string
   topics: { name: string } | null
 }
@@ -64,6 +66,43 @@ const STATUS_OPTIONS = [
   { value: 'active', label: 'Active' },
   { value: 'disabled', label: 'Disabled' },
 ]
+
+function OrderCell({
+  blockId,
+  value,
+  onCommit,
+}: {
+  blockId: string
+  value: number | null
+  onCommit: (id: string, oldValue: number | null, nextValue: number | null) => void | Promise<void>
+}) {
+  const [local, setLocal] = useState<string | number>(value ?? '')
+
+  useEffect(() => {
+    setLocal(value ?? '')
+  }, [value])
+
+  return (
+    <NumberInput
+      value={local}
+      onChange={v => setLocal(v)}
+      onBlur={() => {
+        const next =
+          typeof local === 'number'
+            ? local
+            : local === '' || local === '-'
+              ? null
+              : Number(local)
+        void onCommit(blockId, value, Number.isNaN(next as number) ? null : next)
+      }}
+      hideControls
+      allowDecimal={false}
+      w={70}
+      size="xs"
+      aria-label="Order"
+    />
+  )
+}
 
 export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const [items, setItems] = useState<BlockRow[]>(rows)
@@ -147,7 +186,10 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     setBulkDeleteOpen(false)
   }
 
-  async function patchBlock(id: string, updates: { status?: BlockStatus; body?: string }): Promise<boolean> {
+  async function patchBlock(
+    id: string,
+    updates: { status?: BlockStatus; body?: string; order?: number },
+  ): Promise<boolean> {
     try {
       const res = await fetch(`/api/admin/blocks/${id}`, {
         method: 'PATCH',
@@ -158,6 +200,26 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     } catch (err) {
       console.error('[BlocksTable] patch failed:', err)
       return false
+    }
+  }
+
+  async function handleOrderBlur(id: string, oldValue: number | null, nextValue: number | null) {
+    console.log('[BlocksTable] order blur:', { id, oldValue, nextValue })
+    if (nextValue === null || !Number.isFinite(nextValue) || !Number.isInteger(nextValue)) {
+      console.log('[BlocksTable] order blur skipped — invalid value:', { id, nextValue })
+      return
+    }
+    if (nextValue === oldValue) {
+      console.log('[BlocksTable] order blur skipped — no change:', { id, value: nextValue })
+      return
+    }
+    console.log('[BlocksTable] order PATCH dispatch:', { id, oldValue, newValue: nextValue })
+    const ok = await patchBlock(id, { order: nextValue })
+    if (ok) {
+      console.log('[BlocksTable] order PATCH success:', { id, oldValue, newValue: nextValue })
+      setItems(prev => prev.map(b => (b.id === id ? { ...b, order: nextValue } : b)))
+    } else {
+      console.error('[BlocksTable] order PATCH failure:', { id, oldValue, newValue: nextValue })
     }
   }
 
@@ -375,6 +437,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
               <Table.Th>Title</Table.Th>
               <Table.Th>Type</Table.Th>
               <Table.Th>Topic</Table.Th>
+              <Table.Th style={{ width: 90 }}>Order</Table.Th>
               <Table.Th>Status</Table.Th>
               <Table.Th>Actions</Table.Th>
             </Table.Tr>
@@ -412,6 +475,13 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                     </Table.Td>
                     <Table.Td>
                       <Text variant="muted">{block.topics?.name ?? '—'}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <OrderCell
+                        blockId={block.id}
+                        value={block.order}
+                        onCommit={handleOrderBlur}
+                      />
                     </Table.Td>
                     <Table.Td>
                       <Badge
@@ -460,7 +530,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                   </Table.Tr>
                   {isEditing && (
                     <Table.Tr>
-                      <Table.Td colSpan={6}>
+                      <Table.Td colSpan={7}>
                         <Stack gap="sm" p="sm">
                           <Textarea
                             value={editBody}
@@ -598,6 +668,14 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
               </Group>
               <Text variant="label" style={{ marginTop: 4 }}>{block.title}</Text>
               <Text variant="muted">{block.topics?.name ?? '—'}</Text>
+              <Group gap="xs" mt="xs" wrap="nowrap" align="center">
+                <Text variant="label">Order</Text>
+                <OrderCell
+                  blockId={block.id}
+                  value={block.order}
+                  onCommit={handleOrderBlur}
+                />
+              </Group>
               {isEditing ? (
                 <Stack gap="sm" mt="sm">
                   <Textarea

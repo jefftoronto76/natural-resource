@@ -203,7 +203,7 @@ header.
 | Route | Method | Purpose |
 |-------|--------|---------|
 | `/api/admin/blocks` | GET | Returns active blocks (`id, title, type, body, is_default`) for the authenticated tenant. Filters `active = true`, ordered by type then title. Used for the Composer's existing-blocks context. |
-| `/api/admin/blocks/[id]` | PATCH | Updates block `status` or `body`. Validates status against `'active' \| 'disabled' \| 'deleted'`. Keeps the legacy `active` boolean in sync with `status` so the Composer GET doesn't surface disabled or deleted blocks. Tenant-scoped via `.eq('tenant_id', authCtx.tenant_id)`. |
+| `/api/admin/blocks/[id]` | PATCH | Updates block `status`, `body`, or `order`. Validates status against `'active' \| 'disabled' \| 'deleted'`; `order` must be an integer. Keeps the legacy `active` boolean in sync with `status` so the Composer GET doesn't surface disabled or deleted blocks. Tenant-scoped via `.eq('tenant_id', authCtx.tenant_id)`. |
 | `/api/admin/blocks/save` | POST | Creates a new block from the Composer draft confirmation flow. |
 | `/api/admin/blocks/chat` | POST | Streaming chat route for the Composer. Accepts `{ type, topic, content, messages, documentContext?, existingBlocks? }`. Returns a Vercel AI SDK data stream. |
 

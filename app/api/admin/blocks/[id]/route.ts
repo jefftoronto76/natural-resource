@@ -19,14 +19,14 @@ export async function PATCH(
 
   const { id } = await params
 
-  let body: { status?: string; body?: string }
+  let body: { status?: string; body?: string; order?: number }
   try {
     body = await req.json()
   } catch {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const updates: { status?: BlockStatus; body?: string; active?: boolean } = {}
+  const updates: { status?: BlockStatus; body?: string; active?: boolean; order?: number } = {}
 
   if (typeof body.status === 'string') {
     if (!VALID_STATUSES.includes(body.status as BlockStatus)) {
@@ -41,6 +41,13 @@ export async function PATCH(
 
   if (typeof body.body === 'string') {
     updates.body = body.body
+  }
+
+  if (body.order !== undefined) {
+    if (typeof body.order !== 'number' || !Number.isFinite(body.order) || !Number.isInteger(body.order)) {
+      return Response.json({ error: 'Invalid order value' }, { status: 400 })
+    }
+    updates.order = body.order
   }
 
   if (Object.keys(updates).length === 0) {
