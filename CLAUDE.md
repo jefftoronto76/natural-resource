@@ -193,7 +193,7 @@ header.
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/admin/prompt/compile` | POST | Compiles all active blocks for the authenticated tenant into the master prompt. Orders by compile sequence (guardrail → identity → process → knowledge → escalation), then by `order` column ascending within each type. Joins bodies with double newlines. Archives the previous `master_prompt` row to `master_prompt_history` and increments the version. Returns `{ success, version, tokenCount, content, updatedAt }`. |
+| `/api/admin/prompt/compile` | POST | Compiles all active blocks for the authenticated tenant into the master prompt. Orders by compile sequence (guardrail → identity → process → knowledge → escalation); within each type, blocks with `order > 0` come first ascending by order, then blocks with `order` = 0 or null come last ordered by title ascending. Logs the final compile sequence (title, type, order) before joining. Joins bodies with double newlines. Archives the previous `master_prompt` row to `master_prompt_history` and increments the version. Returns `{ success, version, tokenCount, content, updatedAt }`. |
 | `/api/admin/prompt/compile/check` | POST | LLM-based safety review of a single block body. Takes `{ body: string }`, returns `{ ok: boolean, issues: [{ description: string, offendingText: string \| null }] }`. Server-side verbatim guard: every returned `offendingText` is validated against `body.includes()` and nulled if not a real substring. Fails open to `{ ok: true, issues: [] }` on any error so the save flow is never blocked. |
 | `/api/admin/prompt/save` | POST | Manual save path for the master prompt (legacy). Takes `{ prompt, checkResult }`, tenant-scoped, archives previous version to history, increments version. |
 | `/api/admin/prompt/check` | POST | Safety check for an entire system prompt (legacy, used by the old prompt save flow). Returns `{ pass, issues }`. |
@@ -273,8 +273,9 @@ deploy.
 
 **Compile order**: Types are compiled into the master prompt in this
 fixed order: guardrail (1st), identity (2nd), process (3rd), knowledge
-(4th), escalation (5th). Within each type, blocks are ordered by the
-`order` column ascending. This order is enforced in
+(4th), escalation (5th). Within each type, blocks with `order > 0` come
+first ascending by `order`; blocks with `order` = 0 or null come last,
+ordered by title ascending. This order is enforced in
 `/api/admin/prompt/compile` and encoded in `BlocksTable.tsx`
 `TYPE_LABELS` — do not change without updating both.
 

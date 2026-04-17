@@ -3,13 +3,15 @@ import { getAdminClient } from '@/lib/supabase-admin'
 import { getAuthContext } from '@/lib/get-auth-context'
 
 // Fixed compile sequence — mirrors the TYPE_LABELS ordinal order on the
-// Blocks page. Blocks in each type bucket are then sub-ordered by the
-// `order` column ascending.
+// Blocks page. Within each type bucket: blocks with `order > 0` come
+// first ascending by order; blocks with `order` = 0 or null come last,
+// ordered by title ascending.
 const COMPILE_ORDER = ['guardrail', 'identity', 'process', 'knowledge', 'escalation'] as const
 type CompileType = typeof COMPILE_ORDER[number]
 
 interface BlockForCompile {
   id: string
+  title: string
   type: string
   body: string
   order: number | null
@@ -30,7 +32,7 @@ export async function POST() {
   console.log('[prompt/compile] fetching active blocks for tenant_id:', authCtx.tenant_id)
   const { data: blocks, error: blocksError } = await supabase
     .from('blocks')
-    .select('id, type, body, order')
+    .select('id, title, type, body, order')
     .eq('tenant_id', authCtx.tenant_id)
     .eq('status', 'active')
 
@@ -47,17 +49,30 @@ export async function POST() {
     COMPILE_ORDER.map((t, i) => [t, i]),
   )
 
+  const isOrdered = (n: number | null): boolean =>
+    typeof n === 'number' && Number.isFinite(n) && n > 0
+
   const sorted = [...rows]
     .filter(b => typeOrderIndex.has(b.type))
     .sort((a, b) => {
       const typeDelta = (typeOrderIndex.get(a.type) ?? 999) - (typeOrderIndex.get(b.type) ?? 999)
       if (typeDelta !== 0) return typeDelta
-      const orderA = a.order ?? Number.MAX_SAFE_INTEGER
-      const orderB = b.order ?? Number.MAX_SAFE_INTEGER
-      return orderA - orderB
+
+      const aOrdered = isOrdered(a.order)
+      const bOrdered = isOrdered(b.order)
+      // Ordered blocks (order > 0) come before unordered (0 or null).
+      if (aOrdered && !bOrdered) return -1
+      if (!aOrdered && bOrdered) return 1
+      // Both ordered: sort by order ascending.
+      if (aOrdered && bOrdered) return (a.order as number) - (b.order as number)
+      // Both unordered: sort by title ascending.
+      return (a.title ?? '').localeCompare(b.title ?? '')
     })
 
-  console.log('[prompt/compile] compile order:', sorted.map(b => ({ type: b.type, order: b.order, id: b.id })))
+  console.log(
+    '[prompt/compile] compile sequence:',
+    sorted.map(b => ({ title: b.title, type: b.type, order: b.order })),
+  )
 
   // Warn about excluded types (blocks with an unknown/legacy type)
   const excludedCount = rows.length - sorted.length
