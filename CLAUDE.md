@@ -150,7 +150,7 @@ Reusable admin-side components in `/components/admin/primitives/`:
 
 | Component | File | Purpose |
 |-----------|------|---------|
-| `PromptFullnessMeter` | `PromptFullnessMeter.tsx` | Takes `bodies: string[]`, sums character counts, approximates tokens as `ceil(chars/4)`, renders a Mantine `Progress` bar with a monospace label. Color thresholds: green under 3000 tokens, yellow 3000–4000, red over 4000. Used on the Blocks page (reactive to the client-side items state) and the Prompt page (server-fetched on mount). |
+| `PromptFullnessMeter` | `PromptFullnessMeter.tsx` | Takes `bodies: string[]`, sums character counts, approximates tokens as `ceil(chars/4)`, renders a Mantine `Progress` bar with a monospace label. Color thresholds: green under 5000 tokens, yellow 5000–7000, red over 7000. Used on the Blocks page (reactive to the client-side items state) and the Prompt page (server-fetched on mount). |
 
 ### Page-local components
 

@@ -19,6 +19,7 @@ import {
   NumberInput,
 } from '@mantine/core'
 import { IconPencil, IconTrash } from '@tabler/icons-react'
+import { notifications } from '@mantine/notifications'
 import { Text } from '@/components/admin/primitives/Text'
 import { PromptFullnessMeter } from '@/components/admin/primitives/PromptFullnessMeter'
 
@@ -74,7 +75,7 @@ function OrderCell({
 }: {
   blockId: string
   value: number | null
-  onCommit: (id: string, oldValue: number | null, nextValue: number | null) => void | Promise<void>
+  onCommit: (id: string, oldValue: number | null, nextValue: number | null) => Promise<boolean>
 }) {
   const [local, setLocal] = useState<string | number>(value ?? '')
 
@@ -87,13 +88,18 @@ function OrderCell({
       value={local}
       onChange={v => setLocal(v)}
       onBlur={() => {
-        const next =
+        const parsed =
           typeof local === 'number'
             ? local
             : local === '' || local === '-'
               ? null
               : Number(local)
-        void onCommit(blockId, value, Number.isNaN(next as number) ? null : next)
+        const next = parsed === null || Number.isNaN(parsed) ? null : parsed
+        void onCommit(blockId, value, next).then(ok => {
+          if (!ok) {
+            setLocal(value ?? '')
+          }
+        })
       }}
       hideControls
       allowDecimal={false}
@@ -203,24 +209,56 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     }
   }
 
-  async function handleOrderBlur(id: string, oldValue: number | null, nextValue: number | null) {
+  async function handleOrderBlur(
+    id: string,
+    oldValue: number | null,
+    nextValue: number | null,
+  ): Promise<boolean> {
     console.log('[BlocksTable] order blur:', { id, oldValue, nextValue })
     if (nextValue === null || !Number.isFinite(nextValue) || !Number.isInteger(nextValue)) {
       console.log('[BlocksTable] order blur skipped — invalid value:', { id, nextValue })
-      return
+      return false
     }
     if (nextValue === oldValue) {
       console.log('[BlocksTable] order blur skipped — no change:', { id, value: nextValue })
-      return
+      return true
     }
+
+    const current = items.find(b => b.id === id)
+    if (!current) {
+      console.error('[BlocksTable] order blur — block not found in state:', { id })
+      return false
+    }
+
+    const conflict = items.find(
+      b => b.id !== id && b.type === current.type && b.order === nextValue,
+    )
+    console.log('[BlocksTable] order duplicate check:', {
+      id,
+      type: current.type,
+      nextValue,
+      hasConflict: Boolean(conflict),
+      conflictTitle: conflict?.title ?? null,
+      conflictId: conflict?.id ?? null,
+    })
+    if (conflict) {
+      notifications.show({
+        color: 'red',
+        title: 'Duplicate order number',
+        message: `Order number already used by ${conflict.title} in this type. Please choose a different number.`,
+      })
+      return false
+    }
+
     console.log('[BlocksTable] order PATCH dispatch:', { id, oldValue, newValue: nextValue })
     const ok = await patchBlock(id, { order: nextValue })
     if (ok) {
       console.log('[BlocksTable] order PATCH success:', { id, oldValue, newValue: nextValue })
       setItems(prev => prev.map(b => (b.id === id ? { ...b, order: nextValue } : b)))
-    } else {
-      console.error('[BlocksTable] order PATCH failure:', { id, oldValue, newValue: nextValue })
+      return true
     }
+    console.error('[BlocksTable] order PATCH failure:', { id, oldValue, newValue: nextValue })
+    return false
   }
 
   async function handleStatusChange(id: string, value: string | null) {
