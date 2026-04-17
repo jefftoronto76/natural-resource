@@ -169,6 +169,7 @@ page-local client components.
 | Page | File | Purpose |
 |------|------|---------|
 | Settings | `app/admin/settings/page.tsx` | Tenant configuration. Currently contains the Parameters section rendering the `SageParameters` component. |
+| Blocks | `app/admin/prompt-studio/blocks/page.tsx` | Server component — fetches all non-deleted blocks for the tenant (including `order`) and renders `BlocksTable`. Table exposes an inline `Order` column: a Mantine `NumberInput` (no stepper, width ~70px) on desktop, and a labeled field on mobile. Values save automatically on blur via `PATCH /api/admin/blocks/[id]` with `{ order }` — no separate save button. Before dispatch, the client checks `items` state for another block of the same `type` with the same `order`; on conflict, a red Mantine notification ("Order number already used by [title] in this type. Please choose a different number.") fires and the save is aborted, reverting the input to its prior value. Console logs cover blur, duplicate-check result, PATCH dispatch, success, failure. |
 
 ---
 
@@ -241,7 +242,7 @@ Row Level Security is enforced at the Supabase layer.
 | `tenants` | id, parent_id, name, slug, type, settings, domain (text) |
 | `tenant_users` | tenant_id, user_id, role |
 | `users` | id, clerk_id, email, name |
-| `blocks` | id, topic_id, owner_id, tenant_id, type, title, body, active, status (text default 'active': 'active' \| 'disabled' \| 'deleted'), order, is_default (bool default false), default_edited_at (timestamptz), default_edited_by (uuid references users(id)), default_action (text: 'edited' \| 'deleted'), default_acknowledged (bool default false), default_acknowledged_at (timestamptz) |
+| `blocks` | id, topic_id, owner_id, tenant_id, type, title, body, active, status (text default 'active': 'active' \| 'disabled' \| 'deleted'), order (integer, nullable — actively used: within each type, blocks with `order > 0` sort ascending by order, blocks with `order` = 0 or null sort last by title ascending; consumed by `/api/admin/prompt/compile` and the Blocks page inline Order input), is_default (bool default false), default_edited_at (timestamptz), default_edited_by (uuid references users(id)), default_action (text: 'edited' \| 'deleted'), default_acknowledged (bool default false), default_acknowledged_at (timestamptz) |
 | `topics` | id, tenant_id, type, name |
 | `content` | id, owner_id, tenant_id, block_id, type, name, raw, storage_path |
 | `chat_sessions` | id, tenant_id, visitor_name, messages, status, message_count, session_type (text default 'prospect': 'prospect' \| 'composer' \| 'client'), session_subtype (text nullable: 'block' \| 'wizard'), block_id (uuid references blocks(id)) |
