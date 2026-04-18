@@ -4,6 +4,62 @@ import { getAdminClient } from '@/lib/supabase-admin'
 import { DEFAULT_SYSTEM_PROMPT } from '@/lib/sage-prompt'
 import { getTenantFromRequest } from '@/lib/get-tenant-from-request'
 
+interface SageParameterRow {
+  key: string
+  label: string | null
+  description: string | null
+  cta_label: string | null
+  url: string | null
+}
+
+async function getBookingCardSection(tenantId: string): Promise<string> {
+  try {
+    const { data, error } = await getAdminClient()
+      .from('sage_parameters')
+      .select('key, label, description, cta_label, url')
+      .eq('tenant_id', tenantId)
+
+    if (error) {
+      console.error('[sage/route] sage_parameters query failed:', error.message)
+      console.log('[sage/route] booking card section appended:', false, 'tenant_id:', tenantId)
+      return ''
+    }
+
+    const rows: SageParameterRow[] = data ?? []
+    console.log('[sage/route] sage_parameters fetched:', {
+      tenant_id: tenantId,
+      count: rows.length,
+    })
+
+    if (rows.length === 0) {
+      console.log('[sage/route] booking card section appended:', false, 'tenant_id:', tenantId)
+      return ''
+    }
+
+    const lines = rows.map(
+      row =>
+        `[BOOKING: ${row.label ?? ''} | ${row.description ?? ''} | ${row.cta_label ?? ''} | ${row.url ?? ''}]`,
+    )
+
+    const section = [
+      'Booking cards — when offering a session or call, output a booking card on its own line at the end of your message using this exact syntax. Never output it inline within a sentence. Never output it mid-message.',
+      '',
+      'Available booking options:',
+      ...lines,
+    ].join('\n')
+
+    console.log('[sage/route] booking card section appended:', true, 'tenant_id:', tenantId)
+    return section
+  } catch (err) {
+    console.error(
+      '[sage/route] sage_parameters query threw:',
+      err instanceof Error ? err.message : err,
+    )
+    console.log('[sage/route] booking card section appended:', false, 'tenant_id:', tenantId)
+    return ''
+  }
+}
+
 async function getSystemPrompt(tenantId: string | null): Promise<string> {
   if (!tenantId) {
     console.log('[sage/route] no tenant_id — using DEFAULT_SYSTEM_PROMPT')
@@ -76,7 +132,11 @@ export async function POST(req: Request) {
     }
   }
 
-  const systemPrompt = await getSystemPrompt(tenantId)
+  const [basePrompt, bookingSection] = await Promise.all([
+    getSystemPrompt(tenantId),
+    tenantId ? getBookingCardSection(tenantId) : Promise.resolve(''),
+  ])
+  const systemPrompt = bookingSection ? `${basePrompt}\n\n${bookingSection}` : basePrompt
 
   try {
     const result = await streamText({
