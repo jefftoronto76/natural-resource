@@ -54,10 +54,10 @@ function parseBookingCards(content: string): { prose: string; cards: BookingCard
   return { prose, cards }
 }
 
-// Runs an embed snippet by re-materializing it into live <script>/<link> nodes
-// — setting innerHTML alone does NOT execute <script>. Handles both inline JS
-// and HTML fragments containing <script src="..."> tags.
-function executeEmbedCode(embedCode: string): void {
+// Injects an embed snippet into a target element, re-materializing <script>
+// tags so they execute (setting innerHTML alone does NOT execute scripts).
+// Handles both pure inline JS and HTML fragments containing <script src="...">.
+function injectInlineEmbed(target: HTMLElement, embedCode: string): void {
   const trimmed = embedCode.trim()
   if (!trimmed) return
 
@@ -65,14 +65,17 @@ function executeEmbedCode(embedCode: string): void {
   if (!hasScriptTag) {
     const script = document.createElement('script')
     script.text = trimmed
-    document.body.appendChild(script)
+    target.appendChild(script)
     return
   }
 
-  const container = document.createElement('div')
-  container.innerHTML = trimmed
-  Array.from(container.childNodes).forEach(node => {
-    if (node.nodeType !== 1) return
+  const temp = document.createElement('div')
+  temp.innerHTML = trimmed
+  Array.from(temp.childNodes).forEach(node => {
+    if (node.nodeType !== 1) {
+      target.appendChild(node.cloneNode(true))
+      return
+    }
     if (node.nodeName === 'SCRIPT') {
       const original = node as HTMLScriptElement
       const script = document.createElement('script')
@@ -88,57 +91,77 @@ function executeEmbedCode(embedCode: string): void {
           script.setAttribute(attr.name, attr.value)
         }
       }
-      document.body.appendChild(script)
+      target.appendChild(script)
     } else if (node.nodeName === 'LINK') {
       document.head.appendChild(node.cloneNode(true))
     } else {
-      document.body.appendChild(node.cloneNode(true))
+      target.appendChild(node.cloneNode(true))
     }
   })
 }
 
 function BookingCard({ label, description, ctaLabel, url, openAs, embedCode }: BookingCardProps) {
+  const inlineRef = useRef<HTMLDivElement>(null)
+  const [inlineOpen, setInlineOpen] = useState(false)
+
   const effectiveOpenAs: OpenAs =
     openAs === 'popup' && (!embedCode || embedCode.trim().length === 0) ? 'new_tab' : openAs
 
-  const handlePopupClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleInlineClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     if (!embedCode) {
-      console.warn('[BookingCard] popup selected but embed_code missing — falling back to new tab')
+      console.warn('[BookingCard] inline selected but embed_code missing — falling back to new tab')
       if (url) window.open(url, '_blank', 'noopener,noreferrer')
       return
     }
-    console.log('[BookingCard] executing embed_code for', label || url)
+    if (inlineOpen) return
+    const target = inlineRef.current
+    if (!target) return
+    console.log('[BookingCard] injecting inline embed for', label || url)
+    setInlineOpen(true)
     try {
-      executeEmbedCode(embedCode)
+      injectInlineEmbed(target, embedCode)
     } catch (err) {
-      console.error('[BookingCard] embed execution failed — falling back to new tab:', err)
+      console.error('[BookingCard] inline embed injection failed — falling back to new tab:', err)
+      setInlineOpen(false)
       if (url) window.open(url, '_blank', 'noopener,noreferrer')
     }
   }
 
   if (openAs === 'popup' && (!embedCode || embedCode.trim().length === 0)) {
-    console.warn('[BookingCard] popup requested without embed_code for', label || url)
+    console.warn('[BookingCard] inline requested without embed_code for', label || url)
   }
 
   const buttonClass =
     'mt-3 inline-block rounded-md bg-[#2d6a4f] px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-white no-underline hover:opacity-90'
 
   return (
-    <div className="w-full rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-      <p className="m-0 font-body text-base font-semibold text-[#1a1917]">{label}</p>
-      {description && (
-        <p className="mt-1 mb-0 font-body text-sm text-[#1a1917]/60">{description}</p>
-      )}
-      {effectiveOpenAs === 'popup' ? (
-        <button type="button" onClick={handlePopupClick} className={`${buttonClass} cursor-pointer border-0`}>
-          {ctaLabel || 'Book'}
-        </button>
-      ) : url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" className={buttonClass}>
-          {ctaLabel || 'Book'}
-        </a>
-      ) : null}
+    <div className="w-full">
+      <div className="w-full rounded-lg border border-black/10 bg-white p-4 shadow-sm">
+        <p className="m-0 font-body text-base font-semibold text-[#1a1917]">{label}</p>
+        {description && (
+          <p className="mt-1 mb-0 font-body text-sm text-[#1a1917]/60">{description}</p>
+        )}
+        {effectiveOpenAs === 'popup' ? (
+          <button
+            type="button"
+            onClick={handleInlineClick}
+            disabled={inlineOpen}
+            className={`${buttonClass} cursor-pointer border-0 disabled:opacity-50`}
+          >
+            {ctaLabel || 'Book'}
+          </button>
+        ) : url ? (
+          <a href={url} target="_blank" rel="noopener noreferrer" className={buttonClass}>
+            {ctaLabel || 'Book'}
+          </a>
+        ) : null}
+      </div>
+      <div
+        ref={inlineRef}
+        aria-hidden={!inlineOpen}
+        className={`mt-2 w-full min-h-[700px] ${inlineOpen ? 'block' : 'hidden'}`}
+      />
     </div>
   )
 }

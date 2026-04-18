@@ -59,7 +59,7 @@ const NEW_CARD_ID = '__new__'
 
 const OPEN_AS_OPTIONS: { value: OpenAs; label: string }[] = [
   { value: 'new_tab', label: 'New Tab' },
-  { value: 'popup', label: 'Popup' },
+  { value: 'popup', label: 'Inline' },
 ]
 
 function isOpenAs(value: unknown): value is OpenAs {

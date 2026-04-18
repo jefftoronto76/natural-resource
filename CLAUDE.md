@@ -156,8 +156,8 @@ Reusable admin-side components in `/components/admin/primitives/`:
 
 | Component | File | Purpose |
 |-----------|------|---------|
-| `SageParameters` | `app/admin/settings/SageParameters.tsx` | Mantine-based client component rendered inside the Parameters section on the Settings page. Owns the section header row (title + "Add New" button, right-aligned) and the card list below it. Fetches `/api/admin/sage-parameters` on mount. Each existing parameter renders as a Mantine `Card` showing Label (title), Description (subtitle), CTA label, URL, and Open-as (with Embed-code status when `open_as = 'popup'`), plus edit (pencil) / delete (trash) `ActionIcon`s top-right. Edit expands the card inline with `TextInput`s for Label, Description (max 60 chars, live counter), CTA Label (max 20 chars, live counter), and URL; a Mantine `Select` for Open behavior (`New Tab` / `Popup`); and — only when Popup is selected — a monospace Mantine `Textarea` labeled "Embed Code" (placeholder "Paste your booking tool's popup snippet here") for the `embed_code` value. Switching back to `New Tab` nulls `embed_code` on save. Add New prepends an empty editable card to the top of the list. Save and Add both PATCH `/api/admin/sage-parameters` (Add auto-generates `key` from the label, lowercase non-alphanumerics collapsed to `_`; duplicate keys rejected client-side). Delete opens a Mantine `Modal` confirmation and calls `DELETE /api/admin/sage-parameters/[key]`. Surfaces success/error via `@mantine/notifications`. Console logs cover fetch, PATCH dispatch (with `open_as` / `has_embed_code`), success/failure, DELETE, and add-new-card open. |
-| `BookingCard` (+ `parseBookingCards`, `executeEmbedCode`) | `src/components/Chat.tsx` | Inline Tailwind component and parser used by the public visitor chat. `parseBookingCards(content)` extracts every `[BOOKING: label \| description \| cta_label \| url]` match from an assistant message, strips any trailing incomplete `[BOOKING:` fragment still streaming, collapses leftover blank lines, and returns `{ prose, cards }`. The Chat component also fetches `/api/sage/parameters` on mount, matches each parsed card to a parameter by `url`, and passes `openAs` + `embedCode` as props. `BookingCard` is a white card with `border border-black/10` + `shadow-sm`, bold label, muted description, and a `#2d6a4f` CTA whose element type switches on `openAs`: `<a target="_blank" rel="noopener noreferrer">` for `'new_tab'`; `<button>` for `'popup'` that calls `executeEmbedCode(embedCode)` on click. `executeEmbedCode` re-materializes the snippet into live `<script>` / `<link>` nodes so script tags actually execute (handles both inline JS and HTML fragments with `<script src="...">`). If `openAs = 'popup'` and `embedCode` is empty, falls back to new-tab behavior and `console.warn`s. |
+| `SageParameters` | `app/admin/settings/SageParameters.tsx` | Mantine-based client component rendered inside the Parameters section on the Settings page. Owns the section header row (title + "Add New" button, right-aligned) and the card list below it. Fetches `/api/admin/sage-parameters` on mount. Each existing parameter renders as a Mantine `Card` showing Label (title), Description (subtitle), CTA label, URL, and Open-as (with Embed-code status when `open_as = 'popup'`), plus edit (pencil) / delete (trash) `ActionIcon`s top-right. Edit expands the card inline with `TextInput`s for Label, Description (max 60 chars, live counter), CTA Label (max 20 chars, live counter), and URL; a Mantine `Select` for Open behavior (`New Tab` / `Inline` — the `Inline` option maps to the `open_as = 'popup'` DB value for backwards compatibility); and — only when Inline is selected — a monospace Mantine `Textarea` labeled "Embed Code" (placeholder "Paste your booking tool's popup snippet here") for the `embed_code` value. Switching back to `New Tab` nulls `embed_code` on save. Add New prepends an empty editable card to the top of the list. Save and Add both PATCH `/api/admin/sage-parameters` (Add auto-generates `key` from the label, lowercase non-alphanumerics collapsed to `_`; duplicate keys rejected client-side). Delete opens a Mantine `Modal` confirmation and calls `DELETE /api/admin/sage-parameters/[key]`. Surfaces success/error via `@mantine/notifications`. Console logs cover fetch, PATCH dispatch (with `open_as` / `has_embed_code`), success/failure, DELETE, and add-new-card open. |
+| `BookingCard` (+ `parseBookingCards`, `injectInlineEmbed`) | `src/components/Chat.tsx` | Inline Tailwind component and parser used by the public visitor chat. `parseBookingCards(content)` extracts every `[BOOKING: label \| description \| cta_label \| url]` match from an assistant message, strips any trailing incomplete `[BOOKING:` fragment still streaming, collapses leftover blank lines, and returns `{ prose, cards }`. The Chat component also fetches `/api/sage/parameters` on mount, matches each parsed card to a parameter by `url`, and passes `openAs` + `embedCode` as props. `BookingCard` is a white card with `border border-black/10` + `shadow-sm`, bold label, muted description, a `#2d6a4f` CTA, and — directly below the card — a ref'd inline-embed container (`mt-2 w-full min-h-[700px]`, hidden until first click). CTA element type switches on `openAs`: `<a target="_blank" rel="noopener noreferrer">` for `'new_tab'`; `<button>` for `'popup'` (admin label "Inline") that, on click, reveals the container and calls `injectInlineEmbed(container, embedCode)`. `injectInlineEmbed` re-materializes the snippet into live `<script>` / `<link>` nodes scoped to the target container so script tags actually execute (handles both pure inline JS and HTML fragments with `<script src="...">`). The button disables itself after injection to keep the mount idempotent. If `openAs = 'popup'` and `embedCode` is empty, falls back to new-tab behavior and `console.warn`s. |
 
 ---
 
@@ -271,13 +271,24 @@ with characters that'd break pipe delimiting, and we don't want the LLM
 copying them verbatim). Instead, Chat.tsx fetches `/api/sage/parameters`
 on mount and matches each parsed card to a parameter by `url`:
 - `open_as = 'new_tab'` (default): CTA renders as an `<a target="_blank" rel="noopener noreferrer">`.
-- `open_as = 'popup'` with non-empty `embed_code`: CTA renders as a
-  `<button>`; on click, `executeEmbedCode` re-materializes the snippet
-  into live `<script>` / `<link>` nodes and appends them (setting
-  `innerHTML` alone does not execute `<script>` tags). Handles both
-  inline JS and HTML-with-`<script src="...">` fragments.
+- `open_as = 'popup'` (admin label "Inline") with non-empty `embed_code`:
+  CTA renders as a `<button>`, and directly below the card there is a
+  hidden ref'd container (`mt-2 w-full min-h-[700px]`). On click, the
+  container is revealed and `injectInlineEmbed(container, embedCode)`
+  re-materializes the snippet into live `<script>` / `<link>` nodes
+  scoped to that container (setting `innerHTML` alone does not execute
+  `<script>` tags). Handles both pure inline JS and HTML-with-
+  `<script src="...">` fragments (e.g. Calendly's inline-widget
+  snippet). The button disables itself after injection so subsequent
+  clicks don't remount the widget.
 - `open_as = 'popup'` with empty `embed_code`: falls back to new-tab
   behavior and `console.warn`s.
+
+**Terminology note**: The DB value is still `'popup'` for historical
+reasons, but the admin label and visitor-facing behavior are both
+"Inline" — the embed renders directly below the booking card, not in a
+popup overlay. Renaming the DB value would require a migration; the
+label-only rename keeps the column untouched.
 
 ---
 
