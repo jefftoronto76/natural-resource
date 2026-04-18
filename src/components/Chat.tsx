@@ -6,6 +6,58 @@ import { useSageStore } from '../lib/store'
 import { streamSageResponse } from '../lib/sage'
 import { useReveal } from '@/hooks/useReveal'
 
+interface BookingCardData {
+  label: string
+  description: string
+  ctaLabel: string
+  url: string
+}
+
+// Matches a completed booking-card line: [BOOKING: label | description | cta | url]
+const BOOKING_REGEX = /\[BOOKING:\s*([^|\]]*)\|\s*([^|\]]*)\|\s*([^|\]]*)\|\s*([^\]]*)\]/g
+
+function parseBookingCards(content: string): { prose: string; cards: BookingCardData[] } {
+  const cards: BookingCardData[] = []
+  let prose = content.replace(
+    BOOKING_REGEX,
+    (_match, label: string, description: string, ctaLabel: string, url: string) => {
+      cards.push({
+        label: label.trim(),
+        description: description.trim(),
+        ctaLabel: ctaLabel.trim(),
+        url: url.trim(),
+      })
+      return ''
+    },
+  )
+  // Strip an incomplete [BOOKING:... fragment still streaming (no closing bracket yet)
+  prose = prose.replace(/\[BOOKING:[^\]]*$/, '')
+  // Collapse extra blank lines left behind by removed cards
+  prose = prose.replace(/\n{3,}/g, '\n\n').trim()
+  return { prose, cards }
+}
+
+function BookingCard({ label, description, ctaLabel, url }: BookingCardData) {
+  return (
+    <div className="w-full rounded-lg border border-black/10 bg-white p-4 shadow-sm">
+      <p className="m-0 font-body text-base font-semibold text-[#1a1917]">{label}</p>
+      {description && (
+        <p className="mt-1 mb-0 font-body text-sm text-[#1a1917]/60">{description}</p>
+      )}
+      {url && (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-block rounded-md bg-[#2d6a4f] px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-white no-underline hover:opacity-90"
+        >
+          {ctaLabel || 'Book'}
+        </a>
+      )}
+    </div>
+  )
+}
+
 const markdownComponents = {
   p: ({ children }: any) => (
     <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', color: '#1a1917', margin: '0 0 12px 0' }}>
@@ -458,31 +510,66 @@ export function Chat() {
               )}
               {messages.map((msg) => {
                 if (msg.role === 'assistant' && !msg.content) return null
+                if (msg.role === 'user') {
+                  return (
+                    <div
+                      key={msg.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                      }}
+                    >
+                      <div style={{
+                        maxWidth: '70%',
+                        padding: '16px',
+                        background: '#2d6a4f',
+                        color: 'white',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        lineHeight: 1.7,
+                        fontFamily: 'var(--font-body)',
+                        whiteSpace: 'pre-wrap',
+                      }}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  )
+                }
+                const { prose, cards } = parseBookingCards(msg.content)
+                if (!prose && cards.length === 0) return null
                 return (
                   <div
                     key={msg.id}
                     style={{
                       display: 'flex',
-                      justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                      maxWidth: '70%',
                     }}
                   >
-                    <div style={{
-                      maxWidth: '70%',
-                      padding: '16px',
-                      background: msg.role === 'user' ? '#2d6a4f' : 'white',
-                      color: msg.role === 'user' ? 'white' : 'var(--color-text-primary)',
-                      border: msg.role === 'user' ? 'none' : '1px solid rgba(26,25,23,0.08)',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      lineHeight: 1.7,
-                      fontFamily: 'var(--font-body)',
-                      ...(msg.role === 'user' ? { whiteSpace: 'pre-wrap' } : {}),
-                    }}>
-                      {msg.role === 'user'
-                        ? msg.content
-                        : <ReactMarkdown components={markdownComponents}>{msg.content}</ReactMarkdown>
-                      }
-                    </div>
+                    {prose && (
+                      <div style={{
+                        width: '100%',
+                        padding: '16px',
+                        background: 'white',
+                        color: 'var(--color-text-primary)',
+                        border: '1px solid rgba(26,25,23,0.08)',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        lineHeight: 1.7,
+                        fontFamily: 'var(--font-body)',
+                      }}>
+                        <ReactMarkdown components={markdownComponents}>{prose}</ReactMarkdown>
+                      </div>
+                    )}
+                    {cards.length > 0 && (
+                      <div className="flex w-full flex-col gap-2">
+                        {cards.map((card, i) => (
+                          <BookingCard key={i} {...card} />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )
               })}
