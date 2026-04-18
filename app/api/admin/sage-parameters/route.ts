@@ -1,6 +1,8 @@
 import { getAdminClient } from '@/lib/supabase-admin'
 import { getAuthContext } from '@/lib/get-auth-context'
 
+type OpenAs = 'new_tab' | 'popup'
+
 interface SageParameter {
   id: string
   tenant_id: string
@@ -10,11 +12,18 @@ interface SageParameter {
   description: string | null
   cta_label: string | null
   url: string | null
+  open_as: OpenAs
+  embed_code: string | null
   updated_at: string
 }
 
 const DESCRIPTION_MAX = 60
 const CTA_LABEL_MAX = 20
+const VALID_OPEN_AS: readonly OpenAs[] = ['new_tab', 'popup']
+
+function isOpenAs(value: unknown): value is OpenAs {
+  return typeof value === 'string' && (VALID_OPEN_AS as readonly string[]).includes(value)
+}
 
 export async function GET() {
   let authCtx: { owner_id: string; tenant_id: string }
@@ -29,7 +38,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('sage_parameters')
-    .select('id, tenant_id, key, value, label, description, cta_label, url, updated_at')
+    .select('id, tenant_id, key, value, label, description, cta_label, url, open_as, embed_code, updated_at')
     .eq('tenant_id', authCtx.tenant_id)
     .order('key')
 
@@ -63,6 +72,8 @@ export async function PATCH(req: Request) {
     description?: unknown
     cta_label?: unknown
     url?: unknown
+    open_as?: unknown
+    embed_code?: unknown
   }
   try {
     body = await req.json()
@@ -88,6 +99,15 @@ export async function PATCH(req: Request) {
   if (body.url !== undefined && typeof body.url !== 'string') {
     return Response.json({ error: 'Invalid url' }, { status: 400 })
   }
+  if (body.open_as !== undefined && !isOpenAs(body.open_as)) {
+    return Response.json(
+      { error: `Invalid open_as (expected one of: ${VALID_OPEN_AS.join(', ')})` },
+      { status: 400 },
+    )
+  }
+  if (body.embed_code !== undefined && body.embed_code !== null && typeof body.embed_code !== 'string') {
+    return Response.json({ error: 'Invalid embed_code' }, { status: 400 })
+  }
 
   const key: string = body.key
   const label: string = body.label
@@ -95,6 +115,9 @@ export async function PATCH(req: Request) {
   const description: string = typeof body.description === 'string' ? body.description : ''
   const ctaLabel: string = typeof body.cta_label === 'string' ? body.cta_label : ''
   const url: string = typeof body.url === 'string' ? body.url : ''
+  const openAs: OpenAs = isOpenAs(body.open_as) ? body.open_as : 'new_tab'
+  const embedCode: string | null =
+    typeof body.embed_code === 'string' && body.embed_code.length > 0 ? body.embed_code : null
 
   if (description.length > DESCRIPTION_MAX) {
     return Response.json(
@@ -122,11 +145,13 @@ export async function PATCH(req: Request) {
         description,
         cta_label: ctaLabel,
         url,
+        open_as: openAs,
+        embed_code: embedCode,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'tenant_id, key' },
     )
-    .select('id, tenant_id, key, value, label, description, cta_label, url, updated_at')
+    .select('id, tenant_id, key, value, label, description, cta_label, url, open_as, embed_code, updated_at')
     .single()
 
   if (error) {
@@ -137,7 +162,8 @@ export async function PATCH(req: Request) {
   const parameter: SageParameter = data
   console.log('[sage-parameters] PATCH', {
     key,
-    result: parameter,
+    open_as: parameter.open_as,
+    has_embed_code: Boolean(parameter.embed_code),
   })
 
   return Response.json(parameter)

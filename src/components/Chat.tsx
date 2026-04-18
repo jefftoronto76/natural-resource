@@ -6,11 +6,28 @@ import { useSageStore } from '../lib/store'
 import { streamSageResponse } from '../lib/sage'
 import { useReveal } from '@/hooks/useReveal'
 
+type OpenAs = 'new_tab' | 'popup'
+
 interface BookingCardData {
   label: string
   description: string
   ctaLabel: string
   url: string
+}
+
+interface SageParameterPublic {
+  key: string
+  label: string | null
+  description: string | null
+  cta_label: string | null
+  url: string | null
+  open_as: OpenAs
+  embed_code: string | null
+}
+
+interface BookingCardProps extends BookingCardData {
+  openAs: OpenAs
+  embedCode: string | null
 }
 
 // Matches a completed booking-card line: [BOOKING: label | description | cta | url]
@@ -37,23 +54,91 @@ function parseBookingCards(content: string): { prose: string; cards: BookingCard
   return { prose, cards }
 }
 
-function BookingCard({ label, description, ctaLabel, url }: BookingCardData) {
+// Runs an embed snippet by re-materializing it into live <script>/<link> nodes
+// — setting innerHTML alone does NOT execute <script>. Handles both inline JS
+// and HTML fragments containing <script src="..."> tags.
+function executeEmbedCode(embedCode: string): void {
+  const trimmed = embedCode.trim()
+  if (!trimmed) return
+
+  const hasScriptTag = /<script[\s>]/i.test(trimmed)
+  if (!hasScriptTag) {
+    const script = document.createElement('script')
+    script.text = trimmed
+    document.body.appendChild(script)
+    return
+  }
+
+  const container = document.createElement('div')
+  container.innerHTML = trimmed
+  Array.from(container.childNodes).forEach(node => {
+    if (node.nodeType !== 1) return
+    if (node.nodeName === 'SCRIPT') {
+      const original = node as HTMLScriptElement
+      const script = document.createElement('script')
+      if (original.src) {
+        script.src = original.src
+        script.async = original.async
+        script.defer = original.defer
+      } else {
+        script.text = original.textContent ?? ''
+      }
+      for (const attr of Array.from(original.attributes)) {
+        if (attr.name !== 'src' && attr.name !== 'async' && attr.name !== 'defer') {
+          script.setAttribute(attr.name, attr.value)
+        }
+      }
+      document.body.appendChild(script)
+    } else if (node.nodeName === 'LINK') {
+      document.head.appendChild(node.cloneNode(true))
+    } else {
+      document.body.appendChild(node.cloneNode(true))
+    }
+  })
+}
+
+function BookingCard({ label, description, ctaLabel, url, openAs, embedCode }: BookingCardProps) {
+  const effectiveOpenAs: OpenAs =
+    openAs === 'popup' && (!embedCode || embedCode.trim().length === 0) ? 'new_tab' : openAs
+
+  const handlePopupClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    if (!embedCode) {
+      console.warn('[BookingCard] popup selected but embed_code missing — falling back to new tab')
+      if (url) window.open(url, '_blank', 'noopener,noreferrer')
+      return
+    }
+    console.log('[BookingCard] executing embed_code for', label || url)
+    try {
+      executeEmbedCode(embedCode)
+    } catch (err) {
+      console.error('[BookingCard] embed execution failed — falling back to new tab:', err)
+      if (url) window.open(url, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  if (openAs === 'popup' && (!embedCode || embedCode.trim().length === 0)) {
+    console.warn('[BookingCard] popup requested without embed_code for', label || url)
+  }
+
+  const buttonClass =
+    'mt-3 inline-block rounded-md bg-[#2d6a4f] px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-white no-underline hover:opacity-90'
+
   return (
     <div className="w-full rounded-lg border border-black/10 bg-white p-4 shadow-sm">
       <p className="m-0 font-body text-base font-semibold text-[#1a1917]">{label}</p>
       {description && (
         <p className="mt-1 mb-0 font-body text-sm text-[#1a1917]/60">{description}</p>
       )}
-      {url && (
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-block rounded-md bg-[#2d6a4f] px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-white no-underline hover:opacity-90"
-        >
+      {effectiveOpenAs === 'popup' ? (
+        <button type="button" onClick={handlePopupClick} className={`${buttonClass} cursor-pointer border-0`}>
+          {ctaLabel || 'Book'}
+        </button>
+      ) : url ? (
+        <a href={url} target="_blank" rel="noopener noreferrer" className={buttonClass}>
           {ctaLabel || 'Book'}
         </a>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -113,11 +198,34 @@ export function Chat() {
   const [input, setInput] = useState('')
   const [isError, setIsError] = useState(false)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const [sageParameters, setSageParameters] = useState<SageParameterPublic[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const retryMsgsRef = useRef<typeof messages>([])
   const retrySessionIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    console.log('[Chat] fetching sage parameters')
+    fetch('/api/sage/parameters')
+      .then(async r => {
+        if (!r.ok) {
+          console.error('[Chat] sage parameters fetch failed:', r.status)
+          return
+        }
+        const data: SageParameterPublic[] = await r.json()
+        if (cancelled) return
+        console.log('[Chat] sage parameters fetched:', data.length)
+        setSageParameters(data)
+      })
+      .catch(err => {
+        console.error('[Chat] sage parameters fetch threw:', err)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (isExpanded) {
@@ -565,9 +673,19 @@ export function Chat() {
                     )}
                     {cards.length > 0 && (
                       <div className="flex w-full flex-col gap-2">
-                        {cards.map((card, i) => (
-                          <BookingCard key={i} {...card} />
-                        ))}
+                        {cards.map((card, i) => {
+                          const match = sageParameters.find(p => (p.url ?? '') === card.url)
+                          const openAs: OpenAs = match?.open_as ?? 'new_tab'
+                          const embedCode = match?.embed_code ?? null
+                          return (
+                            <BookingCard
+                              key={i}
+                              {...card}
+                              openAs={openAs}
+                              embedCode={embedCode}
+                            />
+                          )
+                        })}
                       </div>
                     )}
                   </div>

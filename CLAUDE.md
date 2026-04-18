@@ -156,8 +156,8 @@ Reusable admin-side components in `/components/admin/primitives/`:
 
 | Component | File | Purpose |
 |-----------|------|---------|
-| `SageParameters` | `app/admin/settings/SageParameters.tsx` | Mantine-based client component rendered inside the Parameters section on the Settings page. Owns the section header row (title + "Add New" button, right-aligned) and the card list below it. Fetches `/api/admin/sage-parameters` on mount. Each existing parameter renders as a Mantine `Card` showing Label (title), Description (subtitle), CTA label, and URL, with edit (pencil) and delete (trash) `ActionIcon`s top-right. Edit expands the card inline with `TextInput`s for Label, Description (max 60 chars, live counter), CTA Label (max 20 chars, live counter), and URL, plus Save/Cancel. Add New prepends an empty editable card to the top of the list. Save and Add both PATCH `/api/admin/sage-parameters` (Add auto-generates `key` from the label, lowercase non-alphanumerics collapsed to `_`; duplicate keys rejected client-side). Delete opens a Mantine `Modal` confirmation and calls `DELETE /api/admin/sage-parameters/[key]`. Surfaces success/error via `@mantine/notifications`. Console logs cover fetch, PATCH dispatch/success/failure, DELETE dispatch/success/failure, and add-new-card open. |
-| `BookingCard` (+ `parseBookingCards`) | `src/components/Chat.tsx` | Inline Tailwind component and parser used by the public visitor chat. `parseBookingCards(content)` extracts every `[BOOKING: label \| description \| cta_label \| url]` match from an assistant message, strips any trailing incomplete `[BOOKING:` fragment still streaming, collapses leftover blank lines, and returns `{ prose, cards }`. The Chat message renderer renders the prose as Markdown inside the existing assistant bubble, then renders one `BookingCard` per parsed entry below the bubble in the assistant-aligned column (max-width 70%, stacked with gap). `BookingCard` is a white card with `border border-black/10` + `shadow-sm`, bold label, muted description, and a `#2d6a4f` CTA anchor that opens the URL in a new tab (`target="_blank" rel="noopener noreferrer"`). |
+| `SageParameters` | `app/admin/settings/SageParameters.tsx` | Mantine-based client component rendered inside the Parameters section on the Settings page. Owns the section header row (title + "Add New" button, right-aligned) and the card list below it. Fetches `/api/admin/sage-parameters` on mount. Each existing parameter renders as a Mantine `Card` showing Label (title), Description (subtitle), CTA label, URL, and Open-as (with Embed-code status when `open_as = 'popup'`), plus edit (pencil) / delete (trash) `ActionIcon`s top-right. Edit expands the card inline with `TextInput`s for Label, Description (max 60 chars, live counter), CTA Label (max 20 chars, live counter), and URL; a Mantine `Select` for Open behavior (`New Tab` / `Popup`); and — only when Popup is selected — a monospace Mantine `Textarea` labeled "Embed Code" (placeholder "Paste your booking tool's popup snippet here") for the `embed_code` value. Switching back to `New Tab` nulls `embed_code` on save. Add New prepends an empty editable card to the top of the list. Save and Add both PATCH `/api/admin/sage-parameters` (Add auto-generates `key` from the label, lowercase non-alphanumerics collapsed to `_`; duplicate keys rejected client-side). Delete opens a Mantine `Modal` confirmation and calls `DELETE /api/admin/sage-parameters/[key]`. Surfaces success/error via `@mantine/notifications`. Console logs cover fetch, PATCH dispatch (with `open_as` / `has_embed_code`), success/failure, DELETE, and add-new-card open. |
+| `BookingCard` (+ `parseBookingCards`, `executeEmbedCode`) | `src/components/Chat.tsx` | Inline Tailwind component and parser used by the public visitor chat. `parseBookingCards(content)` extracts every `[BOOKING: label \| description \| cta_label \| url]` match from an assistant message, strips any trailing incomplete `[BOOKING:` fragment still streaming, collapses leftover blank lines, and returns `{ prose, cards }`. The Chat component also fetches `/api/sage/parameters` on mount, matches each parsed card to a parameter by `url`, and passes `openAs` + `embedCode` as props. `BookingCard` is a white card with `border border-black/10` + `shadow-sm`, bold label, muted description, and a `#2d6a4f` CTA whose element type switches on `openAs`: `<a target="_blank" rel="noopener noreferrer">` for `'new_tab'`; `<button>` for `'popup'` that calls `executeEmbedCode(embedCode)` on click. `executeEmbedCode` re-materializes the snippet into live `<script>` / `<link>` nodes so script tags actually execute (handles both inline JS and HTML fragments with `<script src="...">`). If `openAs = 'popup'` and `embedCode` is empty, falls back to new-tab behavior and `console.warn`s. |
 
 ---
 
@@ -213,8 +213,8 @@ header.
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/admin/sage-parameters` | GET | Returns all `sage_parameters` rows (`id, tenant_id, key, value, label, description, cta_label, url, updated_at`) for the authenticated tenant, ordered by `key`. 401 when `getAuthContext()` fails. |
-| `/api/admin/sage-parameters` | PATCH | Upserts a single parameter for the authenticated tenant. Accepts `{ key, label, description?, cta_label?, url?, value? }` (all strings; `description` max 60 chars, `cta_label` max 20 chars). Upsert uses `onConflict: 'tenant_id, key'` and stamps `updated_at` on write. 401 when `getAuthContext()` fails, 400 on invalid body. |
+| `/api/admin/sage-parameters` | GET | Returns all `sage_parameters` rows (`id, tenant_id, key, value, label, description, cta_label, url, open_as, embed_code, updated_at`) for the authenticated tenant, ordered by `key`. 401 when `getAuthContext()` fails. |
+| `/api/admin/sage-parameters` | PATCH | Upserts a single parameter for the authenticated tenant. Accepts `{ key, label, description?, cta_label?, url?, value?, open_as?, embed_code? }` (strings except `embed_code` which may be string or null; `description` max 60 chars, `cta_label` max 20 chars; `open_as` one of `'new_tab' \| 'popup'`, default `'new_tab'`). Upsert uses `onConflict: 'tenant_id, key'` and stamps `updated_at` on write. 401 when `getAuthContext()` fails, 400 on invalid body. |
 | `/api/admin/sage-parameters/[key]` | DELETE | Deletes the parameter matching `{ tenant_id, key }` for the authenticated tenant. 401 when `getAuthContext()` fails, 400 on missing key, 500 on Supabase error. |
 
 ### Content / Assets
@@ -231,6 +231,7 @@ header.
 | Route | Method | Purpose |
 |-------|--------|---------|
 | `/api/sage` | POST | Public visitor chat. Resolves tenant via `getTenantFromRequest(req)`, reads the highest-version `master_prompt` row for that tenant, and — when a tenant is resolved — also fetches all `sage_parameters` rows for that tenant and appends a "Booking cards" section to the system prompt containing one `[BOOKING: label \| description \| cta_label \| url]` line per parameter. Section is omitted when no parameters exist. Streams the Anthropic response. Falls back to `DEFAULT_SYSTEM_PROMPT` when no tenant is resolved or no master_prompt row exists. |
+| `/api/sage/parameters` | GET | Public read for the visitor chat renderer. Resolves tenant via `getTenantFromRequest(req)` and returns `[{ key, label, description, cta_label, url, open_as, embed_code }]` for that tenant (no admin fields, no `value`). Returns `[]` when no tenant is resolved or on DB error — never 4xx/5xx so client rendering stays resilient. Consumed by `src/components/Chat.tsx` to resolve `open_as` / `embed_code` for each parsed `[BOOKING: ...]` card by URL match. |
 
 ---
 
@@ -260,8 +261,23 @@ Runs a regex over each assistant message, extracts every completed
 trailing incomplete `[BOOKING:` fragment still streaming, collapses
 leftover blank lines, and returns `{ prose, cards }`. The prose renders
 via `ReactMarkdown` inside the assistant bubble; each card renders as a
-`BookingCard` (Tailwind, white background, `#2d6a4f` CTA anchor opening
-the URL in a new tab) below the bubble in the assistant-aligned column.
+`BookingCard` (Tailwind, white background, `#2d6a4f` CTA) below the
+bubble in the assistant-aligned column.
+
+**Open behavior** (`open_as` / `embed_code`): The bracket syntax only
+carries `label | description | cta_label | url` — `open_as` and
+`embed_code` are intentionally excluded (embed snippets contain HTML/JS
+with characters that'd break pipe delimiting, and we don't want the LLM
+copying them verbatim). Instead, Chat.tsx fetches `/api/sage/parameters`
+on mount and matches each parsed card to a parameter by `url`:
+- `open_as = 'new_tab'` (default): CTA renders as an `<a target="_blank" rel="noopener noreferrer">`.
+- `open_as = 'popup'` with non-empty `embed_code`: CTA renders as a
+  `<button>`; on click, `executeEmbedCode` re-materializes the snippet
+  into live `<script>` / `<link>` nodes and appends them (setting
+  `innerHTML` alone does not execute `<script>` tags). Handles both
+  inline JS and HTML-with-`<script src="...">` fragments.
+- `open_as = 'popup'` with empty `embed_code`: falls back to new-tab
+  behavior and `console.warn`s.
 
 ---
 
@@ -283,7 +299,7 @@ Row Level Security is enforced at the Supabase layer.
 | `do_not_engage` | id, owner_id, tenant_id, content, version |
 | `master_prompt` | id, tenant_id, content, version, safety_check_result, updated_at (timestamptz), last_safety_check (timestamptz) |
 | `master_prompt_history` | id, prompt_id, tenant_id, content, version |
-| `sage_parameters` | id (uuid), tenant_id (uuid), key (text), value (text — legacy, not surfaced in UI), label (text — card title), description (text, max 60 chars — card subtitle), cta_label (text, max 20 chars — button text), url (text — booking URL), updated_at (timestamptz). Unique constraint on (tenant_id, key). |
+| `sage_parameters` | id (uuid), tenant_id (uuid), key (text), value (text — legacy, not surfaced in UI), label (text — card title), description (text, max 60 chars — card subtitle), cta_label (text, max 20 chars — button text), url (text — booking URL), open_as (text default 'new_tab': 'new_tab' \| 'popup' — controls how the CTA opens on the visitor chat booking card), embed_code (text, nullable — JS/HTML snippet executed on click when `open_as = 'popup'`; ignored otherwise), updated_at (timestamptz). Unique constraint on (tenant_id, key). |
 
 **Deployment note — tenant_id backfill required**: `master_prompt` and
 `master_prompt_history` rows must have `tenant_id` populated before

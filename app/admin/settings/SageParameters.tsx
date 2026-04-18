@@ -7,13 +7,17 @@ import {
   Card,
   Group,
   Modal,
+  Select,
   Skeleton,
   Stack,
+  Textarea,
   TextInput,
 } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
 import { Text } from '@/components/admin/primitives/Text'
+
+type OpenAs = 'new_tab' | 'popup'
 
 interface SageParameter {
   id: string
@@ -24,6 +28,8 @@ interface SageParameter {
   description: string | null
   cta_label: string | null
   url: string | null
+  open_as: OpenAs
+  embed_code: string | null
   updated_at: string
 }
 
@@ -34,6 +40,8 @@ interface PatchPayload {
   cta_label: string
   url: string
   value: string
+  open_as: OpenAs
+  embed_code: string | null
 }
 
 interface DraftFields {
@@ -41,11 +49,22 @@ interface DraftFields {
   description: string
   cta_label: string
   url: string
+  open_as: OpenAs
+  embed_code: string
 }
 
 const DESCRIPTION_MAX = 60
 const CTA_LABEL_MAX = 20
 const NEW_CARD_ID = '__new__'
+
+const OPEN_AS_OPTIONS: { value: OpenAs; label: string }[] = [
+  { value: 'new_tab', label: 'New Tab' },
+  { value: 'popup', label: 'Popup' },
+]
+
+function isOpenAs(value: unknown): value is OpenAs {
+  return value === 'new_tab' || value === 'popup'
+}
 
 function slugifyKey(label: string): string {
   return label
@@ -68,7 +87,7 @@ function extractErrorMessage(body: unknown, fallback: string): string {
 }
 
 function emptyDraft(): DraftFields {
-  return { label: '', description: '', cta_label: '', url: '' }
+  return { label: '', description: '', cta_label: '', url: '', open_as: 'new_tab', embed_code: '' }
 }
 
 function draftFromParameter(p: SageParameter): DraftFields {
@@ -77,6 +96,8 @@ function draftFromParameter(p: SageParameter): DraftFields {
     description: p.description ?? '',
     cta_label: p.cta_label ?? '',
     url: p.url ?? '',
+    open_as: p.open_as ?? 'new_tab',
+    embed_code: p.embed_code ?? '',
   }
 }
 
@@ -123,7 +144,11 @@ export function SageParameters() {
   }, [fetchParameters])
 
   async function patchParameter(payload: PatchPayload): Promise<SageParameter> {
-    console.log('[SageParameters] PATCH dispatch:', payload.key)
+    console.log('[SageParameters] PATCH dispatch:', {
+      key: payload.key,
+      open_as: payload.open_as,
+      has_embed_code: Boolean(payload.embed_code),
+    })
     const res = await fetch('/api/admin/sage-parameters', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -172,6 +197,14 @@ export function SageParameters() {
     return null
   }
 
+  function draftToPatchExtras(draft: DraftFields): Pick<PatchPayload, 'open_as' | 'embed_code'> {
+    const embedTrimmed = draft.embed_code.trim()
+    return {
+      open_as: draft.open_as,
+      embed_code: draft.open_as === 'popup' && embedTrimmed.length > 0 ? embedTrimmed : null,
+    }
+  }
+
   async function handleSaveExisting(param: SageParameter) {
     const draft = drafts[param.id] ?? draftFromParameter(param)
     const validationError = validateDraft(draft)
@@ -188,6 +221,7 @@ export function SageParameters() {
         cta_label: draft.cta_label,
         url: draft.url.trim(),
         value: param.value ?? '',
+        ...draftToPatchExtras(draft),
       })
       setParameters(prev => prev.map(p => (p.key === saved.key ? saved : p)))
       setEditingId(null)
@@ -242,6 +276,7 @@ export function SageParameters() {
         cta_label: draft.cta_label,
         url: draft.url.trim(),
         value: '',
+        ...draftToPatchExtras(draft),
       })
       setParameters(prev => [saved, ...prev.filter(p => p.key !== saved.key)])
       setShowNewCard(false)
@@ -435,6 +470,8 @@ interface ViewCardProps {
 }
 
 function ParameterViewCard({ parameter, onEdit, onDelete }: ViewCardProps) {
+  const openAsLabel =
+    OPEN_AS_OPTIONS.find(o => o.value === parameter.open_as)?.label ?? 'New Tab'
   return (
     <Card withBorder radius="md" p="md" style={{ backgroundColor: 'transparent' }}>
       <Stack gap="xs">
@@ -477,6 +514,13 @@ function ParameterViewCard({ parameter, onEdit, onDelete }: ViewCardProps) {
         <Stack gap={4}>
           <FieldRow label="CTA label" value={parameter.cta_label} />
           <FieldRow label="URL" value={parameter.url} mono />
+          <FieldRow label="Open as" value={openAsLabel} />
+          {parameter.open_as === 'popup' && (
+            <FieldRow
+              label="Embed code"
+              value={parameter.embed_code && parameter.embed_code.length > 0 ? 'Set' : 'Not set'}
+            />
+          )}
         </Stack>
       </Stack>
     </Card>
@@ -571,6 +615,32 @@ function ParameterEditCard({ draft, onChange, onSave, onCancel, saving, isNew }:
           type="url"
           disabled={saving}
         />
+        <Select
+          label="Open behavior"
+          data={OPEN_AS_OPTIONS}
+          value={draft.open_as}
+          onChange={value => {
+            const next: OpenAs = isOpenAs(value) ? value : 'new_tab'
+            onChange({ open_as: next })
+          }}
+          size="sm"
+          allowDeselect={false}
+          disabled={saving}
+        />
+        {draft.open_as === 'popup' && (
+          <Textarea
+            label="Embed Code"
+            value={draft.embed_code}
+            onChange={e => onChange({ embed_code: e.currentTarget.value })}
+            placeholder="Paste your booking tool's popup snippet here"
+            size="sm"
+            autosize
+            minRows={3}
+            maxRows={10}
+            disabled={saving}
+            styles={{ input: { fontFamily: 'var(--mantine-font-family-monospace)' } }}
+          />
+        )}
         <Group gap="xs" justify="flex-end" wrap="wrap">
           <Button
             variant="subtle"
