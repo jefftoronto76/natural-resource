@@ -1,8 +1,18 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Group, Paper, Skeleton, Stack, TextInput } from '@mantine/core'
+import {
+  ActionIcon,
+  Button,
+  Card,
+  Group,
+  Modal,
+  Skeleton,
+  Stack,
+  TextInput,
+} from '@mantine/core'
 import { notifications } from '@mantine/notifications'
+import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
 import { Text } from '@/components/admin/primitives/Text'
 
 interface SageParameter {
@@ -11,14 +21,31 @@ interface SageParameter {
   key: string
   value: string
   label: string | null
+  description: string | null
+  cta_label: string | null
+  url: string | null
   updated_at: string
 }
 
 interface PatchPayload {
   key: string
-  value: string
   label: string
+  description: string
+  cta_label: string
+  url: string
+  value: string
 }
+
+interface DraftFields {
+  label: string
+  description: string
+  cta_label: string
+  url: string
+}
+
+const DESCRIPTION_MAX = 60
+const CTA_LABEL_MAX = 20
+const NEW_CARD_ID = '__new__'
 
 function slugifyKey(label: string): string {
   return label
@@ -40,14 +67,28 @@ function extractErrorMessage(body: unknown, fallback: string): string {
   return fallback
 }
 
+function emptyDraft(): DraftFields {
+  return { label: '', description: '', cta_label: '', url: '' }
+}
+
+function draftFromParameter(p: SageParameter): DraftFields {
+  return {
+    label: p.label ?? '',
+    description: p.description ?? '',
+    cta_label: p.cta_label ?? '',
+    url: p.url ?? '',
+  }
+}
+
 export function SageParameters() {
   const [parameters, setParameters] = useState<SageParameter[]>([])
   const [loading, setLoading] = useState(true)
-  const [drafts, setDrafts] = useState<Record<string, string>>({})
-  const [savingKey, setSavingKey] = useState<string | null>(null)
-  const [newLabel, setNewLabel] = useState('')
-  const [newValue, setNewValue] = useState('')
-  const [adding, setAdding] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [drafts, setDrafts] = useState<Record<string, DraftFields>>({})
+  const [savingId, setSavingId] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<SageParameter | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [showNewCard, setShowNewCard] = useState(false)
 
   const fetchParameters = useCallback(async () => {
     console.log('[SageParameters] fetching parameters')
@@ -65,11 +106,6 @@ export function SageParameters() {
       const data: SageParameter[] = await res.json()
       console.log('[SageParameters] fetched parameters:', data.length)
       setParameters(data)
-      const nextDrafts: Record<string, string> = {}
-      for (const p of data) {
-        nextDrafts[p.key] = p.value
-      }
-      setDrafts(nextDrafts)
     } catch (err) {
       console.error('[SageParameters] fetch request failed:', err)
       notifications.show({
@@ -104,46 +140,83 @@ export function SageParameters() {
     return data
   }
 
-  async function handleSave(param: SageParameter) {
-    const value = drafts[param.key] ?? ''
-    setSavingKey(param.key)
+  function startEdit(param: SageParameter) {
+    setEditingId(param.id)
+    setDrafts(prev => ({ ...prev, [param.id]: draftFromParameter(param) }))
+  }
+
+  function cancelEdit(id: string) {
+    setEditingId(current => (current === id ? null : current))
+    setDrafts(prev => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }
+
+  function updateDraft(id: string, patch: Partial<DraftFields>) {
+    setDrafts(prev => ({
+      ...prev,
+      [id]: { ...(prev[id] ?? emptyDraft()), ...patch },
+    }))
+  }
+
+  function validateDraft(draft: DraftFields): string | null {
+    if (!draft.label.trim()) return 'Label is required.'
+    if (draft.description.length > DESCRIPTION_MAX) {
+      return `Description must be ${DESCRIPTION_MAX} characters or fewer.`
+    }
+    if (draft.cta_label.length > CTA_LABEL_MAX) {
+      return `CTA label must be ${CTA_LABEL_MAX} characters or fewer.`
+    }
+    return null
+  }
+
+  async function handleSaveExisting(param: SageParameter) {
+    const draft = drafts[param.id] ?? draftFromParameter(param)
+    const validationError = validateDraft(draft)
+    if (validationError) {
+      notifications.show({ color: 'red', title: 'Invalid input', message: validationError })
+      return
+    }
+    setSavingId(param.id)
     try {
       const saved = await patchParameter({
         key: param.key,
-        value,
-        label: param.label ?? '',
+        label: draft.label.trim(),
+        description: draft.description,
+        cta_label: draft.cta_label,
+        url: draft.url.trim(),
+        value: param.value ?? '',
       })
       setParameters(prev => prev.map(p => (p.key === saved.key ? saved : p)))
-      setDrafts(prev => ({ ...prev, [saved.key]: saved.value }))
+      setEditingId(null)
+      setDrafts(prev => {
+        const next = { ...prev }
+        delete next[param.id]
+        return next
+      })
       notifications.show({
         color: 'green',
         title: 'Parameter saved',
-        message: param.label ?? param.key,
+        message: saved.label ?? saved.key,
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save parameter.'
-      notifications.show({
-        color: 'red',
-        title: 'Save failed',
-        message,
-      })
+      notifications.show({ color: 'red', title: 'Save failed', message })
     } finally {
-      setSavingKey(null)
+      setSavingId(null)
     }
   }
 
-  async function handleAdd() {
-    const label = newLabel.trim()
-    const value = newValue.trim()
-    if (!label) {
-      notifications.show({
-        color: 'red',
-        title: 'Label required',
-        message: 'Enter a label for the new parameter.',
-      })
+  async function handleSaveNew() {
+    const draft = drafts[NEW_CARD_ID] ?? emptyDraft()
+    const validationError = validateDraft(draft)
+    if (validationError) {
+      notifications.show({ color: 'red', title: 'Invalid input', message: validationError })
       return
     }
-    const key = slugifyKey(label)
+    const key = slugifyKey(draft.label)
     if (!key) {
       notifications.show({
         color: 'red',
@@ -152,117 +225,374 @@ export function SageParameters() {
       })
       return
     }
-    console.log('[SageParameters] add dispatch, derived key:', key)
-    setAdding(true)
-    try {
-      const saved = await patchParameter({ key, value, label })
-      setParameters(prev => {
-        const filtered = prev.filter(p => p.key !== saved.key)
-        return [...filtered, saved].sort((a, b) => a.key.localeCompare(b.key))
+    if (parameters.some(p => p.key === key)) {
+      notifications.show({
+        color: 'red',
+        title: 'Duplicate key',
+        message: 'A parameter with this label already exists.',
       })
-      setDrafts(prev => ({ ...prev, [saved.key]: saved.value }))
-      setNewLabel('')
-      setNewValue('')
+      return
+    }
+    setSavingId(NEW_CARD_ID)
+    try {
+      const saved = await patchParameter({
+        key,
+        label: draft.label.trim(),
+        description: draft.description,
+        cta_label: draft.cta_label,
+        url: draft.url.trim(),
+        value: '',
+      })
+      setParameters(prev => [saved, ...prev.filter(p => p.key !== saved.key)])
+      setShowNewCard(false)
+      setDrafts(prev => {
+        const next = { ...prev }
+        delete next[NEW_CARD_ID]
+        return next
+      })
       notifications.show({
         color: 'green',
-        title: 'Parameter saved',
-        message: label,
+        title: 'Parameter added',
+        message: saved.label ?? saved.key,
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save parameter.'
+      notifications.show({ color: 'red', title: 'Add failed', message })
+    } finally {
+      setSavingId(null)
+    }
+  }
+
+  function cancelNew() {
+    setShowNewCard(false)
+    setDrafts(prev => {
+      const next = { ...prev }
+      delete next[NEW_CARD_ID]
+      return next
+    })
+  }
+
+  function startAddNew() {
+    console.log('[SageParameters] add new card opened')
+    setShowNewCard(true)
+    setDrafts(prev => ({ ...prev, [NEW_CARD_ID]: emptyDraft() }))
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return
+    console.log('[SageParameters] DELETE dispatch:', deleteTarget.key)
+    setDeleting(true)
+    try {
+      const res = await fetch(
+        `/api/admin/sage-parameters/${encodeURIComponent(deleteTarget.key)}`,
+        { method: 'DELETE' },
+      )
+      if (!res.ok) {
+        const body: unknown = await res.json().catch(() => null)
+        const message = extractErrorMessage(body, 'Failed to delete parameter.')
+        console.error('[SageParameters] DELETE failed:', message)
+        notifications.show({ color: 'red', title: 'Delete failed', message })
+        return
+      }
+      console.log('[SageParameters] DELETE success:', deleteTarget.key)
+      setParameters(prev => prev.filter(p => p.key !== deleteTarget.key))
+      notifications.show({
+        color: 'green',
+        title: 'Parameter deleted',
+        message: deleteTarget.label ?? deleteTarget.key,
+      })
+      setDeleteTarget(null)
+    } catch (err) {
+      console.error('[SageParameters] DELETE request failed:', err)
       notifications.show({
         color: 'red',
-        title: 'Add failed',
-        message,
+        title: 'Delete failed',
+        message: 'Could not reach the server.',
       })
     } finally {
-      setAdding(false)
+      setDeleting(false)
     }
   }
 
   return (
-    <Paper radius="sm" p="md" withBorder style={{ backgroundColor: 'transparent' }}>
-      <Stack gap="md">
-        {loading ? (
-          <Stack gap="xs">
-            <Skeleton height={40} radius="sm" />
-            <Skeleton height={40} radius="sm" />
-          </Stack>
-        ) : parameters.length === 0 ? (
+    <Stack gap="md">
+      <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+        <Stack gap={4} style={{ flex: 1, minWidth: 200 }}>
+          <Text
+            id="parameters-heading"
+            variant="title"
+            style={{ fontSize: 'var(--mantine-font-size-md)' }}
+          >
+            Parameters
+          </Text>
           <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
-            No parameters saved yet. Add one below to get started.
+            Values Sage uses in conversation, such as booking links.
           </Text>
-        ) : (
-          <Stack gap="sm">
-            {parameters.map(param => {
-              const draftValue = drafts[param.key] ?? ''
-              const dirty = draftValue !== param.value
-              const saving = savingKey === param.key
-              return (
-                <Group key={param.id} gap="xs" align="flex-end" wrap="wrap">
-                  <TextInput
-                    label={param.label && param.label.length > 0 ? param.label : param.key}
-                    value={draftValue}
-                    onChange={e =>
-                      setDrafts(prev => ({ ...prev, [param.key]: e.currentTarget.value }))
-                    }
-                    size="sm"
-                    style={{ flex: 1, minWidth: 200 }}
-                  />
-                  <Button
-                    variant="filled"
-                    color="green"
-                    size="sm"
-                    onClick={() => handleSave(param)}
-                    disabled={!dirty || saving}
-                    loading={saving}
-                  >
-                    Save
-                  </Button>
-                </Group>
-              )
-            })}
-          </Stack>
-        )}
-
-        <Stack
-          gap="sm"
-          pt="sm"
-          style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}
+        </Stack>
+        <Button
+          variant="filled"
+          color="green"
+          size="sm"
+          leftSection={<IconPlus size={14} />}
+          onClick={startAddNew}
+          disabled={showNewCard}
         >
-          <Text variant="label" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
-            Add parameter
-          </Text>
-          <Stack gap="xs">
-            <TextInput
-              label="Label"
-              value={newLabel}
-              onChange={e => setNewLabel(e.currentTarget.value)}
-              placeholder="e.g. Booking link"
-              size="sm"
+          Add New
+        </Button>
+      </Group>
+
+      {loading ? (
+        <Stack gap="sm">
+          <Skeleton height={120} radius="md" />
+          <Skeleton height={120} radius="md" />
+        </Stack>
+      ) : (
+        <Stack gap="sm">
+          {showNewCard && (
+            <ParameterEditCard
+              draft={drafts[NEW_CARD_ID] ?? emptyDraft()}
+              onChange={patch => updateDraft(NEW_CARD_ID, patch)}
+              onSave={handleSaveNew}
+              onCancel={cancelNew}
+              saving={savingId === NEW_CARD_ID}
+              isNew
             />
-            <TextInput
-              label="Value"
-              value={newValue}
-              onChange={e => setNewValue(e.currentTarget.value)}
-              placeholder="e.g. https://cal.com/your-handle"
+          )}
+
+          {parameters.length === 0 && !showNewCard ? (
+            <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+              No parameters saved yet. Click &ldquo;Add New&rdquo; to get started.
+            </Text>
+          ) : (
+            parameters.map(param => {
+              const isEditing = editingId === param.id
+              if (isEditing) {
+                return (
+                  <ParameterEditCard
+                    key={param.id}
+                    draft={drafts[param.id] ?? draftFromParameter(param)}
+                    onChange={patch => updateDraft(param.id, patch)}
+                    onSave={() => handleSaveExisting(param)}
+                    onCancel={() => cancelEdit(param.id)}
+                    saving={savingId === param.id}
+                  />
+                )
+              }
+              return (
+                <ParameterViewCard
+                  key={param.id}
+                  parameter={param}
+                  onEdit={() => startEdit(param)}
+                  onDelete={() => setDeleteTarget(param)}
+                />
+              )
+            })
+          )}
+        </Stack>
+      )}
+
+      <Modal
+        opened={deleteTarget !== null}
+        onClose={() => {
+          if (!deleting) setDeleteTarget(null)
+        }}
+        title="Delete parameter?"
+        centered
+        size="sm"
+      >
+        <Stack gap="md">
+          <Text variant="muted">Delete this parameter? This cannot be undone.</Text>
+          <Group gap="xs" justify="flex-end">
+            <Button
+              variant="subtle"
+              color="gray"
               size="sm"
-            />
-            <Group gap="xs">
-              <Button
-                variant="filled"
-                color="green"
-                size="sm"
-                onClick={handleAdd}
-                loading={adding}
-                disabled={newLabel.trim().length === 0}
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="filled"
+              color="red"
+              size="sm"
+              onClick={handleConfirmDelete}
+              loading={deleting}
+            >
+              Delete
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+    </Stack>
+  )
+}
+
+interface ViewCardProps {
+  parameter: SageParameter
+  onEdit: () => void
+  onDelete: () => void
+}
+
+function ParameterViewCard({ parameter, onEdit, onDelete }: ViewCardProps) {
+  return (
+    <Card withBorder radius="md" p="md" style={{ backgroundColor: 'transparent' }}>
+      <Stack gap="xs">
+        <Group justify="space-between" align="flex-start" gap="sm" wrap="nowrap">
+          <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
+            <Text variant="label" style={{ fontSize: 'var(--mantine-font-size-md)' }}>
+              {parameter.label && parameter.label.length > 0 ? parameter.label : parameter.key}
+            </Text>
+            {parameter.description && parameter.description.length > 0 && (
+              <Text
+                variant="muted"
+                style={{ fontSize: 'var(--mantine-font-size-sm)' }}
               >
-                Add
-              </Button>
-            </Group>
+                {parameter.description}
+              </Text>
+            )}
           </Stack>
+          <Group gap={4} wrap="nowrap">
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="md"
+              onClick={onEdit}
+              aria-label={`Edit ${parameter.label ?? parameter.key}`}
+            >
+              <IconPencil size={16} />
+            </ActionIcon>
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              size="md"
+              onClick={onDelete}
+              aria-label={`Delete ${parameter.label ?? parameter.key}`}
+            >
+              <IconTrash size={16} />
+            </ActionIcon>
+          </Group>
+        </Group>
+
+        <Stack gap={4}>
+          <FieldRow label="CTA label" value={parameter.cta_label} />
+          <FieldRow label="URL" value={parameter.url} mono />
         </Stack>
       </Stack>
-    </Paper>
+    </Card>
+  )
+}
+
+interface FieldRowProps {
+  label: string
+  value: string | null
+  mono?: boolean
+}
+
+function FieldRow({ label, value, mono }: FieldRowProps) {
+  const display = value && value.length > 0 ? value : '—'
+  return (
+    <Group gap="xs" wrap="wrap" align="baseline">
+      <Text
+        variant="muted"
+        style={{ fontSize: 'var(--mantine-font-size-xs)', minWidth: 72 }}
+      >
+        {label}
+      </Text>
+      <Text
+        variant="body"
+        style={{
+          fontSize: 'var(--mantine-font-size-sm)',
+          wordBreak: 'break-all',
+          fontFamily: mono ? 'var(--mantine-font-family-monospace)' : undefined,
+          flex: 1,
+          minWidth: 0,
+        }}
+      >
+        {display}
+      </Text>
+    </Group>
+  )
+}
+
+interface EditCardProps {
+  draft: DraftFields
+  onChange: (patch: Partial<DraftFields>) => void
+  onSave: () => void
+  onCancel: () => void
+  saving: boolean
+  isNew?: boolean
+}
+
+function ParameterEditCard({ draft, onChange, onSave, onCancel, saving, isNew }: EditCardProps) {
+  const descriptionCount = draft.description.length
+  const ctaCount = draft.cta_label.length
+  return (
+    <Card withBorder radius="md" p="md" style={{ backgroundColor: 'transparent' }}>
+      <Stack gap="sm">
+        <Text variant="label" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+          {isNew ? 'New parameter' : 'Edit parameter'}
+        </Text>
+        <TextInput
+          label="Label"
+          value={draft.label}
+          onChange={e => onChange({ label: e.currentTarget.value })}
+          placeholder="e.g. Booking link"
+          size="sm"
+          required
+          disabled={saving}
+        />
+        <TextInput
+          label="Description"
+          value={draft.description}
+          onChange={e => onChange({ description: e.currentTarget.value.slice(0, DESCRIPTION_MAX) })}
+          placeholder="Short subtitle shown on the card"
+          size="sm"
+          maxLength={DESCRIPTION_MAX}
+          description={`${descriptionCount}/${DESCRIPTION_MAX}`}
+          disabled={saving}
+        />
+        <TextInput
+          label="CTA label"
+          value={draft.cta_label}
+          onChange={e => onChange({ cta_label: e.currentTarget.value.slice(0, CTA_LABEL_MAX) })}
+          placeholder="e.g. Book a call"
+          size="sm"
+          maxLength={CTA_LABEL_MAX}
+          description={`${ctaCount}/${CTA_LABEL_MAX}`}
+          disabled={saving}
+        />
+        <TextInput
+          label="URL"
+          value={draft.url}
+          onChange={e => onChange({ url: e.currentTarget.value })}
+          placeholder="https://cal.com/your-handle"
+          size="sm"
+          type="url"
+          disabled={saving}
+        />
+        <Group gap="xs" justify="flex-end" wrap="wrap">
+          <Button
+            variant="subtle"
+            color="gray"
+            size="sm"
+            onClick={onCancel}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="filled"
+            color="green"
+            size="sm"
+            onClick={onSave}
+            loading={saving}
+            disabled={draft.label.trim().length === 0}
+          >
+            Save
+          </Button>
+        </Group>
+      </Stack>
+    </Card>
   )
 }

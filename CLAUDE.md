@@ -156,7 +156,7 @@ Reusable admin-side components in `/components/admin/primitives/`:
 
 | Component | File | Purpose |
 |-----------|------|---------|
-| `SageParameters` | `app/admin/settings/SageParameters.tsx` | Mantine-based client component rendered inside the Parameters section on the Settings page. Fetches `/api/admin/sage-parameters` on mount, renders each parameter as a labeled `TextInput` + Save button, and a bottom "Add parameter" form (label + value + Add). Save and Add both PATCH `/api/admin/sage-parameters`; Add auto-generates `key` from the label (lowercase, non-alphanumerics collapsed to `_`). Surfaces success/error via `@mantine/notifications`. Section heading and description are owned by the page, not the component. |
+| `SageParameters` | `app/admin/settings/SageParameters.tsx` | Mantine-based client component rendered inside the Parameters section on the Settings page. Owns the section header row (title + "Add New" button, right-aligned) and the card list below it. Fetches `/api/admin/sage-parameters` on mount. Each existing parameter renders as a Mantine `Card` showing Label (title), Description (subtitle), CTA label, and URL, with edit (pencil) and delete (trash) `ActionIcon`s top-right. Edit expands the card inline with `TextInput`s for Label, Description (max 60 chars, live counter), CTA Label (max 20 chars, live counter), and URL, plus Save/Cancel. Add New prepends an empty editable card to the top of the list. Save and Add both PATCH `/api/admin/sage-parameters` (Add auto-generates `key` from the label, lowercase non-alphanumerics collapsed to `_`; duplicate keys rejected client-side). Delete opens a Mantine `Modal` confirmation and calls `DELETE /api/admin/sage-parameters/[key]`. Surfaces success/error via `@mantine/notifications`. Console logs cover fetch, PATCH dispatch/success/failure, DELETE dispatch/success/failure, and add-new-card open. |
 
 ---
 
@@ -212,8 +212,9 @@ header.
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/admin/sage-parameters` | GET | Returns all `sage_parameters` rows (`id, tenant_id, key, value, label, updated_at`) for the authenticated tenant, ordered by `key`. 401 when `getAuthContext()` fails. |
-| `/api/admin/sage-parameters` | PATCH | Upserts a single parameter for the authenticated tenant. Accepts `{ key, value, label }` (all strings). Upsert uses `onConflict: 'tenant_id, key'` and stamps `updated_at` on write. 401 when `getAuthContext()` fails, 400 on invalid body. |
+| `/api/admin/sage-parameters` | GET | Returns all `sage_parameters` rows (`id, tenant_id, key, value, label, description, cta_label, url, updated_at`) for the authenticated tenant, ordered by `key`. 401 when `getAuthContext()` fails. |
+| `/api/admin/sage-parameters` | PATCH | Upserts a single parameter for the authenticated tenant. Accepts `{ key, label, description?, cta_label?, url?, value? }` (all strings; `description` max 60 chars, `cta_label` max 20 chars). Upsert uses `onConflict: 'tenant_id, key'` and stamps `updated_at` on write. 401 when `getAuthContext()` fails, 400 on invalid body. |
+| `/api/admin/sage-parameters/[key]` | DELETE | Deletes the parameter matching `{ tenant_id, key }` for the authenticated tenant. 401 when `getAuthContext()` fails, 400 on missing key, 500 on Supabase error. |
 
 ### Content / Assets
 
@@ -250,7 +251,7 @@ Row Level Security is enforced at the Supabase layer.
 | `do_not_engage` | id, owner_id, tenant_id, content, version |
 | `master_prompt` | id, tenant_id, content, version, safety_check_result, updated_at (timestamptz), last_safety_check (timestamptz) |
 | `master_prompt_history` | id, prompt_id, tenant_id, content, version |
-| `sage_parameters` | id (uuid), tenant_id (uuid), key (text), value (text), label (text), updated_at (timestamptz). Unique constraint on (tenant_id, key). |
+| `sage_parameters` | id (uuid), tenant_id (uuid), key (text), value (text — legacy, not surfaced in UI), label (text — card title), description (text, max 60 chars — card subtitle), cta_label (text, max 20 chars — button text), url (text — booking URL), updated_at (timestamptz). Unique constraint on (tenant_id, key). |
 
 **Deployment note — tenant_id backfill required**: `master_prompt` and
 `master_prompt_history` rows must have `tenant_id` populated before

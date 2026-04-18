@@ -13,24 +13,7 @@ export default function SettingsPage() {
       <div className="flex-1 overflow-auto p-4 sm:p-6">
         <Stack gap="lg">
           <section aria-labelledby="parameters-heading">
-            <Stack gap="md">
-              <Stack gap={4}>
-                <Text
-                  id="parameters-heading"
-                  variant="title"
-                  style={{ fontSize: 'var(--mantine-font-size-md)' }}
-                >
-                  Parameters
-                </Text>
-                <Text
-                  variant="muted"
-                  style={{ fontSize: 'var(--mantine-font-size-sm)' }}
-                >
-                  Values Sage uses in conversation, such as booking links.
-                </Text>
-              </Stack>
-              <SageParameters />
-            </Stack>
+            <SageParameters />
           </section>
         </Stack>
       </div>
