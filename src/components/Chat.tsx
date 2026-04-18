@@ -157,7 +157,7 @@ function BookingCard({ label, description, ctaLabel, url, openAs, embedCode }: B
           </a>
         ) : null}
       </div>
-      {openAs === 'new_tab' && (
+      {effectiveOpenAs === 'new_tab' && (
         <p className="mt-2 m-0 font-body text-xs text-[#1a1917]/55">
           Heads up — clicking the button will open in a new tab to complete your booking.
         </p>

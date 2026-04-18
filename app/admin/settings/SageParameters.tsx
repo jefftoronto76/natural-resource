@@ -194,6 +194,9 @@ export function SageParameters() {
     if (draft.cta_label.length > CTA_LABEL_MAX) {
       return `CTA label must be ${CTA_LABEL_MAX} characters or fewer.`
     }
+    if (draft.open_as === 'popup' && draft.embed_code.trim().length === 0) {
+      return 'Embed code is required for inline booking.'
+    }
     return null
   }
 
