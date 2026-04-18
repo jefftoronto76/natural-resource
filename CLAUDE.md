@@ -234,6 +234,37 @@ header.
 
 ---
 
+## Booking Card Syntax
+
+Sage outputs booking cards using a specific bracket syntax that the
+visitor chat parses at render time. This syntax is the contract between
+the server-side system prompt injection and the client-side renderer —
+changing the format requires updating both ends.
+
+**Format:** `[BOOKING: label | description | cta_label | url]`
+
+- One card per line, placed on its own line at the end of the assistant
+  message — never inline within prose, never mid-message.
+- `label`, `description`, `cta_label`, and `url` correspond to the
+  `sage_parameters` columns of the same name.
+
+**Server injection** (`app/api/sage/route.ts`): When a tenant is resolved,
+the route fetches all `sage_parameters` rows for the tenant and appends
+a "Booking cards" section to the system prompt containing the format
+rules plus one `[BOOKING: ...]` line per available parameter. The section
+is omitted when the tenant has no parameters.
+
+**Client parsing** (`parseBookingCards` in `src/components/Chat.tsx`):
+Runs a regex over each assistant message, extracts every completed
+`[BOOKING: ...]` match into a typed `BookingCardData` list, strips any
+trailing incomplete `[BOOKING:` fragment still streaming, collapses
+leftover blank lines, and returns `{ prose, cards }`. The prose renders
+via `ReactMarkdown` inside the assistant bubble; each card renders as a
+`BookingCard` (Tailwind, white background, `#2d6a4f` CTA anchor opening
+the URL in a new tab) below the bubble in the assistant-aligned column.
+
+---
+
 ## Database Schema
 
 All tables are multi-tenant. Every data access must respect `tenant_id`.
