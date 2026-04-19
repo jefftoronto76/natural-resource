@@ -40,13 +40,17 @@ export function Work() {
     }
   }, [openCalendar])
 
-  const handleDiscoveryClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleQuestionModeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    if (window.Calendly) {
-      window.Calendly.initPopupWidget({
-        url: 'https://calendly.com/naturalresource/discovery-call?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f'
-      })
+    const target = '/#chat?mode=question'
+    // pushState updates the URL without a browser jump-scroll; we dispatch a
+    // hashchange manually because pushState does not fire one, and Chat reads
+    // the `mode` param from the hash on hashchange.
+    if (window.location.hash !== '#chat?mode=question') {
+      history.pushState(null, '', target)
+      window.dispatchEvent(new HashChangeEvent('hashchange'))
     }
+    document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
@@ -467,7 +471,7 @@ export function Work() {
         </div>
       </div>
 
-      {/* Discovery Call Link */}
+      {/* Question Mode Chat Link */}
       <div style={{
         textAlign: 'center',
         marginTop: '48px',
@@ -475,10 +479,10 @@ export function Work() {
         color: 'rgba(26,25,23,0.6)',
         fontFamily: 'DM Sans, sans-serif'
       }}>
-        Not sure where to start?{' '}
+        Still have questions?{' '}
         <a
-          href="#"
-          onClick={handleDiscoveryClick}
+          href="/#chat?mode=question"
+          onClick={handleQuestionModeClick}
           style={{
             color: '#2d6a4f',
             textDecoration: 'none',
@@ -488,7 +492,7 @@ export function Work() {
           onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
           onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
         >
-          Book a free 15-minute call
+          Click here
         </a>
         .
       </div>

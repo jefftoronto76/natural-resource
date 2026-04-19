@@ -33,6 +33,17 @@ interface BookingCardProps extends BookingCardData {
 // Matches a completed booking-card line: [BOOKING: label | description | cta | url]
 const BOOKING_REGEX = /\[BOOKING:\s*([^|\]]*)\|\s*([^|\]]*)\|\s*([^|\]]*)\|\s*([^\]]*)\]/g
 
+function detectModeFromLocation(): 'question' | null {
+  if (typeof window === 'undefined') return null
+  const hash = window.location.hash
+  const hashQueryStart = hash.indexOf('?')
+  const hashParams =
+    hashQueryStart >= 0 ? new URLSearchParams(hash.slice(hashQueryStart + 1)) : null
+  const searchParams = new URLSearchParams(window.location.search)
+  const value = hashParams?.get('mode') ?? searchParams.get('mode')
+  return value === 'question' ? 'question' : null
+}
+
 function parseBookingCards(content: string): { prose: string; cards: BookingCardData[] } {
   const cards: BookingCardData[] = []
   let prose = content.replace(
@@ -227,20 +238,18 @@ export function Chat() {
   const [isError, setIsError] = useState(false)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const [sageParameters, setSageParameters] = useState<SageParameterPublic[]>([])
-  // Read mode once on mount from the URL hash-query (/#chat?mode=question)
-  // or the top-level query string. The value is captured via lazy init so it
-  // is not re-evaluated on subsequent renders or messages.
+  // Read mode from the URL hash-query (/#chat?mode=question) or the top-level
+  // query string. Captured via lazy init on mount, and re-read on hashchange
+  // so in-page nav (e.g. the Work section's "Click here" link) also activates
+  // question mode without a full reload. Per-message behavior is unaffected —
+  // the mode snapshot feeding a given send call is stable for that request.
   // TODO: migrate to conditional block in Composer when activation_condition feature ships
-  const [mode] = useState<'question' | null>(() => {
-    if (typeof window === 'undefined') return null
-    const hash = window.location.hash
-    const hashQueryStart = hash.indexOf('?')
-    const hashParams =
-      hashQueryStart >= 0 ? new URLSearchParams(hash.slice(hashQueryStart + 1)) : null
-    const searchParams = new URLSearchParams(window.location.search)
-    const value = hashParams?.get('mode') ?? searchParams.get('mode')
-    return value === 'question' ? 'question' : null
-  })
+  const [mode, setMode] = useState<'question' | null>(() => detectModeFromLocation())
+  useEffect(() => {
+    const onHashChange = () => setMode(detectModeFromLocation())
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
