@@ -548,7 +548,7 @@ export function Chat() {
           )}
 
           <button
-            onClick={expand}
+            onClick={() => expand()}
             style={{
               background: '#2d6a4f',
               color: 'white',
