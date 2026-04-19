@@ -3,13 +3,15 @@ import { readDataStream } from './stream'
 
 export async function streamSageResponse(
   messages: SageMessage[],
-  onChunk: (chunk: string) => void
+  onChunk: (chunk: string) => void,
+  options?: { mode?: 'question' | null },
 ): Promise<void> {
   const response = await fetch('/api/sage', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      mode: options?.mode ?? null,
     }),
   })
 

@@ -227,6 +227,20 @@ export function Chat() {
   const [isError, setIsError] = useState(false)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const [sageParameters, setSageParameters] = useState<SageParameterPublic[]>([])
+  // Read mode once on mount from the URL hash-query (/#chat?mode=question)
+  // or the top-level query string. The value is captured via lazy init so it
+  // is not re-evaluated on subsequent renders or messages.
+  // TODO: migrate to conditional block in Composer when activation_condition feature ships
+  const [mode] = useState<'question' | null>(() => {
+    if (typeof window === 'undefined') return null
+    const hash = window.location.hash
+    const hashQueryStart = hash.indexOf('?')
+    const hashParams =
+      hashQueryStart >= 0 ? new URLSearchParams(hash.slice(hashQueryStart + 1)) : null
+    const searchParams = new URLSearchParams(window.location.search)
+    const value = hashParams?.get('mode') ?? searchParams.get('mode')
+    return value === 'question' ? 'question' : null
+  })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
@@ -318,6 +332,17 @@ export function Chat() {
 
   const sendGreeting = async () => {
     setGreeted(true)
+
+    if (mode === 'question') {
+      console.log('[Chat] question mode — using hardcoded greeting')
+      addMessage({
+        role: 'assistant',
+        content:
+          "Hi, I'm Sage — your AI assistant. I know Jeff's work and his approach. What's your question?",
+      })
+      return
+    }
+
     setStreaming(true)
     addMessage({ role: 'assistant', content: '' })
 
@@ -368,7 +393,7 @@ export function Chat() {
     try {
       await streamSageResponse(msgsToSend, (chunk: string) => {
         updateLastMessage(chunk)
-      })
+      }, { mode })
     } catch (error) {
       updateLastMessage('')
       setIsError(true)
@@ -399,7 +424,7 @@ export function Chat() {
     try {
       await streamSageResponse(retryMsgsRef.current, (chunk: string) => {
         updateLastMessage(chunk)
-      })
+      }, { mode })
     } catch (error) {
       updateLastMessage('')
       setIsError(true)

@@ -4,6 +4,13 @@ import { getAdminClient } from '@/lib/supabase-admin'
 import { DEFAULT_SYSTEM_PROMPT } from '@/lib/sage-prompt'
 import { getTenantFromRequest } from '@/lib/get-tenant-from-request'
 
+// Appended to the master system prompt when the visitor arrives in
+// question mode (?mode=question). The master prompt is never modified —
+// this is additive context only.
+// TODO: migrate to conditional block in Composer when activation_condition feature ships
+const QUESTION_MODE_CONTEXT =
+  'CONTEXT: This visitor arrived with a specific question in mind. Skip the name-ask and discovery phase. Answer their question directly and concisely. Do not ask for their name unless the conversation develops into a longer exchange. If the answer reveals a deeper need or a topic better handled in a paid session — coaching or a working session — pivot naturally to suggesting one, but only after actually answering their question first. All other guardrails and Do Not Engage rules still apply.'
+
 interface SageParameterRow {
   key: string
   label: string | null
@@ -101,7 +108,7 @@ export async function POST(req: Request) {
   const tenantId = await getTenantFromRequest(req)
   console.log('[sage/route] resolved tenant_id:', tenantId)
 
-  let body: { messages: { role: string; content: string }[] }
+  let body: { messages: { role: string; content: string }[]; mode?: string | null }
   try {
     body = await req.json()
   } catch {
@@ -109,6 +116,8 @@ export async function POST(req: Request) {
   }
 
   const { messages } = body
+  const questionMode = body.mode === 'question'
+  console.log('[sage/route] mode:', questionMode ? 'question' : 'default')
 
   let conversationMessages: { role: 'user' | 'assistant'; content: string }[]
 
@@ -136,7 +145,9 @@ export async function POST(req: Request) {
     getSystemPrompt(tenantId),
     tenantId ? getBookingCardSection(tenantId) : Promise.resolve(''),
   ])
-  const systemPrompt = bookingSection ? `${basePrompt}\n\n${bookingSection}` : basePrompt
+  const systemPrompt = [basePrompt, bookingSection, questionMode ? QUESTION_MODE_CONTEXT : '']
+    .filter(segment => segment.length > 0)
+    .join('\n\n')
 
   try {
     const result = await streamText({
