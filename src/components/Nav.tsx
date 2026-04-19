@@ -38,19 +38,29 @@ export function Nav() {
         </a>
 
         {/* Desktop links */}
-        <div style={{ display: 'flex', gap: '32px' }} className="nr-desktop-links">
-          {LINKS.map(({ label, href }) => (
-            <a key={label} href={href}
-              onClick={label === 'Chat' ? (e) => { e.preventDefault(); expand() } : undefined}
-              style={{
-                fontFamily: 'var(--font-mono)', fontSize: '13.2px',
-                letterSpacing: '0.18em', textTransform: 'uppercase',
-                color: 'var(--color-text-muted)', textDecoration: 'none',
-                cursor: 'pointer',
-              }}>
-              {label}
-            </a>
-          ))}
+        <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }} className="nr-desktop-links">
+          {LINKS.map(({ label, href }) => {
+            const isChatLink = label === 'Chat'
+            return (
+              <a
+                key={label}
+                href={href}
+                onClick={isChatLink ? (e) => { e.preventDefault(); expand() } : undefined}
+                className={isChatLink ? 'nav-chat-pill' : undefined}
+                style={{
+                  fontFamily: 'var(--font-mono)', fontSize: '13.2px',
+                  letterSpacing: '0.18em', textTransform: 'uppercase',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  ...(isChatLink
+                    ? { padding: '8px 16px' }
+                    : { color: 'var(--color-text-muted)' }),
+                }}
+              >
+                {label}
+              </a>
+            )
+          })}
         </div>
 
         {/* Mobile hamburger */}
@@ -74,23 +84,39 @@ export function Nav() {
           padding: '16px 24px 24px',
           gap: '0',
         }}>
-          {LINKS.map(({ label, href }) => (
-            <a key={label} href={href}
-              onClick={label === 'Chat'
-                ? (e) => { e.preventDefault(); setOpen(false); expand() }
-                : () => setOpen(false)
-              }
-              style={{
-                fontFamily: 'var(--font-mono)', fontSize: '14.4px',
-                letterSpacing: '0.18em', textTransform: 'uppercase',
-                color: 'var(--color-text-primary)', textDecoration: 'none',
-                padding: '16px 0',
-                borderBottom: '1px solid rgba(26,25,23,0.06)',
-                cursor: 'pointer',
-              }}>
-              {label}
-            </a>
-          ))}
+          {LINKS.map(({ label, href }) => {
+            const isChatLink = label === 'Chat'
+            return (
+              <a
+                key={label}
+                href={href}
+                onClick={isChatLink
+                  ? (e) => { e.preventDefault(); setOpen(false); expand() }
+                  : () => setOpen(false)
+                }
+                className={isChatLink ? 'nav-chat-pill' : undefined}
+                style={{
+                  fontFamily: 'var(--font-mono)', fontSize: '14.4px',
+                  letterSpacing: '0.18em', textTransform: 'uppercase',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  ...(isChatLink
+                    ? {
+                      padding: '14px 24px',
+                      marginTop: '12px',
+                      alignSelf: 'flex-start',
+                    }
+                    : {
+                      color: 'var(--color-text-primary)',
+                      padding: '16px 0',
+                      borderBottom: '1px solid rgba(26,25,23,0.06)',
+                    }),
+                }}
+              >
+                {label}
+              </a>
+            )
+          })}
         </div>
       )}
 
