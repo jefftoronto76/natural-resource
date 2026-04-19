@@ -278,16 +278,25 @@ export function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
   }, [messages, isExpanded])
 
-  // On mobile keyboard open, resize overlay to match the actual visible area
+  // On mobile, detect keyboard open/close via VisualViewport and scroll the
+  // latest message into view. The overlay itself resizes via `height: 100dvh`
+  // — we intentionally do NOT mutate top/height here, because setting fixed
+  // pixel values fights with dvh and causes the input to float mid-screen on
+  // iOS Safari. Desktop is no-op'd via the matchMedia gate.
   useEffect(() => {
     if (!isExpanded) return
     const vv = window.visualViewport
     if (!vv) return
+    const mobileQuery = window.matchMedia('(max-width: 768px)')
+    const baselineHeight = window.innerHeight
     const onViewportChange = () => {
-      if (!overlayRef.current) return
-      overlayRef.current.style.top = `${vv.offsetTop}px`
-      overlayRef.current.style.height = `${vv.height}px`
-      setKeyboardOpen(vv.height < window.screen.height * 0.75)
+      if (!mobileQuery.matches) {
+        setKeyboardOpen(false)
+        return
+      }
+      const open = vv.height < baselineHeight * 0.85
+      setKeyboardOpen(open)
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
     vv.addEventListener('resize', onViewportChange)
     vv.addEventListener('scroll', onViewportChange)
@@ -788,6 +797,7 @@ export function Chat() {
             background: 'white',
             borderTop: '1px solid rgba(26,25,23,0.08)',
             padding: '12px clamp(16px, 4vw, 48px)',
+            paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
             flexShrink: 0,
           }}>
             <div style={{
