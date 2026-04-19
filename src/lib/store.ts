@@ -38,6 +38,7 @@ interface SageStore {
   hasGreeted: boolean
   isStreaming: boolean
   isExpanded: boolean
+  mode: 'question' | null
   sessionId: string | null
   addMessage: (msg: Omit<SageMessage, 'id' | 'timestamp'>) => void
   updateLastMessage: (content: string) => void
@@ -45,7 +46,7 @@ interface SageStore {
   setGreeted: (greeted: boolean) => void
   setStreaming: (streaming: boolean) => void
   setSessionId: (id: string) => void
-  expand: () => void
+  expand: (mode?: 'question') => void
   collapse: () => void
   reset: () => void
 }
@@ -56,6 +57,7 @@ export const useSageStore = create<SageStore>((set) => ({
   hasGreeted: false,
   isStreaming: false,
   isExpanded: false,
+  mode: null,
   sessionId: null,
   addMessage: (msg) => set((state) => ({
     messages: [...state.messages, {
@@ -75,7 +77,7 @@ export const useSageStore = create<SageStore>((set) => ({
   setGreeted: (greeted) => set({ hasGreeted: greeted }),
   setStreaming: (streaming) => set({ isStreaming: streaming }),
   setSessionId: (id) => set({ sessionId: id }),
-  expand: () => set({ isExpanded: true }),
+  expand: (mode) => set({ isExpanded: true, mode: mode ?? null }),
   collapse: () => set({ isExpanded: false }),
-  reset: () => set({ messages: [], visitorName: null, hasGreeted: false, isStreaming: false, isExpanded: false, sessionId: null }),
+  reset: () => set({ messages: [], visitorName: null, hasGreeted: false, isStreaming: false, isExpanded: false, mode: null, sessionId: null }),
 }))

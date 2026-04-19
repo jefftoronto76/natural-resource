@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react';
+import { useSageStore } from '../lib/store'
 
 export function Work() {
   const [expandedCard1, setExpandedCard1] = useState(false);
@@ -8,6 +9,7 @@ export function Work() {
   const [openCalendar, setOpenCalendar] = useState<'card1' | 'card2' | null>(null);
   const calendly1Ref = useRef<HTMLDivElement>(null);
   const calendly2Ref = useRef<HTMLDivElement>(null);
+  const expand = useSageStore((s) => s.expand);
 
   useEffect(() => {
     const loadCalendly = () => {
@@ -42,15 +44,13 @@ export function Work() {
 
   const handleQuestionModeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    const target = '/#chat?mode=question'
-    // pushState updates the URL without a browser jump-scroll; we dispatch a
-    // hashchange manually because pushState does not fire one, and Chat reads
-    // the `mode` param from the hash on hashchange.
+    // Keep the URL bar showing the deep-linkable form so visitors can copy
+    // and share. The overlay itself opens via expand('question') — the URL
+    // is decorative here, not the source of runtime state.
     if (window.location.hash !== '#chat?mode=question') {
-      history.pushState(null, '', target)
-      window.dispatchEvent(new HashChangeEvent('hashchange'))
+      history.pushState(null, '', '/#chat?mode=question')
     }
-    document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })
+    expand('question')
   }
 
   return (

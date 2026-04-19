@@ -225,6 +225,7 @@ export function Chat() {
     isStreaming,
     hasGreeted,
     sessionId,
+    mode,
     expand,
     collapse,
     addMessage,
@@ -238,18 +239,17 @@ export function Chat() {
   const [isError, setIsError] = useState(false)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const [sageParameters, setSageParameters] = useState<SageParameterPublic[]>([])
-  // Read mode from the URL hash-query (/#chat?mode=question) or the top-level
-  // query string. Captured via lazy init on mount, and re-read on hashchange
-  // so in-page nav (e.g. the Work section's "Click here" link) also activates
-  // question mode without a full reload. Per-message behavior is unaffected —
-  // the mode snapshot feeding a given send call is stable for that request.
+
+  // On fresh page load, auto-open the overlay in question mode when the URL
+  // carries ?mode=question. In-page nav (Work's "Click here") routes through
+  // expand('question') directly, so the URL is not the source of truth at
+  // runtime — it only seeds the initial mount.
   // TODO: migrate to conditional block in Composer when activation_condition feature ships
-  const [mode, setMode] = useState<'question' | null>(() => detectModeFromLocation())
   useEffect(() => {
-    const onHashChange = () => setMode(detectModeFromLocation())
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
-  }, [])
+    if (detectModeFromLocation() === 'question') {
+      expand('question')
+    }
+  }, [expand])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
