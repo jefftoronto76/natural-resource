@@ -301,11 +301,14 @@ export function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
   }, [messages, isExpanded])
 
-  // On mobile, detect keyboard open/close via VisualViewport and scroll the
-  // latest message into view. The overlay itself resizes via `height: 100dvh`
-  // — we intentionally do NOT mutate top/height here, because setting fixed
-  // pixel values fights with dvh and causes the input to float mid-screen on
-  // iOS Safari. Desktop is no-op'd via the matchMedia gate.
+  // On mobile, track the VisualViewport and size the overlay to the visible
+  // rect above the software keyboard. `height: 100dvh` alone is NOT enough
+  // on iOS Safari — dvh tracks browser-chrome visibility, not the keyboard,
+  // so the layout viewport stays full-height when the keyboard opens and
+  // the overlay ends up extending behind it. Imperatively setting
+  // `overlay.style.top = vv.offsetTop` and `.height = vv.height` is the
+  // only reliable signal iOS gives us. Gated to mobile via matchMedia so
+  // desktop behavior is unchanged.
   useEffect(() => {
     if (!isExpanded) return
     const vv = window.visualViewport
@@ -317,6 +320,9 @@ export function Chat() {
         setKeyboardOpen(false)
         return
       }
+      if (!overlayRef.current) return
+      overlayRef.current.style.top = `${vv.offsetTop}px`
+      overlayRef.current.style.height = `${vv.height}px`
       const open = vv.height < baselineHeight * 0.85
       setKeyboardOpen(open)
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
