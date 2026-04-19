@@ -33,6 +33,17 @@ interface BookingCardProps extends BookingCardData {
 // Matches a completed booking-card line: [BOOKING: label | description | cta | url]
 const BOOKING_REGEX = /\[BOOKING:\s*([^|\]]*)\|\s*([^|\]]*)\|\s*([^|\]]*)\|\s*([^\]]*)\]/g
 
+function detectModeFromLocation(): 'question' | null {
+  if (typeof window === 'undefined') return null
+  const hash = window.location.hash
+  const hashQueryStart = hash.indexOf('?')
+  const hashParams =
+    hashQueryStart >= 0 ? new URLSearchParams(hash.slice(hashQueryStart + 1)) : null
+  const searchParams = new URLSearchParams(window.location.search)
+  const value = hashParams?.get('mode') ?? searchParams.get('mode')
+  return value === 'question' ? 'question' : null
+}
+
 function parseBookingCards(content: string): { prose: string; cards: BookingCardData[] } {
   const cards: BookingCardData[] = []
   let prose = content.replace(
@@ -214,6 +225,7 @@ export function Chat() {
     isStreaming,
     hasGreeted,
     sessionId,
+    mode,
     expand,
     collapse,
     addMessage,
@@ -227,6 +239,17 @@ export function Chat() {
   const [isError, setIsError] = useState(false)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const [sageParameters, setSageParameters] = useState<SageParameterPublic[]>([])
+
+  // On fresh page load, auto-open the overlay in question mode when the URL
+  // carries ?mode=question. In-page nav (Work's "Click here") routes through
+  // expand('question') directly, so the URL is not the source of truth at
+  // runtime — it only seeds the initial mount.
+  // TODO: migrate to conditional block in Composer when activation_condition feature ships
+  useEffect(() => {
+    if (detectModeFromLocation() === 'question') {
+      expand('question')
+    }
+  }, [expand])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
@@ -278,16 +301,25 @@ export function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
   }, [messages, isExpanded])
 
-  // On mobile keyboard open, resize overlay to match the actual visible area
+  // On mobile, detect keyboard open/close via VisualViewport and scroll the
+  // latest message into view. The overlay itself resizes via `height: 100dvh`
+  // — we intentionally do NOT mutate top/height here, because setting fixed
+  // pixel values fights with dvh and causes the input to float mid-screen on
+  // iOS Safari. Desktop is no-op'd via the matchMedia gate.
   useEffect(() => {
     if (!isExpanded) return
     const vv = window.visualViewport
     if (!vv) return
+    const mobileQuery = window.matchMedia('(max-width: 768px)')
+    const baselineHeight = window.innerHeight
     const onViewportChange = () => {
-      if (!overlayRef.current) return
-      overlayRef.current.style.top = `${vv.offsetTop}px`
-      overlayRef.current.style.height = `${vv.height}px`
-      setKeyboardOpen(vv.height < window.screen.height * 0.75)
+      if (!mobileQuery.matches) {
+        setKeyboardOpen(false)
+        return
+      }
+      const open = vv.height < baselineHeight * 0.85
+      setKeyboardOpen(open)
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
     vv.addEventListener('resize', onViewportChange)
     vv.addEventListener('scroll', onViewportChange)
@@ -309,6 +341,17 @@ export function Chat() {
 
   const sendGreeting = async () => {
     setGreeted(true)
+
+    if (mode === 'question') {
+      console.log('[Chat] question mode — using hardcoded greeting')
+      addMessage({
+        role: 'assistant',
+        content:
+          "Hi, I'm Sage — your AI assistant. I know Jeff's work and his approach. What's your question?",
+      })
+      return
+    }
+
     setStreaming(true)
     addMessage({ role: 'assistant', content: '' })
 
@@ -359,7 +402,7 @@ export function Chat() {
     try {
       await streamSageResponse(msgsToSend, (chunk: string) => {
         updateLastMessage(chunk)
-      })
+      }, { mode })
     } catch (error) {
       updateLastMessage('')
       setIsError(true)
@@ -390,7 +433,7 @@ export function Chat() {
     try {
       await streamSageResponse(retryMsgsRef.current, (chunk: string) => {
         updateLastMessage(chunk)
-      })
+      }, { mode })
     } catch (error) {
       updateLastMessage('')
       setIsError(true)
@@ -505,7 +548,7 @@ export function Chat() {
           )}
 
           <button
-            onClick={expand}
+            onClick={() => expand()}
             style={{
               background: '#2d6a4f',
               color: 'white',
@@ -788,6 +831,7 @@ export function Chat() {
             background: 'white',
             borderTop: '1px solid rgba(26,25,23,0.08)',
             padding: '12px clamp(16px, 4vw, 48px)',
+            paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
             flexShrink: 0,
           }}>
             <div style={{

@@ -174,6 +174,33 @@ page-local client components.
 
 ---
 
+## Public Site (Visitor)
+
+Public-facing components in `/src/components/`. Tailwind + inline
+styles (no Mantine on the public side).
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `Chat` (Sage overlay) | `src/components/Chat.tsx` | Full-viewport visitor chat overlay. Mounted persistently from `App.tsx`; toggled via `useSageStore.expand()` / `collapse()`. Container is `position: fixed; height: 100dvh` so iOS Safari resizes when the keyboard opens. A mobile-only VisualViewport listener (gated via `matchMedia('(max-width: 768px)')`) tracks keyboard open/close and scrolls the latest message into view; desktop is no-op. Input container has `paddingBottom: max(12px, env(safe-area-inset-bottom))` so the bar clears notched-device home indicators. Reads `mode` from the `useSageStore` store. On mount, `detectModeFromLocation()` parses `mode` from the hash-query (`/#chat?mode=question`) or top-level search string and — if `'question'` — calls `expand('question')` to auto-open the overlay. When `mode === 'question'`, `sendGreeting` writes a hardcoded greeting ("Hi, I'm Sage — your AI assistant. I know Jeff's work and his approach. What's your question?") and skips the LLM streaming call. `mode` is passed through to `streamSageResponse` on every send/retry so the server appends the question-mode CONTEXT block. Booking-card parsing is documented separately under "Booking Card Syntax". |
+| `Hero` | `src/components/Hero.tsx` | Hero section with two CTAs (DOM order: left then right). Left "Book a Session" — outlined minimal style (`background: transparent`, muted text, 1px `rgba(26,25,23,0.15)` border); `href="#work"`, `preventDefault` + smooth `scrollIntoView` to the Work section. Right "Start a Conversation" — filled black style (`background: var(--color-text-primary)`, `color: var(--color-bg)`); `href="#chat"`, `preventDefault` + `expand()` (no args → default mode). |
+| `Nav` | `src/components/Nav.tsx` | Top fixed navigation. Two links from a `LINKS` array: `Schedule` (`#work`) and `Chat` (calls `expand()` on click — default mode). The `Chat` entry receives the `.nav-chat-pill` class on both desktop and the mobile hamburger drawer: filled green pill (`#2d6a4f` bg, white text, `border-radius: 999px`); hover swaps to `var(--color-accent-hover)`; `:focus-visible` adds a 2px accent outline. Padding differs by breakpoint (`8px 16px` desktop, `14px 24px` mobile drawer with top margin and `align-self: flex-start`). Schedule renders as a plain text link, unchanged. Class definition lives in `src/index.css`. |
+| `Work` | `src/components/Work.tsx` | Two service cards (Coaching / Embedded Execution) each with an inline Calendly widget that toggles open via local state and is initialized via the global Calendly script (loaded once on mount). Below the cards: "Still have questions? Click here." line. The "Click here" link uses `href="/#chat?mode=question"` (decorative — preserves the deep-linkable URL for copy/share) and an `onClick` that `preventDefault`s, calls `history.pushState` to update the URL bar (only when the hash isn't already `#chat?mode=question`), then calls `expand('question')` from the Sage store. The overlay opens directly in question mode — no scroll handoff to the chat anchor section. |
+
+### Discovery-call link cleanup
+
+The free 15-minute discovery call is removed as a **user-facing link**
+on the public site — `Work.tsx`'s "Click here" routes to question mode
+instead. The discovery call is **not** removed from Sage's master
+system prompt; Sage may still offer it at her discretion during a
+conversation. Remaining intentional references:
+
+- `src/lib/sage-prompt.ts` — `DEFAULT_SYSTEM_PROMPT` pricing + behavior + booking-link sections
+- `src/components/Session.tsx` — `handleDiscoveryClick` popup invocation and the "Start with a free 15-minute call →" link
+
+Do not remove these without explicit instruction.
+
+---
+
 ## Utilities
 
 Shared helpers in `src/lib/`:
@@ -182,6 +209,7 @@ Shared helpers in `src/lib/`:
 |--------|------|---------|
 | `getAuthContext` | `get-auth-context.ts` | Resolves the current Clerk user to their Supabase `owner_id` and `tenant_id` via the `users.clerk_id` → `tenant_users.user_id` lookup. Throws `Unauthorized` / `User not found` / `Tenant not found` on failure. Used by every authenticated admin API route for tenant scoping. |
 | `getTenantFromRequest` | `get-tenant-from-request.ts` | Resolves `tenant_id` from the `Host` header of an anonymous public request. Strips subdomains to the root domain (e.g. `app.jefflougheed.ca` → `jefflougheed.ca`), filters dev hosts (localhost, `*.local`, `127.0.0.1`), queries `tenants.domain` for a match. Returns `tenant_id` string or `null`. Used by `/api/sage/route.ts` for anonymous visitor chat — falls back to `DEFAULT_SYSTEM_PROMPT` on null. |
+| `useSageStore` | `store.ts` | Zustand store for the public visitor chat. State: `messages`, `isExpanded`, `mode: 'question' \| null`, `hasGreeted`, `visitorName`, `isStreaming`, `sessionId`. Actions: `expand(mode?: 'question')` (sets both `isExpanded: true` and `mode: mode ?? null` atomically), `collapse()`, `addMessage`, `updateLastMessage`, `setVisitorName`, `setGreeted`, `setStreaming`, `setSessionId`, `reset()` (clears mode along with everything else). Consumed by `Chat`, `Hero`, `Nav`, and `Work`. Because `expand` takes an optional parameter, do not pass it directly as an event handler — wrap as `() => expand()` so React does not forward the `MouseEvent` into the `mode` slot (TS error). |
 
 ---
 
@@ -230,7 +258,7 @@ header.
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/sage` | POST | Public visitor chat. Resolves tenant via `getTenantFromRequest(req)`, reads the highest-version `master_prompt` row for that tenant, and — when a tenant is resolved — also fetches all `sage_parameters` rows for that tenant and appends a "Booking cards" section to the system prompt containing one `[BOOKING: label \| description \| cta_label \| url]` line per parameter. Section is omitted when no parameters exist. Streams the Anthropic response. Falls back to `DEFAULT_SYSTEM_PROMPT` when no tenant is resolved or no master_prompt row exists. |
+| `/api/sage` | POST | Public visitor chat. Resolves tenant via `getTenantFromRequest(req)`, reads the highest-version `master_prompt` row for that tenant, and — when a tenant is resolved — also fetches all `sage_parameters` rows for that tenant and appends a "Booking cards" section to the system prompt containing one `[BOOKING: label \| description \| cta_label \| url]` line per parameter. Section is omitted when no parameters exist. Also accepts an optional `mode` field in the request body; when `mode === 'question'`, appends the `QUESTION_MODE_CONTEXT` string to the end of the system prompt (after the booking section) so Sage skips the name-ask/discovery phase and answers directly. The master prompt content itself is never modified — question mode is additive context only. All other modes (absent, unknown) leave the prompt unchanged. Streams the Anthropic response. Falls back to `DEFAULT_SYSTEM_PROMPT` when no tenant is resolved or no master_prompt row exists. |
 | `/api/sage/parameters` | GET | Public read for the visitor chat renderer. Resolves tenant via `getTenantFromRequest(req)` and returns `[{ key, label, description, cta_label, url, open_as, embed_code }]` for that tenant (no admin fields, no `value`). Returns `[]` when no tenant is resolved or on DB error — never 4xx/5xx so client rendering stays resilient. Consumed by `src/components/Chat.tsx` to resolve `open_as` / `embed_code` for each parsed `[BOOKING: ...]` card by URL match. |
 
 ---

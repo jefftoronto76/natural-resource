@@ -73,3 +73,20 @@ body {
     gap: 32px !important;
   }
 }
+
+/* Nav Chat pill */
+.nav-chat-pill {
+  background: var(--color-accent);
+  color: #ffffff !important;
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.nav-chat-pill:hover {
+  background: var(--color-accent-hover);
+}
+
+.nav-chat-pill:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}

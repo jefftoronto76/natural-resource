@@ -48,20 +48,20 @@ export function Hero() {
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <a href="#work" onClick={(e) => { e.preventDefault(); document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' }) }} style={{
-              display: 'inline-block', background: 'var(--color-text-primary)',
-              color: 'var(--color-bg)', fontFamily: 'var(--font-mono)',
-              fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
-              padding: '16px 32px', textDecoration: 'none',
-              cursor: 'pointer',
-            }}>Book a Session</a>
-            <a href="#chat" onClick={(e) => { e.preventDefault(); expand() }} style={{
               display: 'inline-block', background: 'transparent',
               color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)',
               fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
               padding: '16px 32px', textDecoration: 'none',
               border: '1px solid rgba(26,25,23,0.15)',
               cursor: 'pointer',
-            }}>Ask a Question</a>
+            }}>Book a Session</a>
+            <a href="#chat" onClick={(e) => { e.preventDefault(); expand() }} style={{
+              display: 'inline-block', background: 'var(--color-text-primary)',
+              color: 'var(--color-bg)', fontFamily: 'var(--font-mono)',
+              fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
+              padding: '16px 32px', textDecoration: 'none',
+              cursor: 'pointer',
+            }}>Start a Conversation</a>
           </div>
         </div>
       </section>

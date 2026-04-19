@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react';
+import { useSageStore } from '../lib/store'
 
 export function Work() {
   const [expandedCard1, setExpandedCard1] = useState(false);
@@ -8,6 +9,7 @@ export function Work() {
   const [openCalendar, setOpenCalendar] = useState<'card1' | 'card2' | null>(null);
   const calendly1Ref = useRef<HTMLDivElement>(null);
   const calendly2Ref = useRef<HTMLDivElement>(null);
+  const expand = useSageStore((s) => s.expand);
 
   useEffect(() => {
     const loadCalendly = () => {
@@ -40,13 +42,15 @@ export function Work() {
     }
   }, [openCalendar])
 
-  const handleDiscoveryClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleQuestionModeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    if (window.Calendly) {
-      window.Calendly.initPopupWidget({
-        url: 'https://calendly.com/naturalresource/discovery-call?hide_event_type_details=1&hide_gdpr_banner=1&background_color=f9f8f5&primary_color=2d6a4f'
-      })
+    // Keep the URL bar showing the deep-linkable form so visitors can copy
+    // and share. The overlay itself opens via expand('question') — the URL
+    // is decorative here, not the source of runtime state.
+    if (window.location.hash !== '#chat?mode=question') {
+      history.pushState(null, '', '/#chat?mode=question')
     }
+    expand('question')
   }
 
   return (
@@ -467,7 +471,7 @@ export function Work() {
         </div>
       </div>
 
-      {/* Discovery Call Link */}
+      {/* Question Mode Chat Link */}
       <div style={{
         textAlign: 'center',
         marginTop: '48px',
@@ -475,10 +479,10 @@ export function Work() {
         color: 'rgba(26,25,23,0.6)',
         fontFamily: 'DM Sans, sans-serif'
       }}>
-        Not sure where to start?{' '}
+        Still have questions?{' '}
         <a
-          href="#"
-          onClick={handleDiscoveryClick}
+          href="/#chat?mode=question"
+          onClick={handleQuestionModeClick}
           style={{
             color: '#2d6a4f',
             textDecoration: 'none',
@@ -488,7 +492,7 @@ export function Work() {
           onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
           onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
         >
-          Book a free 15-minute call
+          Click here
         </a>
         .
       </div>
