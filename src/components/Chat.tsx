@@ -527,38 +527,6 @@ export function Chat() {
             This AI knows Jeff's background. It'll give you a straight answer about whether it's a fit.
           </p>
 
-          {messages.length > 0 && (
-            <div style={{
-              maxHeight: '240px',
-              overflowY: 'auto',
-              marginBottom: '24px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              padding: '16px',
-              background: 'white',
-              border: '1px solid rgba(26,25,23,0.08)',
-              borderRadius: '4px',
-            }}>
-              {messages.slice(-3).map((msg) => (
-                <div
-                  key={msg.id}
-                  style={{
-                    fontSize: '14px',
-                    lineHeight: 1.6,
-                    color: msg.role === 'user' ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
-                    fontWeight: msg.role === 'user' ? 500 : 400,
-                  }}
-                >
-                  <strong style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '4px' }}>
-                    {msg.role === 'user' ? 'You' : 'Sage'}
-                  </strong>
-                  {msg.content.substring(0, 120)}{msg.content.length > 120 ? '...' : ''}
-                </div>
-              ))}
-            </div>
-          )}
-
           <button
             onClick={() => expand()}
             style={{
