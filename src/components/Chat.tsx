@@ -657,95 +657,36 @@ export function Chat() {
               flex: 1,
             }}>
               {messages.length === 0 && (
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <span style={{
-                    fontFamily: 'Playfair Display, serif',
-                    fontSize: 'clamp(48px, 6vw, 80px)',
-                    fontWeight: 400,
-                    color: '#1a1917',
-                  }}>
-                    Hello.
-                  </span>
+                <div className="sage-animate max-w-[680px] border-l-2 border-accent/35 pl-4 [animation:sage-slide-up_0.28s_ease-out_both]">
+                  <p className="mb-3 font-display font-normal leading-[1.15] tracking-[-0.01em] text-[color:var(--color-text-primary)] text-[clamp(26px,4vw,36px)]">
+                    {mode === 'question' ? (
+                      <>Ask me anything about <em className="italic">Jeff's work</em>.</>
+                    ) : (
+                      <>Hi, I'm Sage. <em className="italic">What brings you here?</em></>
+                    )}
+                  </p>
                 </div>
               )}
               {messages.map((msg) => {
                 if (msg.role === 'assistant' && !msg.content) return null
                 if (msg.role === 'user') {
                   return (
-                    <div
-                      key={msg.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                      }}
-                    >
-                      <div style={{
-                        maxWidth: '70%',
-                        padding: '16px',
-                        background: '#2d6a4f',
-                        color: 'white',
-                        borderRadius: '8px',
-                        fontSize: '16px',
-                        lineHeight: 1.7,
-                        fontFamily: 'var(--font-body)',
-                        whiteSpace: 'pre-wrap',
-                      }}>
+                    <div key={msg.id} className="flex justify-end">
+                      <p className="sage-visitor-msg sage-animate max-w-[560px] whitespace-pre-wrap text-right font-display text-[18px] italic leading-[1.5] text-[color:var(--color-text-muted)] [animation:sage-slide-up_0.24s_ease-out_both] [text-wrap:pretty]">
                         {msg.content}
-                      </div>
+                      </p>
                     </div>
                   )
                 }
                 const { prose, cards } = parseBookingCards(msg.content)
                 if (!prose && cards.length === 0) return null
                 return (
-                  <div
+                  <SageReply
                     key={msg.id}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      gap: '12px',
-                      maxWidth: '70%',
-                    }}
-                  >
-                    {prose && (
-                      <div style={{
-                        width: '100%',
-                        padding: '16px',
-                        background: 'white',
-                        color: 'var(--color-text-primary)',
-                        border: '1px solid rgba(26,25,23,0.08)',
-                        borderRadius: '8px',
-                        fontSize: '16px',
-                        lineHeight: 1.7,
-                        fontFamily: 'var(--font-body)',
-                      }}>
-                        <ReactMarkdown components={markdownComponents}>{prose}</ReactMarkdown>
-                      </div>
-                    )}
-                    {cards.length > 0 && (
-                      <div className="flex w-full flex-col gap-2">
-                        {cards.map((card, i) => {
-                          const match = sageParameters.find(p => (p.url ?? '') === card.url)
-                          const openAs: OpenAs = match?.open_as ?? 'new_tab'
-                          const embedCode = match?.embed_code ?? null
-                          return (
-                            <BookingCard
-                              key={i}
-                              {...card}
-                              openAs={openAs}
-                              embedCode={embedCode}
-                            />
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
+                    prose={prose}
+                    cards={cards}
+                    sageParameters={sageParameters}
+                  />
                 )
               })}
               {isError && !isStreaming && (
