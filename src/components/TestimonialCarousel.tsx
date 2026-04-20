@@ -190,7 +190,7 @@ export function TestimonialCarousel() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
       <div style={{
-        background: 'var(--color-bg)',
+        background: 'rgb(var(--color-bg))',
         border: '1px solid rgba(26,25,23,0.12)',
         borderRadius: '16px',
         padding: 'clamp(40px, 5vw, 60px)',
@@ -408,7 +408,7 @@ export function TestimonialCarousel() {
           style={{
             background: 'transparent',
             border: 'none',
-            color: 'var(--color-accent)',
+            color: 'rgb(var(--color-accent))',
             fontFamily: 'var(--font-sans)',
             fontSize: '14px',
             fontWeight: 600,
@@ -1016,7 +1016,7 @@ export function TestimonialCarousel() {
                           <span style={{
                             position: 'absolute',
                             left: 0,
-                            color: 'var(--color-accent)',
+                            color: 'rgb(var(--color-accent))',
                             fontWeight: 600
                           }}>·</span>
                           {detail}
@@ -1099,7 +1099,7 @@ export function TestimonialCarousel() {
                         <span style={{
                           position: 'absolute',
                           left: 0,
-                          color: 'var(--color-accent)',
+                          color: 'rgb(var(--color-accent))',
                           fontWeight: 600
                         }}>·</span>
                         {detail}
@@ -1161,7 +1161,7 @@ export function TestimonialCarousel() {
                 height: '10px',
                 borderRadius: '50%',
                 border: 'none',
-                background: index === activeIndex ? 'var(--color-accent)' : 'rgba(26,25,23,0.2)',
+                background: index === activeIndex ? 'rgb(var(--color-accent))' : 'rgba(26,25,23,0.2)',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 padding: 0

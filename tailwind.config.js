@@ -3,9 +3,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: 'var(--color-bg)',
-        surface: 'var(--color-surface)',
-        accent: 'var(--color-accent)',
+        bg: 'rgb(var(--color-bg) / <alpha-value>)',
+        surface: 'rgb(var(--color-surface) / <alpha-value>)',
+        accent: 'rgb(var(--color-accent) / <alpha-value>)',
       },
       fontFamily: {
         display: 'var(--font-display)',

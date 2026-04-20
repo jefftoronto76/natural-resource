@@ -83,7 +83,7 @@ export function QuoteCarouselSection() {
   const canGoDown = currentIndex < QUOTES.length - 2
 
   const quoteStyle: React.CSSProperties = {
-    borderLeft: '2px solid var(--color-accent)',
+    borderLeft: '2px solid rgb(var(--color-accent))',
     paddingLeft: '24px',
     transition: 'opacity 0.3s ease, transform 0.3s ease',
   }

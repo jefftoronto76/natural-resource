@@ -28,7 +28,7 @@ export function WhyMe() {
     color: 'var(--color-text-muted)', fontWeight: 400, marginBottom: '20px',
   }
   const quoteStyle: React.CSSProperties = {
-    borderLeft: '2px solid var(--color-accent)',
+    borderLeft: '2px solid rgb(var(--color-accent))',
     paddingLeft: '24px', marginTop: '32px',
   }
 

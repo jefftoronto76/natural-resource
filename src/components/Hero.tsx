@@ -11,7 +11,7 @@ export function Hero() {
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         justifyContent: 'center', padding: '64px clamp(24px, 5vw, 48px)',
         borderBottom: '1px solid rgba(26,25,23,0.08)',
-        background: 'var(--color-bg)',
+        background: 'rgb(var(--color-bg))',
       }}>
         <div style={{ maxWidth: '920px' }}>
           <p style={{
@@ -35,7 +35,7 @@ export function Hero() {
           }}>
             Better close rates.<br />
             Deeper relationships.<br />
-            <em style={{ fontStyle: 'italic', color: 'var(--color-accent)' }}>Revenue growth, made easier.</em>
+            <em style={{ fontStyle: 'italic', color: 'rgb(var(--color-accent))' }}>Revenue growth, made easier.</em>
           </h1>
 
           <p style={{
@@ -57,7 +57,7 @@ export function Hero() {
             }}>Book a Session</a>
             <a href="#chat" onClick={(e) => { e.preventDefault(); expand() }} style={{
               display: 'inline-block', background: 'var(--color-text-primary)',
-              color: 'var(--color-bg)', fontFamily: 'var(--font-mono)',
+              color: 'rgb(var(--color-bg))', fontFamily: 'var(--font-mono)',
               fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase',
               padding: '16px 32px', textDecoration: 'none',
               cursor: 'pointer',
