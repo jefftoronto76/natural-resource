@@ -12,7 +12,7 @@ Paste-into-PR checklist for `feat/sage-chat-redesign`. Every box must be checkab
 - [ ] No changes to `useSageStore` shape. `hasGreeted`/`setGreeted` may become unused after this patch — that is acceptable; cleanup is deferred.
 - [ ] `markdownComponents` inline styles at the top of `Chat.tsx` are **not** migrated in this patch (follow-up).
 - [ ] Branch is `feat/sage-chat-redesign` off `main`.
-- [ ] Exactly 4 files touched: `src/index.css`, `src/lib/store.ts` (no-op), `src/components/Chat.tsx`, `CLAUDE.md`.
+- [ ] Exactly 4 files touched: `app/globals.css`, `src/lib/store.ts` (no-op), `src/components/Chat.tsx`, `CLAUDE.md`.
 
 ---
 
@@ -25,13 +25,13 @@ Paste-into-PR checklist for `feat/sage-chat-redesign`. Every box must be checkab
 
 ---
 
-## `src/index.css` additions
+## `app/globals.css` additions
 
 - [ ] `--kb-h: 0px` is declared on `:root`.
 - [ ] `body.sage-locked` uses `position: fixed; top: var(--sage-scroll-y, 0)` — scroll position is preserved.
 - [ ] `.sage-visitor-msg` sets `quotes: "\201C" "\201D" "\2018" "\2019"` and applies `::before { content: open-quote }` / `::after { content: close-quote }`.
-- [ ] `@keyframes sage-slide-up` and `@keyframes sage-pulse` exist in `src/index.css`.
-- [ ] `@keyframes expandChat` has been **moved** from the inline `<style>` in `Chat.tsx` to `src/index.css`; overlay entry still animates.
+- [ ] `@keyframes sage-slide-up` and `@keyframes sage-pulse` exist in `app/globals.css`.
+- [ ] `@keyframes expandChat` has been **moved** from the inline `<style>` in `Chat.tsx` to `app/globals.css`; overlay entry still animates.
 - [ ] `@media (prefers-reduced-motion: reduce)` disables `.sage-animate`, `.sage-visitor-msg`, and `[data-sage-streaming] > *` animations/transitions.
 - [ ] `--color-text-muted` has been bumped to ≥70% opacity (or repointed to a token that computes ≥4.5:1 against `--color-bg`), and a contrast check on 18px italic Playfair body copy passes WCAG AA.
 
@@ -63,7 +63,7 @@ Paste-into-PR checklist for `feat/sage-chat-redesign`. Every box must be checkab
 
 - [ ] The inline `<style>` block at the bottom of `Chat.tsx` is removed in its entirety.
 - [ ] The streaming-dot block uses `sage-pulse` (not `pulse`).
-- [ ] The overlay wrapper's inline `animation: 'expandChat 0.3s ease-out'` still animates (keyframes now live in `src/index.css`).
+- [ ] The overlay wrapper's inline `animation: 'expandChat 0.3s ease-out'` still animates (keyframes now live in `app/globals.css`).
 
 ---
 
@@ -160,6 +160,12 @@ Paste-into-PR checklist for `feat/sage-chat-redesign`. Every box must be checkab
 - [ ] Public-site Chat row reflects: compact header with status pip, `SageReply` typographic replies, italic visitor replies with CSS curly quotes, empty-state-as-greeting, `sendGreeting` removed, Tailwind-only markup.
 - [ ] `#chat` anchor section notes transcript preview removed.
 - [ ] No restructuring of CLAUDE.md beyond those two edits.
+
+---
+
+## Entry point consistency
+
+- [ ] All four chat entry points open the overlay to the same empty-state greeting with the same behavior: Hero "Start a Conversation", Nav CHAT button, `#chat` section CTA, and `/#chat?mode=question` URL load. Verify no entry point renders a duplicated greeting, a stale transcript, or different initial state.
 
 ---
 

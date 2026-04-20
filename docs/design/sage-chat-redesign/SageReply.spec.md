@@ -19,8 +19,8 @@ Drop-in component for `src/components/Chat.tsx`. Add above the `Chat` export.
 **Preconditions**
 - `BookingCardData`, `SageParameterPublic`, `OpenAs`, `BookingCard`, and `markdownComponents` already exist in `Chat.tsx` above the `Chat` export.
 - `ReactMarkdown` is imported.
-- Tailwind config exposes aliases `bg-accent`, `border-accent`, `text-accent`, `font-display`; CSS vars `--color-text-primary`, `--color-bg` are defined in `src/index.css`.
-- `@keyframes sage-slide-up` exists in `src/index.css` (see PATCH_PLAN 1).
+- Tailwind config exposes aliases `bg-accent`, `border-accent`, `text-accent`, `font-display`; CSS vars `--color-text-primary`, `--color-bg` are defined in `app/globals.css`.
+- `@keyframes sage-slide-up` exists in `app/globals.css` (see PATCH_PLAN 1).
 
 **Postconditions**
 - Renders nothing if `prose` is empty **and** `cards.length === 0` (caller already guards this; component self-guards too for safety).
@@ -81,7 +81,7 @@ function SageReply({
 ### Container
 `sage-animate max-w-[680px] border-l-2 border-accent/35 pl-4 [animation:sage-slide-up_0.28s_ease-out_both]`
 
-- `sage-animate` — targeted by the reduced-motion guard in `src/index.css`, so the entry animation disables automatically.
+- `sage-animate` — targeted by the reduced-motion guard in `app/globals.css`, so the entry animation disables automatically.
 - `max-w-[680px]` — reading measure; narrower than visitor messages (`max-w-[560px]`) so Sage's prose has room to breathe in a two-column rhythm on wide viewports.
 - `border-l-2 border-accent/35` — 2px left rule in the sage-green accent token at 35% opacity. Opacity modifier is valid Tailwind; resolves to `rgb(var(--color-accent) / 0.35)` — verify the token is declared as `rgb()` components (not a hex), otherwise fall back to `border-[color:color-mix(in_srgb,var(--color-accent)_35%,transparent)]`.
 - `pl-4` — 16px gap between the rule and the prose.

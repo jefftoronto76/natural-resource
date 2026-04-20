@@ -2,7 +2,7 @@
 
 **Repo:** `jefftoronto76/natural-resource`
 **Branch:** create `feat/sage-chat-redesign` off `main`
-**Files touched:** 4 (`src/index.css`, `src/lib/store.ts`, `src/components/Chat.tsx`, `CLAUDE.md`)
+**Files touched:** 4 (`app/globals.css`, `src/lib/store.ts`, `src/components/Chat.tsx`, `CLAUDE.md`)
 **Posture:** edit-in-place, not rewrite. All existing effects, streaming, retry, booking-card pipeline, session PATCH, and question-mode detection are preserved.
 
 **Deferred (do not land in this PR):**
@@ -29,7 +29,7 @@ For CSS vars **not** aliased (`--color-text-primary`, `--color-text-muted`, `--c
 
 | File | Change | Notes |
 |---|---|---|
-| `src/index.css` | edit (append) | Tokens, body-lock class, curly-quote rule, `sage-slide-up`, `sage-pulse`, reduced-motion guard. |
+| `app/globals.css` | edit (append) | Tokens, body-lock class, curly-quote rule, `sage-slide-up`, `sage-pulse`, reduced-motion guard. |
 | `src/lib/store.ts` | no-op | Verify shape; no code changes. |
 | `src/components/Chat.tsx` | edit in place | 13 diffs — imports, scroll lock, `--kb-h`, header, visitor/assistant/streaming/error branches, empty-state greeting, composer, tray padding, remove inline `<style>`, remove transcript preview, hook up `sage-pulse`. |
 | `CLAUDE.md` | edit | Update public-site Chat row; note transcript-preview removal in `#chat` anchor section. See section 4. |
@@ -58,7 +58,7 @@ Every change is locally reversible. If a visual detail fails review, revert insi
 
 ---
 
-## 1 — `src/index.css` (edit: append at end)
+## 1 — `app/globals.css` (edit: append at end)
 
 ```css
 /* ───────────────────────────────────────────────────────── */
@@ -310,7 +310,7 @@ function SageReply({
 ```
 
 Notes:
-- `border-accent/35` uses the `accent` token alias (`var(--color-accent)` = `#2d6a4f`) with Tailwind's opacity modifier.
+- `border-accent/35` uses the `accent` token alias (`var(--color-accent)` resolves to `45 106 79` (RGB components); `rgb(var(--color-accent))` ≡ `#2d6a4f`) with Tailwind's opacity modifier.
 - `font-display` = Playfair via the config alias.
 - `markdownComponents` is the existing inline-styled map at the top of `Chat.tsx`; leave it alone this patch.
 - `[animation:sage-slide-up_0.28s_ease-out_both]` is an arbitrary-value animation shorthand targeting the keyframes added in section 1.
@@ -431,7 +431,7 @@ Exact "before" hunk:
 + }
 ```
 
-> **Contrast note:** `--color-text-muted` at the existing 62% opacity on `--color-bg` (`#f9f8f5`) is borderline for WCAG AA on 18px italic body text. The ACCEPTANCE criteria call for bumping `--color-text-muted` to **~70% opacity** (or picking a token that gives ≥4.5:1) **in `src/index.css`** where the token is defined. This is a one-line token change; it also benefits every other use of `text-[color:var(--color-text-muted)]`. Verify with a contrast checker before merging.
+> **Contrast note:** `--color-text-muted` at the existing 62% opacity on `--color-bg` (`#f9f8f5`) is borderline for WCAG AA on 18px italic body text. The ACCEPTANCE criteria call for bumping `--color-text-muted` to **~70% opacity** (or picking a token that gives ≥4.5:1) **in `app/globals.css`** where the token is defined. This is a one-line token change; it also benefits every other use of `text-[color:var(--color-text-muted)]`. Verify with a contrast checker before merging.
 
 ### 3.8 — Assistant branch + empty-state greeting
 
@@ -758,9 +758,9 @@ Exact "before" hunk covers the whole bottom tray including the tagline line. One
 
 The current block at the bottom of `Chat.tsx` defines **both** `expandChat` (used by the overlay wrapper's inline `animation: 'expandChat 0.3s ease-out'`) and `pulse` (used by the streaming dots, which section 3.10 now points at `sage-pulse`).
 
-Move `expandChat` to `src/index.css` alongside the other keyframes so the overlay entry still animates, then delete the entire `<style>` block from `Chat.tsx`.
+Move `expandChat` to `app/globals.css` alongside the other keyframes so the overlay entry still animates, then delete the entire `<style>` block from `Chat.tsx`.
 
-**In `src/index.css`, add** (inside the appended block from section 1):
+**In `app/globals.css`, add** (inside the appended block from section 1):
 
 ```css
 @keyframes expandChat {
