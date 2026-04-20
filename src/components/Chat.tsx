@@ -217,13 +217,53 @@ const markdownComponents = {
   },
 }
 
+function SageReply({
+  prose,
+  cards,
+  sageParameters,
+}: {
+  prose: string
+  cards: BookingCardData[]
+  sageParameters: SageParameterPublic[]
+}) {
+  if (!prose && cards.length === 0) return null
+
+  return (
+    <div
+      data-sage-role="assistant"
+      className="sage-animate max-w-[680px] border-l-2 border-accent/35 pl-4 [animation:sage-slide-up_0.28s_ease-out_both]"
+    >
+      {prose && (
+        <div className="font-display text-[18px] font-normal leading-[1.55] tracking-[-0.005em] text-[color:var(--color-text-primary)] [text-wrap:pretty]">
+          <ReactMarkdown components={markdownComponents}>{prose}</ReactMarkdown>
+        </div>
+      )}
+
+      {cards.length > 0 && (
+        <div className="mt-3 flex w-full flex-col gap-2">
+          {cards.map((card, i) => {
+            const match = sageParameters.find((p) => (p.url ?? '') === card.url)
+            return (
+              <BookingCard
+                key={`${card.url}-${i}`}
+                {...card}
+                openAs={match?.open_as ?? 'new_tab'}
+                embedCode={match?.embed_code ?? null}
+              />
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function Chat() {
   const ref = useReveal()
   const {
     messages,
     isExpanded,
     isStreaming,
-    hasGreeted,
     sessionId,
     mode,
     expand,
@@ -231,7 +271,6 @@ export function Chat() {
     addMessage,
     updateLastMessage,
     setStreaming,
-    setGreeted,
     setSessionId,
   } = useSageStore()
 
@@ -281,14 +320,9 @@ export function Chat() {
   useEffect(() => {
     if (isExpanded) {
       document.body.style.overflow = 'hidden'
-
-      if (!hasGreeted) {
-        sendGreeting()
-      }
     } else {
       document.body.style.overflow = ''
     }
-
     return () => {
       document.body.style.overflow = ''
     }
@@ -301,25 +335,16 @@ export function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
   }, [messages, isExpanded])
 
-  // On mobile, detect keyboard open/close via VisualViewport and scroll the
-  // latest message into view. The overlay itself resizes via `height: 100dvh`
-  // — we intentionally do NOT mutate top/height here, because setting fixed
-  // pixel values fights with dvh and causes the input to float mid-screen on
-  // iOS Safari. Desktop is no-op'd via the matchMedia gate.
+  // On mobile keyboard open, resize overlay to match the actual visible area
   useEffect(() => {
     if (!isExpanded) return
     const vv = window.visualViewport
     if (!vv) return
-    const mobileQuery = window.matchMedia('(max-width: 768px)')
-    const baselineHeight = window.innerHeight
     const onViewportChange = () => {
-      if (!mobileQuery.matches) {
-        setKeyboardOpen(false)
-        return
-      }
-      const open = vv.height < baselineHeight * 0.85
-      setKeyboardOpen(open)
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      if (!overlayRef.current) return
+      overlayRef.current.style.top = `${vv.offsetTop}px`
+      overlayRef.current.style.height = `${vv.height}px`
+      setKeyboardOpen(vv.height < window.screen.height * 0.75)
     }
     vv.addEventListener('resize', onViewportChange)
     vv.addEventListener('scroll', onViewportChange)
@@ -338,32 +363,6 @@ export function Chat() {
     window.addEventListener('keydown', handleEscape as any)
     return () => window.removeEventListener('keydown', handleEscape as any)
   }, [isExpanded, collapse])
-
-  const sendGreeting = async () => {
-    setGreeted(true)
-
-    if (mode === 'question') {
-      console.log('[Chat] question mode — using hardcoded greeting')
-      addMessage({
-        role: 'assistant',
-        content:
-          "Hi, I'm Sage — your AI assistant. I know Jeff's work and his approach. What's your question?",
-      })
-      return
-    }
-
-    setStreaming(true)
-    addMessage({ role: 'assistant', content: '' })
-
-    try {
-      await streamSageResponse([], (chunk: string) => {
-        updateLastMessage(chunk)
-      })
-    } catch (error) {
-      updateLastMessage("Hello! I'm Sage, Jeff's AI assistant. How can I help you today?")
-    }
-    setStreaming(false)
-  }
 
   const send = async () => {
     const text = input.trim()
@@ -515,38 +514,6 @@ export function Chat() {
             This AI knows Jeff's background. It'll give you a straight answer about whether it's a fit.
           </p>
 
-          {messages.length > 0 && (
-            <div style={{
-              maxHeight: '240px',
-              overflowY: 'auto',
-              marginBottom: '24px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              padding: '16px',
-              background: 'white',
-              border: '1px solid rgba(26,25,23,0.08)',
-              borderRadius: '4px',
-            }}>
-              {messages.slice(-3).map((msg) => (
-                <div
-                  key={msg.id}
-                  style={{
-                    fontSize: '14px',
-                    lineHeight: 1.6,
-                    color: msg.role === 'user' ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
-                    fontWeight: msg.role === 'user' ? 500 : 400,
-                  }}
-                >
-                  <strong style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '4px' }}>
-                    {msg.role === 'user' ? 'You' : 'Sage'}
-                  </strong>
-                  {msg.content.substring(0, 120)}{msg.content.length > 120 ? '...' : ''}
-                </div>
-              ))}
-            </div>
-          )}
-
           <button
             onClick={() => expand()}
             style={{
@@ -606,50 +573,24 @@ export function Chat() {
           animation: 'expandChat 0.3s ease-out',
           transition: 'height 0.3s ease, top 0.3s ease',
         }}>
-          <header style={{
-            background: 'white',
-            borderBottom: '1px solid rgba(26,25,23,0.08)',
-            padding: '20px clamp(24px, 5vw, 48px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexShrink: 0,
-          }}>
-            <div>
-              <h1 style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '32px',
-                fontWeight: 400,
-                letterSpacing: '-0.01em',
-                color: 'var(--color-text-primary)',
-                marginBottom: '4px',
-              }}>
+          <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-black/[0.06] bg-bg/90 px-4 backdrop-blur-md backdrop-saturate-150 sm:px-8 [-webkit-backdrop-filter:saturate(180%)_blur(12px)]">
+            <div className="flex items-center gap-2.5">
+              <span
+                aria-hidden
+                className={`h-1.5 w-1.5 rounded-full transition-colors ${isStreaming ? 'bg-accent' : 'bg-accent/35'}`}
+              />
+              <h1 className="font-display text-[22px] font-normal leading-none tracking-[-0.01em] text-[color:var(--color-text-primary)]">
                 Sage
               </h1>
-              <p style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                color: 'var(--color-text-dim)',
-              }}>
-                Jeff's AI Assistant
-              </p>
             </div>
             <button
               onClick={collapse}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px',
-                fontSize: '24px',
-                color: 'var(--color-text-muted)',
-                lineHeight: 1,
-              }}
               aria-label="Close chat"
+              className="flex h-11 w-11 items-center justify-center bg-transparent text-[color:var(--color-text-muted)]"
             >
-              ✕
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+                <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
             </button>
           </header>
 
@@ -671,127 +612,45 @@ export function Chat() {
               flex: 1,
             }}>
               {messages.length === 0 && (
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <span style={{
-                    fontFamily: 'Playfair Display, serif',
-                    fontSize: 'clamp(48px, 6vw, 80px)',
-                    fontWeight: 400,
-                    color: '#1a1917',
-                  }}>
-                    Hello.
-                  </span>
+                <div className="sage-animate max-w-[680px] border-l-2 border-accent/35 pl-4 [animation:sage-slide-up_0.28s_ease-out_both]">
+                  <p className="mb-3 font-display font-normal leading-[1.15] tracking-[-0.01em] text-[color:var(--color-text-primary)] text-[clamp(26px,4vw,36px)]">
+                    {mode === 'question' ? (
+                      <>Ask me anything about <em className="italic">Jeff's work</em>.</>
+                    ) : (
+                      <>Hi, I'm Sage. <em className="italic">What brings you here?</em></>
+                    )}
+                  </p>
                 </div>
               )}
               {messages.map((msg) => {
                 if (msg.role === 'assistant' && !msg.content) return null
                 if (msg.role === 'user') {
                   return (
-                    <div
-                      key={msg.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                      }}
-                    >
-                      <div style={{
-                        maxWidth: '70%',
-                        padding: '16px',
-                        background: '#2d6a4f',
-                        color: 'white',
-                        borderRadius: '8px',
-                        fontSize: '16px',
-                        lineHeight: 1.7,
-                        fontFamily: 'var(--font-body)',
-                        whiteSpace: 'pre-wrap',
-                      }}>
+                    <div key={msg.id} className="flex justify-end">
+                      <p className="sage-visitor-msg sage-animate max-w-[560px] whitespace-pre-wrap text-right font-display text-[18px] italic leading-[1.5] text-[color:var(--color-text-muted)] [animation:sage-slide-up_0.24s_ease-out_both] [text-wrap:pretty]">
                         {msg.content}
-                      </div>
+                      </p>
                     </div>
                   )
                 }
                 const { prose, cards } = parseBookingCards(msg.content)
                 if (!prose && cards.length === 0) return null
                 return (
-                  <div
+                  <SageReply
                     key={msg.id}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      gap: '12px',
-                      maxWidth: '70%',
-                    }}
-                  >
-                    {prose && (
-                      <div style={{
-                        width: '100%',
-                        padding: '16px',
-                        background: 'white',
-                        color: 'var(--color-text-primary)',
-                        border: '1px solid rgba(26,25,23,0.08)',
-                        borderRadius: '8px',
-                        fontSize: '16px',
-                        lineHeight: 1.7,
-                        fontFamily: 'var(--font-body)',
-                      }}>
-                        <ReactMarkdown components={markdownComponents}>{prose}</ReactMarkdown>
-                      </div>
-                    )}
-                    {cards.length > 0 && (
-                      <div className="flex w-full flex-col gap-2">
-                        {cards.map((card, i) => {
-                          const match = sageParameters.find(p => (p.url ?? '') === card.url)
-                          const openAs: OpenAs = match?.open_as ?? 'new_tab'
-                          const embedCode = match?.embed_code ?? null
-                          return (
-                            <BookingCard
-                              key={i}
-                              {...card}
-                              openAs={openAs}
-                              embedCode={embedCode}
-                            />
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
+                    prose={prose}
+                    cards={cards}
+                    sageParameters={sageParameters}
+                  />
                 )
               })}
               {isError && !isStreaming && (
-                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                  <div style={{
-                    maxWidth: '70%',
-                    padding: '16px',
-                    background: 'white',
-                    color: 'var(--color-text-primary)',
-                    border: '1px solid rgba(26,25,23,0.08)',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    lineHeight: 1.7,
-                    fontFamily: 'var(--font-body)',
-                  }}>
+                <div className="flex justify-start">
+                  <div className="max-w-[70%] rounded-lg border border-black/[0.08] bg-surface p-4 font-body text-base leading-[1.7] text-[color:var(--color-text-primary)]">
                     Something went wrong. Please try again.
                     <button
                       onClick={retryLastSend}
-                      style={{
-                        display: 'block',
-                        marginTop: '12px',
-                        background: 'transparent',
-                        border: '1px solid rgba(26,25,23,0.15)',
-                        borderRadius: '6px',
-                        padding: '8px 16px',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '11px',
-                        letterSpacing: '0.12em',
-                        textTransform: 'uppercase',
-                        cursor: 'pointer',
-                        color: 'var(--color-text-muted)',
-                      }}
+                      className="mt-3 block rounded-md border border-black/[0.15] bg-transparent px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]"
                     >
                       Retry
                     </button>
@@ -799,25 +658,13 @@ export function Chat() {
                 </div>
               )}
               {isStreaming && messages[messages.length - 1]?.content === '' && (
-                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                  <div style={{
-                    padding: '16px',
-                    background: 'white',
-                    border: '1px solid rgba(26,25,23,0.08)',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    gap: '6px',
-                  }}>
+                <div data-sage-streaming className="flex justify-start">
+                  <div className="flex gap-1.5 rounded-lg border border-black/[0.08] bg-surface p-4">
                     {[0, 1, 2].map((i) => (
                       <div
                         key={i}
-                        style={{
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          background: '#2d6a4f',
-                          animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
-                        }}
+                        className="h-1.5 w-1.5 rounded-full bg-accent"
+                        style={{ animation: `sage-pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
                       />
                     ))}
                   </div>
@@ -827,20 +674,8 @@ export function Chat() {
             </div>
           </div>
 
-          <div style={{
-            background: 'white',
-            borderTop: '1px solid rgba(26,25,23,0.08)',
-            padding: '12px clamp(16px, 4vw, 48px)',
-            paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
-            flexShrink: 0,
-          }}>
-            <div style={{
-              maxWidth: '900px',
-              margin: '0 auto',
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'center',
-            }}>
+          <div className="flex-shrink-0 border-t border-black/[0.08] bg-surface px-4 pt-3 sm:px-12 pb-[max(12px,env(safe-area-inset-bottom))]">
+            <div className="mx-auto flex max-w-[900px] items-center gap-3">
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -848,70 +683,27 @@ export function Chat() {
                 onKeyDown={handleKey}
                 placeholder=""
                 rows={1}
-                style={{
-                  flex: 1,
-                  background: '#f9f8f5',
-                  border: '1px solid rgba(26,25,23,0.12)',
-                  borderRadius: '12px',
-                  padding: '14px 18px',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '16px',
-                  color: 'var(--color-text-primary)',
-                  resize: 'none',
-                  outline: 'none',
-                  lineHeight: 1.5,
-                  minHeight: '48px',
-                  maxHeight: '120px',
-                }}
+                className="min-h-[48px] max-h-[120px] flex-1 resize-none rounded-xl border border-black/[0.12] bg-bg px-[18px] py-3.5 font-body text-base leading-[1.5] text-[color:var(--color-text-primary)] outline-none"
               />
               <button
                 onClick={send}
                 disabled={isStreaming || !input.trim()}
-                style={{
-                  background: '#2d6a4f',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '44px',
-                  height: '44px',
-                  cursor: isStreaming || !input.trim() ? 'not-allowed' : 'pointer',
-                  opacity: isStreaming || !input.trim() ? 0.4 : 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  color: 'white',
-                  fontSize: '20px',
-                }}
                 aria-label="Send message"
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border-0 bg-accent text-xl text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
               >
                 →
               </button>
             </div>
-            <p style={{
-              textAlign: 'center',
-              fontFamily: 'DM Sans, sans-serif',
-              fontSize: '11px',
-              color: 'rgba(26,25,23,0.4)',
-              marginTop: '8px',
-              opacity: keyboardOpen ? 0 : 1,
-              transition: 'opacity 0.3s ease',
-            }}>
+            <p
+              className="mt-2 text-center font-body text-[11px] text-[color:var(--color-text-muted)] transition-opacity duration-300"
+              style={{ opacity: keyboardOpen ? 0 : 1 }}
+            >
               Sage knows Jeff's background and will give you a straight answer.
             </p>
           </div>
         </div>
       )}
 
-      <style>{`
-        @keyframes expandChat {
-          from { opacity: 0; transform: scale(0.98); }
-          to   { opacity: 1; transform: scale(1); }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 0.2; transform: scale(0.8); }
-          50%       { opacity: 1;   transform: scale(1.2); }
-        }
-      `}</style>
     </>
   )
 }
