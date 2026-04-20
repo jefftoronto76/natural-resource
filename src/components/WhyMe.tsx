@@ -56,7 +56,7 @@ export function WhyMe() {
             Fewer fires. Clearer priorities. <em style={{ fontStyle: 'italic' }}>Progress you can see.</em>
           </h2>
           <div style={{ marginBottom: '40px' }}>
-            <p style={{ ...bodyStyle, marginBottom: 0 }}>My role is to help you focus on what matters, build capability, and make progress sustainable.</p>
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>My goal is to help you navigate the messiness of growth by staying focused on what matters: helping your customers, supporting your team, and choosing progress over perfection.</p>
           </div>
 
           <div className="nr-split">
