@@ -4,3 +4,6 @@ dist
 .env.local
 .next/
 tsconfig.tsbuildinfo
+
+# macOS
+.DS_Store

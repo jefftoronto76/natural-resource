@@ -1,5 +1,3 @@
-/// <reference types="next" />
-
 // Calendly widget — loaded via next/script in app/layout.tsx
 interface Window {
   Calendly?: {
