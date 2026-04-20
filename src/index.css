@@ -5,10 +5,10 @@
 @tailwind utilities;
 
 :root {
-  --color-bg: #f9f8f5;
-  --color-surface: #ffffff;
-  --color-accent: #2d6a4f;
-  --color-accent-hover: #1e4d39;
+  --color-bg: 249 248 245;
+  --color-surface: 255 255 255;
+  --color-accent: 45 106 79;
+  --color-accent-hover: 30 77 57;
   --color-text-primary: #1a1917;
   --color-text-muted: rgba(26,25,23,0.62);
   --color-text-dim: rgba(26,25,23,0.42);
@@ -25,7 +25,7 @@
 html { scroll-behavior: smooth; font-size: 16px; }
 
 body {
-  background: var(--color-bg);
+  background: rgb(var(--color-bg));
   color: var(--color-text-primary);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -46,7 +46,7 @@ body {
 .reveal-delay-3 { transition-delay: 0.3s; }
 
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-track { background: rgb(var(--color-bg)); }
 ::-webkit-scrollbar-thumb { background: rgba(26,25,23,0.15); border-radius: 2px; }
 
 .highlight-marker {
@@ -76,17 +76,17 @@ body {
 
 /* Nav Chat pill */
 .nav-chat-pill {
-  background: var(--color-accent);
+  background: rgb(var(--color-accent));
   color: #ffffff !important;
   border-radius: 999px;
   transition: background 0.2s ease;
 }
 
 .nav-chat-pill:hover {
-  background: var(--color-accent-hover);
+  background: rgb(var(--color-accent-hover));
 }
 
 .nav-chat-pill:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid rgb(var(--color-accent));
   outline-offset: 3px;
 }

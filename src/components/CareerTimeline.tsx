@@ -93,7 +93,7 @@ export function CareerTimeline() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'transform 0.3s ease',
             transform: open ? 'rotate(45deg)' : 'none',
-            fontSize: '14px', lineHeight: 1, color: 'var(--color-accent)',
+            fontSize: '14px', lineHeight: 1, color: 'rgb(var(--color-accent))',
             flexShrink: 0,
           } as React.CSSProperties}>+</span>
           {open ? 'Close' : <>Career <span style={{
@@ -153,20 +153,20 @@ export function CareerTimeline() {
                   {/* Dot */}
                   <div style={{
                     width: '10px', height: '10px', borderRadius: '50%',
-                    background: 'var(--color-accent)',
-                    border: '2px solid var(--color-bg)',
-                    outline: '1px solid var(--color-accent)',
+                    background: 'rgb(var(--color-accent))',
+                    border: '2px solid rgb(var(--color-bg))',
+                    outline: '1px solid rgb(var(--color-accent))',
                     marginBottom: '20px',
                     marginLeft: '4px',
                   }} />
 
                   {/* Card */}
                   <div style={{
-                    background: 'var(--color-bg)',
+                    background: 'rgb(var(--color-bg))',
                     border: '1px solid rgba(26,25,23,0.08)',
                     padding: '24px',
                   }}>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', color: 'var(--color-accent)', marginBottom: '6px' }}>{stop.year}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.12em', color: 'rgb(var(--color-accent))', marginBottom: '6px' }}>{stop.year}</p>
                     <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 400, color: 'var(--color-text-primary)', marginBottom: '4px', lineHeight: 1.2 }}>{stop.company}</h4>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '4px' }}>{stop.role}</p>
                     <p style={{ fontSize: '13px', color: 'var(--color-text-dim)', marginBottom: '20px', fontStyle: 'italic' }}>{stop.context}</p>
