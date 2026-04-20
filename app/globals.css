@@ -9,7 +9,7 @@
   --color-accent: 45 106 79;
   --color-accent-hover: 30 77 57;
   --color-text-primary: #1a1917;
-  --color-text-muted: rgba(26,25,23,0.62);
+  --color-text-muted: rgba(26,25,23,0.70);
   --color-text-dim: rgba(26,25,23,0.42);
   --color-border: rgba(26,25,23,0.08);
   --color-border-hover: rgba(26,25,23,0.25);
@@ -149,4 +149,53 @@ body {
   0%   { border-bottom-color: transparent; border-left-color: transparent; }
   50%  { border-bottom-color: rgb(var(--color-accent)); border-left-color: transparent; }
   100% { border-bottom-color: rgb(var(--color-accent)); border-left-color: rgb(var(--color-accent)); }
+}
+
+/* ───────────────────────────────────────────────────────── */
+/* Sage chat overlay — appended for visitor chat redesign   */
+/* ───────────────────────────────────────────────────────── */
+
+:root {
+  --kb-h: 0px; /* keyboard inset, set by Chat.tsx on iOS < 17.4 */
+}
+
+/* Body scroll lock — preserves scroll position on close.
+   Chat.tsx toggles this class instead of mutating overflow inline. */
+body.sage-locked {
+  position: fixed;
+  top: var(--sage-scroll-y, 0);
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Curly quotes on visitor messages. Applied via .sage-visitor-msg
+   on the user-reply <p> in Chat.tsx. */
+.sage-visitor-msg {
+  quotes: "\201C" "\201D" "\2018" "\2019";
+}
+.sage-visitor-msg::before { content: open-quote; }
+.sage-visitor-msg::after  { content: close-quote; }
+
+/* Message entry animation. */
+@keyframes sage-slide-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Streaming indicator dots (replaces inline `pulse` in Chat.tsx). */
+@keyframes sage-pulse {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50%      { opacity: 1;   transform: scale(1.2); }
+}
+
+/* Respect reduced-motion at the CSS layer. */
+@media (prefers-reduced-motion: reduce) {
+  .sage-animate,
+  .sage-visitor-msg,
+  [data-sage-streaming] > * {
+    animation: none !important;
+    transition: none !important;
+  }
 }
