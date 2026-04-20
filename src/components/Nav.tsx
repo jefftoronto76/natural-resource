@@ -11,12 +11,31 @@ const LINKS = [
 export function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [chatBorderDrawn, setChatBorderDrawn] = useState(false)
   const expand = useSageStore((s) => s.expand)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    const el = document.querySelector('[data-nav-trigger="how-i-operate"]')
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setChatBorderDrawn(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.15 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [])
 
   return (
@@ -46,15 +65,13 @@ export function Nav() {
                 key={label}
                 href={href}
                 onClick={isChatLink ? (e) => { e.preventDefault(); expand() } : undefined}
-                className={isChatLink ? 'nav-chat-pill' : undefined}
+                className={isChatLink ? `nav-chat-btn ${chatBorderDrawn ? 'nav-chat-btn--drawn' : ''}` : undefined}
                 style={{
                   fontFamily: 'var(--font-mono)', fontSize: '13.2px',
                   letterSpacing: '0.18em', textTransform: 'uppercase',
                   textDecoration: 'none',
                   cursor: 'pointer',
-                  ...(isChatLink
-                    ? { padding: '8px 16px' }
-                    : { color: 'var(--color-text-muted)' }),
+                  ...(isChatLink ? {} : { color: 'var(--color-text-muted)' }),
                 }}
               >
                 {label}
