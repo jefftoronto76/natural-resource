@@ -294,6 +294,7 @@ export function Chat() {
   const overlayRef = useRef<HTMLDivElement>(null)
   const retryMsgsRef = useRef<typeof messages>([])
   const retrySessionIdRef = useRef<string | null>(null)
+  const isFirstExpansionRef = useRef(true)
 
   useEffect(() => {
     let cancelled = false
@@ -319,13 +320,27 @@ export function Chat() {
 
   useLayoutEffect(() => {
     if (!isExpanded) return
-    const scrollY = window.scrollY
+
+    // On the first expansion after mount, if the URL triggered us
+    // (e.g. /#chat?mode=question), the browser has already auto-scrolled to
+    // the #chat anchor — capturing that scrollY would send the user back
+    // there on close. Treat scrollY as 0 so close returns to the top.
+    const isUrlTriggered =
+      isFirstExpansionRef.current &&
+      window.location.hash.includes('chat') &&
+      detectModeFromLocation() === 'question'
+    isFirstExpansionRef.current = false
+
+    const scrollY = isUrlTriggered ? 0 : window.scrollY
     document.body.style.setProperty('--sage-scroll-y', `-${scrollY}px`)
     document.body.classList.add('sage-locked')
     return () => {
+      // Restore scroll position before removing the lock class so the body
+      // goes straight from fixed-at-offset to static-at-scrollY. Removing
+      // the class first would produce a one-frame paint at y=0.
+      window.scrollTo(0, scrollY)
       document.body.classList.remove('sage-locked')
       document.body.style.removeProperty('--sage-scroll-y')
-      window.scrollTo(0, scrollY)
     }
   }, [isExpanded])
 
