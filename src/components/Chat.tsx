@@ -690,35 +690,12 @@ export function Chat() {
                 )
               })}
               {isError && !isStreaming && (
-                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                  <div style={{
-                    maxWidth: '70%',
-                    padding: '16px',
-                    background: 'white',
-                    color: 'var(--color-text-primary)',
-                    border: '1px solid rgba(26,25,23,0.08)',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    lineHeight: 1.7,
-                    fontFamily: 'var(--font-body)',
-                  }}>
+                <div className="flex justify-start">
+                  <div className="max-w-[70%] rounded-lg border border-black/[0.08] bg-surface p-4 font-body text-base leading-[1.7] text-[color:var(--color-text-primary)]">
                     Something went wrong. Please try again.
                     <button
                       onClick={retryLastSend}
-                      style={{
-                        display: 'block',
-                        marginTop: '12px',
-                        background: 'transparent',
-                        border: '1px solid rgba(26,25,23,0.15)',
-                        borderRadius: '6px',
-                        padding: '8px 16px',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '11px',
-                        letterSpacing: '0.12em',
-                        textTransform: 'uppercase',
-                        cursor: 'pointer',
-                        color: 'var(--color-text-muted)',
-                      }}
+                      className="mt-3 block rounded-md border border-black/[0.15] bg-transparent px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]"
                     >
                       Retry
                     </button>
@@ -726,25 +703,13 @@ export function Chat() {
                 </div>
               )}
               {isStreaming && messages[messages.length - 1]?.content === '' && (
-                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                  <div style={{
-                    padding: '16px',
-                    background: 'white',
-                    border: '1px solid rgba(26,25,23,0.08)',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    gap: '6px',
-                  }}>
+                <div data-sage-streaming className="flex justify-start">
+                  <div className="flex gap-1.5 rounded-lg border border-black/[0.08] bg-surface p-4">
                     {[0, 1, 2].map((i) => (
                       <div
                         key={i}
-                        style={{
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          background: '#2d6a4f',
-                          animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
-                        }}
+                        className="h-1.5 w-1.5 rounded-full bg-accent"
+                        style={{ animation: `sage-pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
                       />
                     ))}
                   </div>
