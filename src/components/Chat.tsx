@@ -618,50 +618,24 @@ export function Chat() {
           animation: 'expandChat 0.3s ease-out',
           transition: 'height 0.3s ease, top 0.3s ease',
         }}>
-          <header style={{
-            background: 'white',
-            borderBottom: '1px solid rgba(26,25,23,0.08)',
-            padding: '20px clamp(24px, 5vw, 48px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexShrink: 0,
-          }}>
-            <div>
-              <h1 style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '32px',
-                fontWeight: 400,
-                letterSpacing: '-0.01em',
-                color: 'var(--color-text-primary)',
-                marginBottom: '4px',
-              }}>
+          <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-black/[0.06] bg-bg/90 px-4 backdrop-blur-md backdrop-saturate-150 sm:px-8 [-webkit-backdrop-filter:saturate(180%)_blur(12px)]">
+            <div className="flex items-center gap-2.5">
+              <span
+                aria-hidden
+                className={`h-1.5 w-1.5 rounded-full transition-colors ${isStreaming ? 'bg-accent' : 'bg-accent/35'}`}
+              />
+              <h1 className="font-display text-[22px] font-normal leading-none tracking-[-0.01em] text-[color:var(--color-text-primary)]">
                 Sage
               </h1>
-              <p style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                color: 'var(--color-text-dim)',
-              }}>
-                Jeff's AI Assistant
-              </p>
             </div>
             <button
               onClick={collapse}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px',
-                fontSize: '24px',
-                color: 'var(--color-text-muted)',
-                lineHeight: 1,
-              }}
               aria-label="Close chat"
+              className="flex h-11 w-11 items-center justify-center bg-transparent text-[color:var(--color-text-muted)]"
             >
-              ✕
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+                <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
             </button>
           </header>
 
