@@ -94,3 +94,59 @@ body {
   outline: 2px solid rgb(var(--color-accent));
   outline-offset: 3px;
 }
+
+/* Nav chat button — desktop scroll-triggered border */
+.nav-chat-btn {
+  position: relative;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+}
+
+.nav-chat-btn:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 3px;
+}
+
+.nav-chat-btn::before,
+.nav-chat-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+}
+
+/* ::before draws top + right edges */
+.nav-chat-btn::before {
+  border-top-color: transparent;
+  border-right-color: transparent;
+}
+
+/* ::after draws bottom + left edges */
+.nav-chat-btn::after {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+
+.nav-chat-btn--drawn::before {
+  animation: nav-chat-draw-top-right 0.35s ease-out forwards;
+}
+
+.nav-chat-btn--drawn::after {
+  animation: nav-chat-draw-bottom-left 0.35s ease-out 0.35s forwards;
+}
+
+@keyframes nav-chat-draw-top-right {
+  0%   { border-top-color: transparent; border-right-color: transparent; }
+  50%  { border-top-color: rgb(var(--color-accent)); border-right-color: transparent; }
+  100% { border-top-color: rgb(var(--color-accent)); border-right-color: rgb(var(--color-accent)); }
+}
+
+@keyframes nav-chat-draw-bottom-left {
+  0%   { border-bottom-color: transparent; border-left-color: transparent; }
+  50%  { border-bottom-color: rgb(var(--color-accent)); border-left-color: transparent; }
+  100% { border-bottom-color: rgb(var(--color-accent)); border-left-color: rgb(var(--color-accent)); }
+}

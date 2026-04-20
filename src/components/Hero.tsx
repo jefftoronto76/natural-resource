@@ -43,7 +43,7 @@ export function Hero() {
             color: 'var(--color-text-muted)', marginBottom: '48px',
           }}>
             Hi, I'm Jeff.<br />
-            I work with technology companies and ambitious professionals as an executive coach and fractional operator, focused on revenue growth.
+            I work hands-on with vertical market software companies — and the people running them — as an executive coach and fractional operator.
           </p>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>

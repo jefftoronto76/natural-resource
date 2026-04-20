@@ -2,7 +2,7 @@
 
 import { useReveal } from '@/hooks/useReveal'
 import { CareerTimeline } from './CareerTimeline'
-import { TestimonialCarousel } from './TestimonialCarousel'
+import { CareerHighlights } from './CareerHighlights'
 import { QuoteCarouselSection } from './QuoteCarouselSection'
 
 const STATS = [
@@ -15,6 +15,7 @@ const STATS = [
 export function WhyMe() {
   const ref = useReveal()
   const carouselRef = useReveal()
+  const closingRef = useReveal()
 
   const sectionPad = '64px clamp(24px, 5vw, 48px)'
   const labelStyle: React.CSSProperties = {
@@ -34,7 +35,7 @@ export function WhyMe() {
 
   return (
     <>
-      <section id="about" style={{ padding: sectionPad, borderBottom: '1px solid rgba(26,25,23,0.08)' }}>
+      <section id="about" data-nav-trigger="how-i-operate" style={{ padding: sectionPad, borderBottom: '1px solid rgba(26,25,23,0.08)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <p style={labelStyle}>
             <span style={{
@@ -53,10 +54,10 @@ export function WhyMe() {
             fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
             color: 'var(--color-text-primary)', marginBottom: '28px',
           }}>
-            Clear thinking. Direct conversations. <em style={{ fontStyle: 'italic' }}>Measurable progress.</em>
+            Fewer fires. Clearer priorities. <em style={{ fontStyle: 'italic' }}>Progress you can see.</em>
           </h2>
           <div style={{ marginBottom: '40px' }}>
-            <p style={{ ...bodyStyle, marginBottom: 0 }}>My role is to help you focus on what matters, build capability, and make progress sustainable.</p>
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>My goal is to help you navigate the messiness of growth by staying focused on what matters: helping your customers, supporting your team, and choosing progress over perfection.</p>
           </div>
 
           <div className="nr-split">
@@ -75,7 +76,7 @@ export function WhyMe() {
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Formal coach training that shows up in the work — and in dedicated 1-on-1 coaching when that's what's needed.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Ownership-level thinking.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Owner's perspective.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>When most of your career is spent reporting to the people who built the business, you see things the way they do.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
@@ -83,18 +84,22 @@ export function WhyMe() {
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Cut through the noise. Find the few things actually shaping performance and fix those.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Capability over dependency.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Stronger individuals build stronger organizations.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Progress over process.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>A process should help you see what to fix. If it isn't, it's a distraction.</p>
               </div>
               <div>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Transparency builds trust.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Progress requires honest conversations — delivered in a way people can actually use.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Field over office.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>I go where the work is. Plane, boardroom, conference, with the team — wherever progress needs to happen.</p>
               </div>
             </div>
 
             <div ref={carouselRef} className="reveal">
-              <TestimonialCarousel />
+              <CareerHighlights />
             </div>
+          </div>
+
+          <div ref={closingRef} className="reveal" style={{ marginTop: '48px' }}>
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>Underneath all of it: relationships always win. Know your customer, understand their pains, help them win. That's the cornerstone of a durable business.</p>
           </div>
         </div>
       </section>
