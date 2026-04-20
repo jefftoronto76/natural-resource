@@ -75,7 +75,7 @@ export function WhyMe() {
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Formal coach training that shows up in the work — and in dedicated 1-on-1 coaching when that's what's needed.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Ownership-level thinking.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Owner's perspective.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>When most of your career is spent reporting to the people who built the business, you see things the way they do.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
@@ -83,13 +83,14 @@ export function WhyMe() {
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>Cut through the noise. Find the few things actually shaping performance and fix those.</p>
               </div>
               <div style={{ marginBottom: '24px' }}>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Capability over dependency.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Stronger individuals build stronger organizations.</p>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Progress over process.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>A process should help you see what to fix. If it isn't, it's a distraction.</p>
               </div>
-              <div>
-                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Transparency builds trust.</p>
-                <p style={{ ...bodyStyle, marginBottom: 0 }}>Progress requires honest conversations — delivered in a way people can actually use.</p>
+              <div style={{ marginBottom: '24px' }}>
+                <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Field over office.</p>
+                <p style={{ ...bodyStyle, marginBottom: 0 }}>I go where the work is. Plane, boardroom, conference, with the team — wherever progress needs to happen.</p>
               </div>
+              <p style={{ ...bodyStyle, marginBottom: 0 }}>Underneath all of it: relationships always win. Know your customer, understand their pains, help them win. That's the cornerstone of a durable business.</p>
             </div>
 
             <div ref={carouselRef} className="reveal">
