@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, KeyboardEvent, useState } from 'react'
+import { useRef, useEffect, useLayoutEffect, KeyboardEvent, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useSageStore } from '../lib/store'
 import { streamSageResponse } from '../lib/sage'
@@ -223,7 +223,6 @@ export function Chat() {
     messages,
     isExpanded,
     isStreaming,
-    hasGreeted,
     sessionId,
     mode,
     expand,
@@ -231,7 +230,6 @@ export function Chat() {
     addMessage,
     updateLastMessage,
     setStreaming,
-    setGreeted,
     setSessionId,
   } = useSageStore()
 
@@ -278,19 +276,15 @@ export function Chat() {
     }
   }, [])
 
-  useEffect(() => {
-    if (isExpanded) {
-      document.body.style.overflow = 'hidden'
-
-      if (!hasGreeted) {
-        sendGreeting()
-      }
-    } else {
-      document.body.style.overflow = ''
-    }
-
+  useLayoutEffect(() => {
+    if (!isExpanded) return
+    const scrollY = window.scrollY
+    document.body.style.setProperty('--sage-scroll-y', `-${scrollY}px`)
+    document.body.classList.add('sage-locked')
     return () => {
-      document.body.style.overflow = ''
+      document.body.classList.remove('sage-locked')
+      document.body.style.removeProperty('--sage-scroll-y')
+      window.scrollTo(0, scrollY)
     }
   }, [isExpanded])
 
@@ -338,32 +332,6 @@ export function Chat() {
     window.addEventListener('keydown', handleEscape as any)
     return () => window.removeEventListener('keydown', handleEscape as any)
   }, [isExpanded, collapse])
-
-  const sendGreeting = async () => {
-    setGreeted(true)
-
-    if (mode === 'question') {
-      console.log('[Chat] question mode — using hardcoded greeting')
-      addMessage({
-        role: 'assistant',
-        content:
-          "Hi, I'm Sage — your AI assistant. I know Jeff's work and his approach. What's your question?",
-      })
-      return
-    }
-
-    setStreaming(true)
-    addMessage({ role: 'assistant', content: '' })
-
-    try {
-      await streamSageResponse([], (chunk: string) => {
-        updateLastMessage(chunk)
-      })
-    } catch (error) {
-      updateLastMessage("Hello! I'm Sage, Jeff's AI assistant. How can I help you today?")
-    }
-    setStreaming(false)
-  }
 
   const send = async () => {
     const text = input.trim()
