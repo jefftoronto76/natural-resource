@@ -719,20 +719,8 @@ export function Chat() {
             </div>
           </div>
 
-          <div style={{
-            background: 'white',
-            borderTop: '1px solid rgba(26,25,23,0.08)',
-            padding: '12px clamp(16px, 4vw, 48px)',
-            paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
-            flexShrink: 0,
-          }}>
-            <div style={{
-              maxWidth: '900px',
-              margin: '0 auto',
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'center',
-            }}>
+          <div className="flex-shrink-0 border-t border-black/[0.08] bg-surface px-4 pt-3 sm:px-12 pb-[max(12px,calc(env(safe-area-inset-bottom)+var(--kb-h)))]">
+            <div className="mx-auto flex max-w-[900px] items-center gap-3">
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -740,54 +728,21 @@ export function Chat() {
                 onKeyDown={handleKey}
                 placeholder=""
                 rows={1}
-                style={{
-                  flex: 1,
-                  background: '#f9f8f5',
-                  border: '1px solid rgba(26,25,23,0.12)',
-                  borderRadius: '12px',
-                  padding: '14px 18px',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '16px',
-                  color: 'var(--color-text-primary)',
-                  resize: 'none',
-                  outline: 'none',
-                  lineHeight: 1.5,
-                  minHeight: '48px',
-                  maxHeight: '120px',
-                }}
+                className="min-h-[48px] max-h-[120px] flex-1 resize-none rounded-xl border border-black/[0.12] bg-bg px-[18px] py-3.5 font-body text-base leading-[1.5] text-[color:var(--color-text-primary)] outline-none"
               />
               <button
                 onClick={send}
                 disabled={isStreaming || !input.trim()}
-                style={{
-                  background: '#2d6a4f',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '44px',
-                  height: '44px',
-                  cursor: isStreaming || !input.trim() ? 'not-allowed' : 'pointer',
-                  opacity: isStreaming || !input.trim() ? 0.4 : 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  color: 'white',
-                  fontSize: '20px',
-                }}
                 aria-label="Send message"
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border-0 bg-accent text-xl text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
               >
                 →
               </button>
             </div>
-            <p style={{
-              textAlign: 'center',
-              fontFamily: 'DM Sans, sans-serif',
-              fontSize: '11px',
-              color: 'rgba(26,25,23,0.4)',
-              marginTop: '8px',
-              opacity: keyboardOpen ? 0 : 1,
-              transition: 'opacity 0.3s ease',
-            }}>
+            <p
+              className="mt-2 text-center font-body text-[11px] text-[color:var(--color-text-muted)] transition-opacity duration-300"
+              style={{ opacity: keyboardOpen ? 0 : 1 }}
+            >
               Sage knows Jeff's background and will give you a straight answer.
             </p>
           </div>
