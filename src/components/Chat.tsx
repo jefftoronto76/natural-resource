@@ -309,10 +309,13 @@ export function Chat() {
     const onViewportChange = () => {
       if (!mobileQuery.matches) {
         setKeyboardOpen(false)
+        document.documentElement.style.setProperty('--kb-h', '0px')
         return
       }
       const open = vv.height < baselineHeight * 0.85
       setKeyboardOpen(open)
+      const inset = Math.max(0, baselineHeight - vv.height - vv.offsetTop)
+      document.documentElement.style.setProperty('--kb-h', `${inset}px`)
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
     vv.addEventListener('resize', onViewportChange)
