@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useLayoutEffect, KeyboardEvent, useState } from 'react'
+import { useRef, useEffect, KeyboardEvent, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useSageStore } from '../lib/store'
 import { streamSageResponse } from '../lib/sage'
@@ -294,7 +294,6 @@ export function Chat() {
   const overlayRef = useRef<HTMLDivElement>(null)
   const retryMsgsRef = useRef<typeof messages>([])
   const retrySessionIdRef = useRef<string | null>(null)
-  const isFirstExpansionRef = useRef(true)
 
   useEffect(() => {
     let cancelled = false
@@ -318,29 +317,14 @@ export function Chat() {
     }
   }, [])
 
-  useLayoutEffect(() => {
-    if (!isExpanded) return
-
-    // On the first expansion after mount, if the URL triggered us
-    // (e.g. /#chat?mode=question), the browser has already auto-scrolled to
-    // the #chat anchor — capturing that scrollY would send the user back
-    // there on close. Treat scrollY as 0 so close returns to the top.
-    const isUrlTriggered =
-      isFirstExpansionRef.current &&
-      window.location.hash.includes('chat') &&
-      detectModeFromLocation() === 'question'
-    isFirstExpansionRef.current = false
-
-    const scrollY = isUrlTriggered ? 0 : window.scrollY
-    document.body.style.setProperty('--sage-scroll-y', `-${scrollY}px`)
-    document.body.classList.add('sage-locked')
+  useEffect(() => {
+    if (isExpanded) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
     return () => {
-      // Restore scroll position before removing the lock class so the body
-      // goes straight from fixed-at-offset to static-at-scrollY. Removing
-      // the class first would produce a one-frame paint at y=0.
-      window.scrollTo(0, scrollY)
-      document.body.classList.remove('sage-locked')
-      document.body.style.removeProperty('--sage-scroll-y')
+      document.body.style.overflow = ''
     }
   }, [isExpanded])
 
@@ -351,28 +335,16 @@ export function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
   }, [messages, isExpanded])
 
-  // On mobile, detect keyboard open/close via VisualViewport and scroll the
-  // latest message into view. The overlay itself resizes via `height: 100dvh`
-  // — we intentionally do NOT mutate top/height here, because setting fixed
-  // pixel values fights with dvh and causes the input to float mid-screen on
-  // iOS Safari. Desktop is no-op'd via the matchMedia gate.
+  // On mobile keyboard open, resize overlay to match the actual visible area
   useEffect(() => {
     if (!isExpanded) return
     const vv = window.visualViewport
     if (!vv) return
-    const mobileQuery = window.matchMedia('(max-width: 768px)')
-    const baselineHeight = window.innerHeight
     const onViewportChange = () => {
-      if (!mobileQuery.matches) {
-        setKeyboardOpen(false)
-        document.documentElement.style.setProperty('--kb-h', '0px')
-        return
-      }
-      const open = vv.height < baselineHeight * 0.85
-      setKeyboardOpen(open)
-      const inset = Math.max(0, baselineHeight - vv.height - vv.offsetTop)
-      document.documentElement.style.setProperty('--kb-h', `${inset}px`)
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      if (!overlayRef.current) return
+      overlayRef.current.style.top = `${vv.offsetTop}px`
+      overlayRef.current.style.height = `${vv.height}px`
+      setKeyboardOpen(vv.height < window.screen.height * 0.75)
     }
     vv.addEventListener('resize', onViewportChange)
     vv.addEventListener('scroll', onViewportChange)
@@ -702,7 +674,7 @@ export function Chat() {
             </div>
           </div>
 
-          <div className="flex-shrink-0 border-t border-black/[0.08] bg-surface px-4 pt-3 sm:px-12 pb-[max(12px,calc(env(safe-area-inset-bottom)+var(--kb-h)))]">
+          <div className="flex-shrink-0 border-t border-black/[0.08] bg-surface px-4 pt-3 sm:px-12 pb-[max(12px,env(safe-area-inset-bottom))]">
             <div className="mx-auto flex max-w-[900px] items-center gap-3">
               <textarea
                 ref={textareaRef}
