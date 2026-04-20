@@ -53,7 +53,7 @@ export function WhyMe() {
             fontWeight: 400, lineHeight: 1.08, letterSpacing: '-0.02em',
             color: 'var(--color-text-primary)', marginBottom: '28px',
           }}>
-            Clear thinking. Direct conversations. <em style={{ fontStyle: 'italic' }}>Measurable progress.</em>
+            Fewer fires. Clearer priorities. <em style={{ fontStyle: 'italic' }}>Progress you can see.</em>
           </h2>
           <div style={{ marginBottom: '40px' }}>
             <p style={{ ...bodyStyle, marginBottom: 0 }}>My role is to help you focus on what matters, build capability, and make progress sustainable.</p>
