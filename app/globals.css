@@ -178,6 +178,12 @@ body.sage-locked {
 .sage-visitor-msg::before { content: open-quote; }
 .sage-visitor-msg::after  { content: close-quote; }
 
+/* Overlay entry animation (relocated from inline <style> in Chat.tsx). */
+@keyframes expandChat {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 /* Message entry animation. */
 @keyframes sage-slide-up {
   from { opacity: 0; transform: translateY(6px); }
