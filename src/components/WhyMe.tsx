@@ -15,6 +15,7 @@ const STATS = [
 export function WhyMe() {
   const ref = useReveal()
   const carouselRef = useReveal()
+  const closingRef = useReveal()
 
   const sectionPad = '64px clamp(24px, 5vw, 48px)'
   const labelStyle: React.CSSProperties = {
@@ -86,16 +87,19 @@ export function WhyMe() {
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Progress over process.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>A process should help you see what to fix. If it isn't, it's a distraction.</p>
               </div>
-              <div style={{ marginBottom: '24px' }}>
+              <div>
                 <p style={{ ...bodyStyle, fontWeight: 700, marginBottom: '16px' }}>Field over office.</p>
                 <p style={{ ...bodyStyle, marginBottom: 0 }}>I go where the work is. Plane, boardroom, conference, with the team — wherever progress needs to happen.</p>
               </div>
-              <p style={{ ...bodyStyle, marginBottom: 0 }}>Underneath all of it: relationships always win. Know your customer, understand their pains, help them win. That's the cornerstone of a durable business.</p>
             </div>
 
             <div ref={carouselRef} className="reveal">
               <CareerHighlights />
             </div>
+          </div>
+
+          <div ref={closingRef} className="reveal" style={{ marginTop: '48px' }}>
+            <p style={{ ...bodyStyle, marginBottom: 0 }}>Underneath all of it: relationships always win. Know your customer, understand their pains, help them win. That's the cornerstone of a durable business.</p>
           </div>
         </div>
       </section>
