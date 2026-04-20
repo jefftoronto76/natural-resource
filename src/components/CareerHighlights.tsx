@@ -148,7 +148,7 @@ const CARDS: CarouselCard[] = [
   }
 ]
 
-export function TestimonialCarousel() {
+export function CareerHighlights() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [modalIndex, setModalIndex] = useState<number | null>(null)
   const [modalVisible, setModalVisible] = useState(false)

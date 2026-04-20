@@ -2,7 +2,7 @@
 
 import { useReveal } from '@/hooks/useReveal'
 import { CareerTimeline } from './CareerTimeline'
-import { TestimonialCarousel } from './TestimonialCarousel'
+import { CareerHighlights } from './CareerHighlights'
 import { QuoteCarouselSection } from './QuoteCarouselSection'
 
 const STATS = [
@@ -94,7 +94,7 @@ export function WhyMe() {
             </div>
 
             <div ref={carouselRef} className="reveal">
-              <TestimonialCarousel />
+              <CareerHighlights />
             </div>
           </div>
         </div>

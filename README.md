@@ -39,7 +39,7 @@ Personal site for Jeff Lougheed's coaching and embedded operator practice.
 | Hero | Headline, subhead, CTA to `#work`. |
 | Problem | Full-bleed section with background image. Mobile: `flex-direction: column`, image anchors top. |
 | How I Operate | Headline + body (full width), then two-column split: Principles in Practice (5 items) + Career Highlights carousel. |
-| Career Highlights | `TestimonialCarousel` — intro card + company cards with expandable detail. |
+| Career Highlights | `CareerHighlights` — intro card + company cards with expandable detail. |
 | Work / Services | Two service cards (1-on-1 Coaching, Embedded Execution). Calendly inline embed. Cards flex-column so buttons pin to bottom. |
 | Chat (Sage) | Public AI chat. Expands to full-screen overlay. See Sage section below. |
 | Footer | Nav links: About, Work, Chat. |
