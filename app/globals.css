@@ -99,7 +99,7 @@ body {
 .nav-chat-btn {
   position: relative;
   padding: 8px 16px;
-  border-radius: 16px;
+  border-radius: 8px;
   color: var(--color-text-muted);
 }
 
@@ -113,7 +113,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 16px;
+  border-radius: 8px;
   pointer-events: none;
   box-sizing: border-box;
   border: 1px solid transparent;
