@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { Group, Progress, Stack, Tooltip } from '@mantine/core'
+import { Progress, Stack, Tooltip } from '@mantine/core'
 import { Text } from '@/components/admin/primitives/Text'
 import { TYPE_COLORS, TYPE_LABELS, type BlockType } from './blockTypes'
 
@@ -29,7 +28,7 @@ function tokensFor(body: string): number {
  * block type. Hovering a segment shows "{title} · {tokens} tokens".
  * Over-budget (> TOKEN_LIMIT) recolors every segment red; between
  * YELLOW_THRESHOLD and TOKEN_LIMIT, segments stay their per-type color
- * but the total label turns yellow as a heads-up.
+ * but the total label turns yellow.
  */
 export function SegmentedTokenMeter({ blocks }: SegmentedTokenMeterProps) {
   const segments = blocks.map(b => ({
@@ -42,26 +41,6 @@ export function SegmentedTokenMeter({ blocks }: SegmentedTokenMeterProps) {
   const overBudget = totalTokens > TOKEN_LIMIT
   const warning = !overBudget && totalTokens >= YELLOW_THRESHOLD
 
-  // Observability — log over-budget state transitions so we can see in
-  // the console when the meter flips between normal / warning / red.
-  const prevStateRef = useRef<'ok' | 'warning' | 'over'>('ok')
-  useEffect(() => {
-    const nextState: 'ok' | 'warning' | 'over' = overBudget
-      ? 'over'
-      : warning
-        ? 'warning'
-        : 'ok'
-    if (nextState !== prevStateRef.current) {
-      console.log('[SegmentedTokenMeter] budget state change', {
-        from: prevStateRef.current,
-        to: nextState,
-        totalTokens,
-        limit: TOKEN_LIMIT,
-      })
-      prevStateRef.current = nextState
-    }
-  }, [overBudget, warning, totalTokens])
-
   const labelColor = overBudget
     ? 'var(--mantine-color-red-7)'
     : warning
@@ -70,18 +49,16 @@ export function SegmentedTokenMeter({ blocks }: SegmentedTokenMeterProps) {
 
   return (
     <Stack gap={6}>
-      <Group justify="space-between" gap="xs" wrap="nowrap">
-        <Text
-          variant="muted"
-          style={{
-            fontSize: 'var(--mantine-font-size-xs)',
-            fontFamily: 'var(--mantine-font-family-monospace)',
-            color: labelColor,
-          }}
-        >
-          {totalTokens.toLocaleString()} / {TOKEN_LIMIT.toLocaleString()} tokens used
-        </Text>
-      </Group>
+      <Text
+        variant="muted"
+        style={{
+          fontSize: 'var(--mantine-font-size-xs)',
+          fontFamily: 'var(--mantine-font-family-monospace)',
+          color: labelColor,
+        }}
+      >
+        {totalTokens.toLocaleString()} / {TOKEN_LIMIT.toLocaleString()} tokens used
+      </Text>
       <Progress.Root size="sm" radius="sm">
         {segments.map(seg => {
           const value = Math.min((seg.tokens / TOKEN_LIMIT) * 100, 100)
