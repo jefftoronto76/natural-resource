@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react'
 import {
   ActionIcon,
   Badge,
+  Button,
   Checkbox,
   Group,
   NumberInput,
+  Stack,
   Switch,
   Table,
 } from '@mantine/core'
@@ -17,6 +19,55 @@ import {
   formatTypeBadgeLabel,
   type BlockType,
 } from './blockTypes'
+
+const PREVIEW_LINE_LIMIT = 8
+const COLUMN_COUNT = 8 // checkbox · chevron · title · type · topic · order · status · actions
+
+function BlockPreviewRow({
+  body,
+  onViewFull,
+}: {
+  body: string
+  onViewFull: () => void
+}) {
+  const lines = body.split('\n')
+  const preview = lines.slice(0, PREVIEW_LINE_LIMIT).join('\n')
+  const hasMore = lines.length > PREVIEW_LINE_LIMIT
+
+  return (
+    <Stack gap="xs" p="sm">
+      {body ? (
+        <pre
+          style={{
+            fontFamily: 'var(--mantine-font-family-monospace)',
+            fontSize: 'var(--mantine-font-size-xs)',
+            color: 'var(--mantine-color-dark-7)',
+            backgroundColor: 'var(--mantine-color-gray-0)',
+            padding: 'var(--mantine-spacing-sm)',
+            borderRadius: 'var(--mantine-radius-sm)',
+            margin: 0,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          {preview}
+          {hasMore && '\n…'}
+        </pre>
+      ) : (
+        <Text variant="muted">(empty)</Text>
+      )}
+      <Button
+        variant="subtle"
+        color="gray"
+        size="xs"
+        onClick={onViewFull}
+        style={{ alignSelf: 'flex-start' }}
+      >
+        View full
+      </Button>
+    </Stack>
+  )
+}
 
 export interface BlockRowBlock {
   id: string
@@ -143,6 +194,7 @@ export function BlockRow({
   }
 
   return (
+    <>
     <Table.Tr>
       <Table.Td>
         <Checkbox
@@ -234,5 +286,13 @@ export function BlockRow({
         </Group>
       </Table.Td>
     </Table.Tr>
+    {isExpanded && (
+      <Table.Tr>
+        <Table.Td colSpan={COLUMN_COUNT}>
+          <BlockPreviewRow body={block.body} onViewFull={handleEdit} />
+        </Table.Td>
+      </Table.Tr>
+    )}
+    </>
   )
 }
