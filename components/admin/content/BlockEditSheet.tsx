@@ -23,6 +23,15 @@ export interface BlockEditSheetProps {
  *
  * Uses Mantine's compound Drawer API so the grabber can sit above
  * the title (grabber → title → body). See INTEGRATION AC6.
+ *
+ * Dismissal behavior:
+ * - Scrim tap fires onClose via Drawer.Overlay (Mantine default).
+ * - Esc key fires onClose via Drawer.Root (closeOnEscape default true).
+ * - The grabber is a visual affordance only — NOT drag-to-dismiss.
+ *   Implementing drag gesture handling is deferred to Phase 2.
+ *
+ * No Drawer.CloseButton is rendered, so no X appears in the header —
+ * the compound API equivalent of withCloseButton={false}.
  */
 export function BlockEditSheet({ opened, onClose, title, children }: BlockEditSheetProps) {
   return (
