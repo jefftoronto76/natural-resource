@@ -1,5 +1,13 @@
 import {
   render as rtlRender,
+  screen,
+  within,
+  fireEvent,
+  waitFor,
+  waitForElementToBeRemoved,
+  cleanup,
+  act,
+  renderHook,
   type RenderOptions,
   type RenderResult,
 } from '@testing-library/react'
@@ -17,6 +25,10 @@ function Wrapper({ children }: { children: ReactNode }) {
  * inside the admin MantineProvider. All component tests should import
  * from this file instead of @testing-library/react directly so
  * Mantine components render with the real theme.
+ *
+ * Re-exports the testing-library surface explicitly (not via
+ * `export *`) so `render` here unambiguously refers to this custom
+ * render, not the one testing-library ships.
  */
 export function render(
   ui: ReactElement,
@@ -25,5 +37,15 @@ export function render(
   return rtlRender(ui, { wrapper: Wrapper, ...options })
 }
 
-export { userEvent }
-export * from '@testing-library/react'
+export {
+  screen,
+  within,
+  fireEvent,
+  waitFor,
+  waitForElementToBeRemoved,
+  cleanup,
+  act,
+  renderHook,
+  userEvent,
+}
+export type { RenderOptions, RenderResult }
