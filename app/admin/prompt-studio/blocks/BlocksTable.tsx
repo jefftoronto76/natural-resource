@@ -21,7 +21,8 @@ import {
 import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { Text } from '@/components/admin/primitives/Text'
-import { PromptFullnessMeter } from '@/components/admin/primitives/PromptFullnessMeter'
+import { SegmentedTokenMeter } from '@/components/admin/content/SegmentedTokenMeter'
+import type { BlockType } from '@/components/admin/content/blockTypes'
 
 const TYPE_COLORS: Record<string, string> = {
   identity: 'violet',
@@ -402,15 +403,20 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     setDeleteTargetId(null)
   }
 
-  const activeBodies = items
+  const activeMeterBlocks = items
     .filter(b => b.status === 'active')
-    .map(b => b.body ?? '')
+    .map(b => ({
+      id: b.id,
+      title: b.title,
+      type: b.type as BlockType,
+      body: b.body ?? '',
+    }))
 
   return (
     <>
-      {/* Prompt fullness meter — always visible */}
+      {/* Segmented token meter — one segment per active block, colored by type */}
       <Box mb="md">
-        <PromptFullnessMeter bodies={activeBodies} />
+        <SegmentedTokenMeter blocks={activeMeterBlocks} />
       </Box>
 
       {items.length === 0 ? (
