@@ -6,10 +6,13 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      // Mirrors tsconfig "paths": ["@/*" -> "./*"]. The secondary
-      // "./src/*" mapping isn't needed for admin-side tests since
-      // the admin tree lives under ./components/ and ./app/, not
-      // ./src/. Add a second alias if a test ever needs src/.
+      // Mirrors tsconfig "paths": ["@/*" -> ["./*", "./src/*"]]. More
+      // specific alias first — @/lib/* routes to src/lib/ where shared
+      // utilities (blockTypes, blockOrder, supabase-admin, etc.) live.
+      // The general @/* fallback handles everything else (components,
+      // app, test).
+      '@/lib': resolve(__dirname, 'src/lib'),
+      '@/test': resolve(__dirname, 'test'),
       '@': resolve(__dirname, '.'),
     },
   },

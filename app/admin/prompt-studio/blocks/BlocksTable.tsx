@@ -1,47 +1,27 @@
 'use client'
 
-import { useState, useEffect, Fragment } from 'react'
+import { useState, Fragment } from 'react'
 import {
   Table,
-  Badge,
   Box,
   Center,
   Group,
   Paper,
   Stack,
-  Switch,
-  ActionIcon,
   Textarea,
   Modal,
   Button,
   Checkbox,
   Alert,
-  NumberInput,
 } from '@mantine/core'
-import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { Text } from '@/components/admin/primitives/Text'
 import { SegmentedTokenMeter } from '@/components/admin/content/SegmentedTokenMeter'
 import { BulkActionsBar } from '@/components/admin/content/BulkActionsBar'
 import { BlockRow as DesktopBlockRow } from '@/components/admin/content/BlockRow'
-import type { BlockType } from '@/components/admin/content/blockTypes'
+import { BlockCard } from '@/components/admin/content/BlockCard'
+import type { BlockType } from '@/lib/blockTypes'
 import { isOrdered } from '@/lib/blockOrder'
-
-const TYPE_COLORS: Record<string, string> = {
-  identity: 'violet',
-  knowledge: 'blue',
-  guardrail: 'red',
-  process: 'orange',
-  escalation: 'yellow',
-}
-
-const TYPE_LABELS: Record<string, string> = {
-  guardrail: 'GUARDRAIL (1st)',
-  identity: 'IDENTITY (2nd)',
-  process: 'PROCESS (3rd)',
-  knowledge: 'KNOWLEDGE (4th)',
-  escalation: 'ESCALATION (5th)',
-}
 
 type BlockStatus = 'active' | 'disabled' | 'deleted'
 
@@ -65,48 +45,6 @@ export interface BlockRow {
   order: number | null
   created_at: string
   topics: { name: string } | null
-}
-
-function OrderCell({
-  blockId,
-  value,
-  onCommit,
-}: {
-  blockId: string
-  value: number | null
-  onCommit: (id: string, oldValue: number | null, nextValue: number | null) => Promise<boolean>
-}) {
-  const [local, setLocal] = useState<string | number>(value ?? '')
-
-  useEffect(() => {
-    setLocal(value ?? '')
-  }, [value])
-
-  return (
-    <NumberInput
-      value={local}
-      onChange={v => setLocal(v)}
-      onBlur={() => {
-        const parsed =
-          typeof local === 'number'
-            ? local
-            : local === '' || local === '-'
-              ? null
-              : Number(local)
-        const next = parsed === null || Number.isNaN(parsed) ? null : parsed
-        void onCommit(blockId, value, next).then(ok => {
-          if (!ok) {
-            setLocal(value ?? '')
-          }
-        })
-      }}
-      hideControls
-      allowDecimal={false}
-      w={70}
-      size="xs"
-      aria-label="Order"
-    />
-  )
 }
 
 export function BlocksTable({ rows }: { rows: BlockRow[] }) {
@@ -607,163 +545,113 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
           const issues = issuesMap[block.id] ?? []
           const hasIssues = issues.length > 0
           return (
-            <Paper key={block.id} p="md" withBorder radius="sm">
-              <Group gap="xs" mb={4} wrap="nowrap">
-                <Checkbox
-                  checked={selectedIds.has(block.id)}
-                  onChange={() => toggleSelect(block.id)}
-                  disabled={bulkInFlight}
-                  aria-label={`Select ${block.title}`}
-                  size="sm"
-                />
-                <Badge
-                  variant="light"
-                  color={TYPE_COLORS[block.type] ?? 'gray'}
-                  size="sm"
-                  radius="sm"
-                >
-                  {TYPE_LABELS[block.type] ?? block.type}
-                </Badge>
-              </Group>
-              <Text variant="label" style={{ marginTop: 4 }}>{block.title}</Text>
-              <Text variant="muted">{block.topics?.name ?? '—'}</Text>
-              <Group gap="xs" mt="xs" wrap="nowrap" align="center">
-                <Text variant="label">Order</Text>
-                <OrderCell
-                  blockId={block.id}
-                  value={block.order}
-                  onCommit={handleOrderBlur}
-                />
-              </Group>
-              {isEditing ? (
-                <Stack gap="sm" mt="sm">
-                  <Textarea
-                    value={editBody}
-                    onChange={e => setEditBody(e.currentTarget.value)}
-                    autosize
-                    minRows={4}
-                    maxRows={12}
-                    size="sm"
-                    disabled={isChecking || isSaving}
-                  />
-                  {hasIssues && (
-                    <Alert
-                      color="yellow"
-                      variant="light"
-                      radius="sm"
-                      title="Safety check flagged this block"
-                    >
-                      <Stack gap="xs">
-                        {issues.map((issue, i) => (
-                          <Stack key={i} gap={4}>
-                            <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
-                              {issue.description}
-                            </Text>
-                            {issue.offendingText && (
-                              <Stack gap={4}>
-                                <Text
-                                  variant="muted"
-                                  style={{
-                                    fontFamily: 'var(--mantine-font-family-monospace)',
-                                    fontSize: 'var(--mantine-font-size-xs)',
-                                    backgroundColor: 'var(--mantine-color-yellow-0)',
-                                    padding: '2px 6px',
-                                    borderRadius: 'var(--mantine-radius-sm)',
-                                    wordBreak: 'break-word',
-                                  }}
-                                >
-                                  {issue.offendingText}
-                                </Text>
-                                <Button
-                                  variant="subtle"
-                                  color="yellow"
-                                  size="xs"
-                                  onClick={() => handleRemoveOffending(block.id, issue.offendingText!)}
-                                  disabled={isChecking || isSaving}
-                                  style={{ alignSelf: 'flex-start' }}
-                                >
-                                  Remove
-                                </Button>
-                              </Stack>
-                            )}
-                          </Stack>
-                        ))}
-                      </Stack>
-                    </Alert>
-                  )}
-                  <Group gap="xs">
-                    <Button
-                      variant="filled"
-                      color="green"
-                      size="xs"
-                      onClick={() => handleCheckAndSave(block.id)}
-                      loading={isChecking || isSaving}
-                    >
-                      {isChecking ? 'Checking...' : isSaving ? 'Saving...' : 'Check & Save'}
-                    </Button>
-                    {hasIssues && (
-                      <Button
-                        variant="default"
-                        color="yellow"
-                        size="xs"
-                        onClick={() => handleSaveAnyway(block.id)}
-                        disabled={isChecking}
-                        loading={isSaving}
-                      >
-                        Save Anyway
-                      </Button>
-                    )}
-                    <Button
-                      variant="subtle"
-                      color="gray"
-                      size="xs"
-                      onClick={handleCancelEdit}
+            <Fragment key={block.id}>
+              <BlockCard
+                block={{
+                  ...block,
+                  type: block.type as BlockType,
+                }}
+                selected={selectedIds.has(block.id)}
+                isSaving={isSaving}
+                onToggleSelect={toggleSelect}
+                onToggleStatus={handleStatusChange}
+                onOrderCommit={handleOrderBlur}
+                onOpenEdit={id => handleEdit(id, block.body)}
+                onDelete={setDeleteTargetId}
+              />
+              {isEditing && (
+                <Paper p="md" withBorder radius="sm">
+                  <Stack gap="sm">
+                    <Textarea
+                      value={editBody}
+                      onChange={e => setEditBody(e.currentTarget.value)}
+                      autosize
+                      minRows={4}
+                      maxRows={12}
+                      size="sm"
                       disabled={isChecking || isSaving}
-                    >
-                      Cancel
-                    </Button>
-                  </Group>
-                </Stack>
-              ) : (
-                <Group gap="xs" mt="sm" wrap="nowrap">
-                  <Switch
-                    checked={block.status === 'active'}
-                    onChange={e =>
-                      handleStatusChange(
-                        block.id,
-                        e.currentTarget.checked ? 'active' : 'disabled',
-                      )
-                    }
-                    color="green"
-                    disabled={isSaving}
-                    aria-label={`${
-                      block.status === 'active' ? 'Disable' : 'Enable'
-                    } ${block.title}`}
-                    style={{ flex: 1, minWidth: 0 }}
-                  />
-                  <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    size="md"
-                    onClick={() => handleEdit(block.id, block.body)}
-                    disabled={isSaving}
-                    aria-label="Edit block"
-                  >
-                    <IconPencil size={16} />
-                  </ActionIcon>
-                  <ActionIcon
-                    variant="subtle"
-                    color="red"
-                    size="md"
-                    onClick={() => setDeleteTargetId(block.id)}
-                    disabled={isSaving}
-                    aria-label="Delete block"
-                  >
-                    <IconTrash size={16} />
-                  </ActionIcon>
-                </Group>
+                    />
+                    {hasIssues && (
+                      <Alert
+                        color="yellow"
+                        variant="light"
+                        radius="sm"
+                        title="Safety check flagged this block"
+                      >
+                        <Stack gap="xs">
+                          {issues.map((issue, i) => (
+                            <Stack key={i} gap={4}>
+                              <Text variant="muted" style={{ fontSize: 'var(--mantine-font-size-sm)' }}>
+                                {issue.description}
+                              </Text>
+                              {issue.offendingText && (
+                                <Stack gap={4}>
+                                  <Text
+                                    variant="muted"
+                                    style={{
+                                      fontFamily: 'var(--mantine-font-family-monospace)',
+                                      fontSize: 'var(--mantine-font-size-xs)',
+                                      backgroundColor: 'var(--mantine-color-yellow-0)',
+                                      padding: '2px 6px',
+                                      borderRadius: 'var(--mantine-radius-sm)',
+                                      wordBreak: 'break-word',
+                                    }}
+                                  >
+                                    {issue.offendingText}
+                                  </Text>
+                                  <Button
+                                    variant="subtle"
+                                    color="yellow"
+                                    size="xs"
+                                    onClick={() => handleRemoveOffending(block.id, issue.offendingText!)}
+                                    disabled={isChecking || isSaving}
+                                    style={{ alignSelf: 'flex-start' }}
+                                  >
+                                    Remove
+                                  </Button>
+                                </Stack>
+                              )}
+                            </Stack>
+                          ))}
+                        </Stack>
+                      </Alert>
+                    )}
+                    <Group gap="xs">
+                      <Button
+                        variant="filled"
+                        color="green"
+                        size="xs"
+                        onClick={() => handleCheckAndSave(block.id)}
+                        loading={isChecking || isSaving}
+                      >
+                        {isChecking ? 'Checking...' : isSaving ? 'Saving...' : 'Check & Save'}
+                      </Button>
+                      {hasIssues && (
+                        <Button
+                          variant="default"
+                          color="yellow"
+                          size="xs"
+                          onClick={() => handleSaveAnyway(block.id)}
+                          disabled={isChecking}
+                          loading={isSaving}
+                        >
+                          Save Anyway
+                        </Button>
+                      )}
+                      <Button
+                        variant="subtle"
+                        color="gray"
+                        size="xs"
+                        onClick={handleCancelEdit}
+                        disabled={isChecking || isSaving}
+                      >
+                        Cancel
+                      </Button>
+                    </Group>
+                  </Stack>
+                </Paper>
               )}
-            </Paper>
+            </Fragment>
           )
         })}
       </Stack>

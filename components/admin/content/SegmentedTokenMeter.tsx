@@ -2,7 +2,7 @@
 
 import { Progress, Stack, Tooltip } from '@mantine/core'
 import { Text } from '@/components/admin/primitives/Text'
-import { TYPE_COLORS, TYPE_LABELS, type BlockType } from './blockTypes'
+import { TYPE_COLORS, TYPE_LABELS, type BlockType } from '@/lib/blockTypes'
 
 const TOKEN_LIMIT = 8000
 const YELLOW_THRESHOLD = 5000

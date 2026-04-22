@@ -18,7 +18,7 @@ import {
   TYPE_COLORS,
   formatTypeBadgeLabel,
   type BlockType,
-} from './blockTypes'
+} from '@/lib/blockTypes'
 
 const PREVIEW_LINE_LIMIT = 8
 const COLUMN_COUNT = 8 // checkbox · chevron · title · type · topic · order · status · actions

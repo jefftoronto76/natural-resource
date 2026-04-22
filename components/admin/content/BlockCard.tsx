@@ -16,7 +16,7 @@ import { Text } from '@/components/admin/primitives/Text'
 import {
   TYPE_COLORS,
   formatTypeBadgeLabel,
-} from './blockTypes'
+} from '@/lib/blockTypes'
 import type { BlockRowBlock } from './BlockRow'
 
 export type BlockCardBlock = BlockRowBlock
