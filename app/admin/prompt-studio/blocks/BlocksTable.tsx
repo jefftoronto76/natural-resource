@@ -22,6 +22,7 @@ import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { Text } from '@/components/admin/primitives/Text'
 import { SegmentedTokenMeter } from '@/components/admin/content/SegmentedTokenMeter'
+import { BulkActionsBar } from '@/components/admin/content/BulkActionsBar'
 import type { BlockType } from '@/components/admin/content/blockTypes'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -428,40 +429,14 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
       {items.length > 0 && <>
       {/* Bulk action bar */}
       {selectedCount > 0 && (
-        <Paper
-          p="sm"
-          mb="md"
-          radius="sm"
-          withBorder
-          style={{ backgroundColor: 'var(--mantine-color-gray-0)' }}
-        >
-          <Group gap="sm" wrap="nowrap">
-            <Text variant="label" style={{ flex: 1, minWidth: 0 }}>
-              {selectedCount} selected
-            </Text>
-            <Select
-              data={STATUS_OPTIONS}
-              placeholder="Set status..."
-              value={null}
-              onChange={handleBulkStatusChange}
-              size="xs"
-              allowDeselect={false}
-              disabled={bulkInFlight}
-              style={{ width: 140 }}
-              aria-label="Bulk status"
-            />
-            <ActionIcon
-              variant="subtle"
-              color="red"
-              size="md"
-              onClick={() => setBulkDeleteOpen(true)}
-              disabled={bulkInFlight}
-              aria-label="Delete selected"
-            >
-              <IconTrash size={16} />
-            </ActionIcon>
-          </Group>
-        </Paper>
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          disabled={bulkInFlight}
+          onEnable={() => handleBulkStatusChange('active')}
+          onDisable={() => handleBulkStatusChange('disabled')}
+          onDelete={() => setBulkDeleteOpen(true)}
+          onClear={() => setSelectedIds(new Set())}
+        />
       )}
 
       {/* Desktop: Table */}
