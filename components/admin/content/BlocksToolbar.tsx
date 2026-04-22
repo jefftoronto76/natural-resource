@@ -4,6 +4,7 @@ import {
   Button,
   Group,
   SegmentedControl,
+  Text,
   TextInput,
 } from '@mantine/core'
 import {
@@ -31,6 +32,8 @@ export interface BlocksToolbarProps {
   onStatusFilterChange: (value: StatusFilter) => void
   allExpanded: boolean
   onToggleExpandAll: () => void
+  filteredCount: number
+  totalCount: number
 }
 
 // Type filter options — derived from BLOCK_TYPES sorted by compile
@@ -73,6 +76,8 @@ export function BlocksToolbar({
   onStatusFilterChange,
   allExpanded,
   onToggleExpandAll,
+  filteredCount,
+  totalCount,
 }: BlocksToolbarProps) {
   function handleTypeChange(value: string) {
     const narrowed = value as TypeFilter
@@ -118,20 +123,28 @@ export function BlocksToolbar({
           aria-label="Filter by status"
         />
       </Group>
-      <Button
-        variant="subtle"
-        size="xs"
-        onClick={handleExpandToggle}
-        leftSection={
-          allExpanded ? (
-            <IconChevronsUp size={14} />
-          ) : (
-            <IconChevronsDown size={14} />
-          )
-        }
-      >
-        {allExpanded ? 'Collapse all' : 'Expand all'}
-      </Button>
+      <Group gap="sm" wrap="nowrap" align="center">
+        <Text size="sm" c="dimmed" aria-live="polite">
+          {filteredCount} / {totalCount}
+        </Text>
+        <Text size="sm" c="dimmed" aria-hidden>
+          ·
+        </Text>
+        <Button
+          variant="subtle"
+          size="xs"
+          onClick={handleExpandToggle}
+          leftSection={
+            allExpanded ? (
+              <IconChevronsUp size={14} />
+            ) : (
+              <IconChevronsDown size={14} />
+            )
+          }
+        >
+          {allExpanded ? 'Collapse all' : 'Expand all'}
+        </Button>
+      </Group>
     </Group>
   )
 }

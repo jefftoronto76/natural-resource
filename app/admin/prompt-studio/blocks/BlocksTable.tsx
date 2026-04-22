@@ -84,8 +84,6 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   }
 
   const selectedCount = selectedIds.size
-  const allSelected = items.length > 0 && selectedCount === items.length
-  const someSelected = selectedCount > 0 && selectedCount < items.length
 
   function toggleSelect(id: string) {
     setSelectedIds(prev => {
@@ -96,13 +94,9 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     })
   }
 
-  function toggleSelectAll() {
-    if (selectedIds.size === items.length) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(items.map(b => b.id)))
-    }
-  }
+  // allSelected / someSelected / toggleSelectAll are defined below,
+  // after `filtered` is derived — select-all is scoped to the
+  // currently-visible (filtered) set, not the full items list.
 
   async function handleBulkStatusChange(value: string | null) {
     if (value !== 'active' && value !== 'disabled') return
@@ -305,6 +299,53 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     return true
   })
 
+  // Select-all is scoped to the currently-visible (filtered) set.
+  // Bulk actions still operate on all selectedIds — so selections
+  // made outside the current filter persist when filters change.
+  const filteredSelectedCount = filtered.reduce(
+    (n, b) => (selectedIds.has(b.id) ? n + 1 : n),
+    0,
+  )
+  const allSelected =
+    filtered.length > 0 && filteredSelectedCount === filtered.length
+  const someSelected =
+    filteredSelectedCount > 0 && filteredSelectedCount < filtered.length
+
+  function toggleSelectAll() {
+    console.log('[BlocksTable] toggle select-all (filtered)', {
+      filteredCount: filtered.length,
+      filteredSelectedCount,
+    })
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (filteredSelectedCount > 0) {
+        // Any visible selection → clear ALL visible (both full and partial).
+        for (const b of filtered) next.delete(b.id)
+      } else {
+        // None visible selected → select all visible.
+        for (const b of filtered) next.add(b.id)
+      }
+      return next
+    })
+  }
+
+  // Expand-all / Collapse-all operates on the currently-filtered set.
+  // "Expand all" in a filter context means "expand everything I can
+  // see." Collapse wipes the expanded set entirely (no point keeping
+  // hidden rows expanded).
+  const allExpanded =
+    filtered.length > 0 && filtered.every(b => expandedIds.has(b.id))
+
+  function handleExpandAll() {
+    console.log('[BlocksTable] expand all', { count: filtered.length })
+    setExpandedIds(new Set(filtered.map(b => b.id)))
+  }
+
+  function handleCollapseAll() {
+    console.log('[BlocksTable] collapse all')
+    setExpandedIds(new Set())
+  }
+
   return (
     <>
       {/* Segmented token meter — one segment per active block, colored by type */}
@@ -320,8 +361,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
 
       {items.length > 0 && (
         <>
-          {/* Desktop/tablet filter toolbar — mobile gets its own UX in PR 4.
-              Stub expand-all handler this step; Step 5 wires it. */}
+          {/* Desktop/tablet filter toolbar — mobile gets its own UX in PR 4. */}
           <Box visibleFrom="md" mb="md">
             <BlocksToolbar
               query={query}
@@ -330,8 +370,12 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
               onTypeFilterChange={setTypeFilter}
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}
-              allExpanded={false}
-              onToggleExpandAll={() => {}}
+              allExpanded={allExpanded}
+              onToggleExpandAll={
+                allExpanded ? handleCollapseAll : handleExpandAll
+              }
+              filteredCount={filtered.length}
+              totalCount={items.length}
             />
           </Box>
 
