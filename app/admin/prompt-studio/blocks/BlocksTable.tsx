@@ -9,7 +9,7 @@ import {
   Group,
   Paper,
   Stack,
-  Select,
+  Switch,
   ActionIcon,
   Textarea,
   Modal,
@@ -64,11 +64,6 @@ export interface BlockRow {
   created_at: string
   topics: { name: string } | null
 }
-
-const STATUS_OPTIONS = [
-  { value: 'active', label: 'Active' },
-  { value: 'disabled', label: 'Disabled' },
-]
 
 function OrderCell({
   blockId,
@@ -457,7 +452,6 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
               <Table.Th>Type</Table.Th>
               <Table.Th>Topic</Table.Th>
               <Table.Th style={{ width: 90 }}>Order</Table.Th>
-              <Table.Th>Status</Table.Th>
               <Table.Th>Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
@@ -503,26 +497,20 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                       />
                     </Table.Td>
                     <Table.Td>
-                      <Badge
-                        variant="light"
-                        color={block.status === 'active' ? 'green' : 'gray'}
-                        size="sm"
-                        radius="sm"
-                      >
-                        {block.status === 'active' ? 'Active' : 'Disabled'}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>
                       <Group gap="xs" wrap="nowrap">
-                        <Select
-                          data={STATUS_OPTIONS}
-                          value={block.status}
-                          onChange={v => handleStatusChange(block.id, v)}
-                          size="xs"
-                          allowDeselect={false}
+                        <Switch
+                          checked={block.status === 'active'}
+                          onChange={e =>
+                            handleStatusChange(
+                              block.id,
+                              e.currentTarget.checked ? 'active' : 'disabled',
+                            )
+                          }
+                          color="green"
                           disabled={isSaving}
-                          style={{ width: 110 }}
-                          aria-label="Status"
+                          aria-label={`${
+                            block.status === 'active' ? 'Disable' : 'Enable'
+                          } ${block.title}`}
                         />
                         <ActionIcon
                           variant="subtle"
@@ -658,31 +646,21 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
           const hasIssues = issues.length > 0
           return (
             <Paper key={block.id} p="md" withBorder radius="sm">
-              <Group justify="space-between" mb={4} wrap="nowrap">
-                <Group gap="xs" wrap="nowrap">
-                  <Checkbox
-                    checked={selectedIds.has(block.id)}
-                    onChange={() => toggleSelect(block.id)}
-                    disabled={bulkInFlight}
-                    aria-label={`Select ${block.title}`}
-                    size="sm"
-                  />
-                  <Badge
-                    variant="light"
-                    color={TYPE_COLORS[block.type] ?? 'gray'}
-                    size="sm"
-                    radius="sm"
-                  >
-                    {TYPE_LABELS[block.type] ?? block.type}
-                  </Badge>
-                </Group>
+              <Group gap="xs" mb={4} wrap="nowrap">
+                <Checkbox
+                  checked={selectedIds.has(block.id)}
+                  onChange={() => toggleSelect(block.id)}
+                  disabled={bulkInFlight}
+                  aria-label={`Select ${block.title}`}
+                  size="sm"
+                />
                 <Badge
                   variant="light"
-                  color={block.status === 'active' ? 'green' : 'gray'}
+                  color={TYPE_COLORS[block.type] ?? 'gray'}
                   size="sm"
                   radius="sm"
                 >
-                  {block.status === 'active' ? 'Active' : 'Disabled'}
+                  {TYPE_LABELS[block.type] ?? block.type}
                 </Badge>
               </Group>
               <Text variant="label" style={{ marginTop: 4 }}>{block.title}</Text>
@@ -786,15 +764,20 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                 </Stack>
               ) : (
                 <Group gap="xs" mt="sm" wrap="nowrap">
-                  <Select
-                    data={STATUS_OPTIONS}
-                    value={block.status}
-                    onChange={v => handleStatusChange(block.id, v)}
-                    size="xs"
-                    allowDeselect={false}
+                  <Switch
+                    checked={block.status === 'active'}
+                    onChange={e =>
+                      handleStatusChange(
+                        block.id,
+                        e.currentTarget.checked ? 'active' : 'disabled',
+                      )
+                    }
+                    color="green"
                     disabled={isSaving}
+                    aria-label={`${
+                      block.status === 'active' ? 'Disable' : 'Enable'
+                    } ${block.title}`}
                     style={{ flex: 1, minWidth: 0 }}
-                    aria-label="Status"
                   />
                   <ActionIcon
                     variant="subtle"
