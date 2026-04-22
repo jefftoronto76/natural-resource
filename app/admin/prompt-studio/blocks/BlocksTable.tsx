@@ -21,6 +21,8 @@ import { BlockCard } from '@/components/admin/content/BlockCard'
 import { BlockEditDrawer } from '@/components/admin/content/BlockEditDrawer'
 import { BlockEditSheet } from '@/components/admin/content/BlockEditSheet'
 import { BlockEditForm } from '@/components/admin/content/BlockEditForm'
+import { BlocksToolbar } from '@/components/admin/content/BlocksToolbar'
+import { useBlocksFilters } from '@/components/admin/content/useBlocksFilters'
 import type { BlockType } from '@/lib/blockTypes'
 import { isOrdered } from '@/lib/blockOrder'
 
@@ -48,6 +50,18 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const [bulkInFlight, setBulkInFlight] = useState(false)
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  // URL-synced filter state — query/type/status come from ?q=, ?type=,
+  // ?status=. Filtering below uses these values; the toolbar consumes
+  // them for controlled inputs.
+  const {
+    query,
+    setQuery,
+    typeFilter,
+    setTypeFilter,
+    statusFilter,
+    setStatusFilter,
+  } = useBlocksFilters()
 
   // useMediaQuery returns undefined on first render (SSR) and true/false
   // after mount. Treat undefined as "not mobile" so the drawer is the
@@ -275,6 +289,22 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
       body: b.body ?? '',
     }))
 
+  // View-level filter. Runs synchronously on every render — `query` is
+  // local to useBlocksFilters (instant keystroke feedback), and the
+  // three filter guards short-circuit in cheapest-first order. The
+  // meter above is intentionally NOT filtered; it measures reality,
+  // not the current view.
+  const filtered = items.filter(b => {
+    if (typeFilter !== 'all' && b.type !== typeFilter) return false
+    if (statusFilter !== 'all' && b.status !== statusFilter) return false
+    if (query.trim()) {
+      const q = query.trim().toLowerCase()
+      const hay = `${b.title} ${b.body ?? ''}`.toLowerCase()
+      if (!hay.includes(q)) return false
+    }
+    return true
+  })
+
   return (
     <>
       {/* Segmented token meter — one segment per active block, colored by type */}
@@ -290,6 +320,21 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
 
       {items.length > 0 && (
         <>
+          {/* Desktop/tablet filter toolbar — mobile gets its own UX in PR 4.
+              Stub expand-all handler this step; Step 5 wires it. */}
+          <Box visibleFrom="md" mb="md">
+            <BlocksToolbar
+              query={query}
+              onQueryChange={setQuery}
+              typeFilter={typeFilter}
+              onTypeFilterChange={setTypeFilter}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              allExpanded={false}
+              onToggleExpandAll={() => {}}
+            />
+          </Box>
+
           {/* Bulk action bar */}
           {selectedCount > 0 && (
             <BulkActionsBar
@@ -325,7 +370,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {items.map(block => (
+                {filtered.map(block => (
                   <DesktopBlockRow
                     key={block.id}
                     block={{ ...block, type: block.type as BlockType }}
@@ -346,7 +391,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
 
           {/* Mobile: Card stack */}
           <Stack gap="sm" hiddenFrom="md">
-            {items.map(block => (
+            {filtered.map(block => (
               <BlockCard
                 key={block.id}
                 block={{ ...block, type: block.type as BlockType }}
