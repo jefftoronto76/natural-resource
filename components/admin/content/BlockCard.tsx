@@ -25,7 +25,6 @@ export interface BlockCardProps {
   block: BlockCardBlock
   selected: boolean
   isSaving?: boolean
-  orderError?: string
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
   onOrderCommit: (
@@ -63,7 +62,6 @@ export function BlockCard({
   block,
   selected,
   isSaving = false,
-  orderError,
   onToggleSelect,
   onToggleStatus,
   onOrderCommit,
@@ -216,7 +214,6 @@ export function BlockCard({
             value={localOrder}
             onChange={handleOrderChange}
             onBlur={handleOrderBlur}
-            error={orderError}
             hideControls
             allowDecimal={false}
             size="sm"

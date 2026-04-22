@@ -19,6 +19,7 @@ import {
   NumberInput,
 } from '@mantine/core'
 import { IconPencil, IconTrash } from '@tabler/icons-react'
+import { notifications } from '@mantine/notifications'
 import { Text } from '@/components/admin/primitives/Text'
 import { SegmentedTokenMeter } from '@/components/admin/content/SegmentedTokenMeter'
 import { BulkActionsBar } from '@/components/admin/content/BulkActionsBar'
@@ -120,7 +121,6 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [checkingId, setCheckingId] = useState<string | null>(null)
   const [issuesMap, setIssuesMap] = useState<Record<string, CheckIssue[]>>({})
-  const [orderErrors, setOrderErrors] = useState<Record<string, string | undefined>>({})
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   function toggleExpand(id: string) {
@@ -256,12 +256,11 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
       conflictId: conflict?.id ?? null,
     })
     if (conflict) {
-      // Surface the per-type duplicate as an inline error via BlockRow's
-      // orderError prop rather than a toast. Same message text as before.
-      setOrderErrors(prev => ({
-        ...prev,
-        [id]: `Order number already used by ${conflict.title} in this type. Please choose a different number.`,
-      }))
+      notifications.show({
+        color: 'red',
+        title: 'Duplicate order number',
+        message: `Order number already used by ${conflict.title} in this type. Please choose a different number.`,
+      })
       return false
     }
 
@@ -270,13 +269,6 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     if (ok) {
       console.log('[BlocksTable] order PATCH success:', { id, oldValue, newValue: nextValue })
       setItems(prev => prev.map(b => (b.id === id ? { ...b, order: nextValue } : b)))
-      // Clear any stale per-type duplicate-order error — commit succeeded.
-      setOrderErrors(prev => {
-        if (!(id in prev)) return prev
-        const next = { ...prev }
-        delete next[id]
-        return next
-      })
       return true
     }
     console.error('[BlocksTable] order PATCH failure:', { id, oldValue, newValue: nextValue })
@@ -498,7 +490,6 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                     selected={selectedIds.has(block.id)}
                     isSaving={isSaving}
                     isExpanded={expandedIds.has(block.id)}
-                    orderError={orderErrors[block.id]}
                     onToggleSelect={toggleSelect}
                     onToggleStatus={handleStatusChange}
                     onOrderCommit={handleOrderBlur}

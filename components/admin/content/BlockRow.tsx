@@ -84,7 +84,6 @@ export interface BlockRowProps {
   selected: boolean
   isSaving?: boolean
   isExpanded?: boolean
-  orderError?: string
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
   onOrderCommit: (
@@ -100,12 +99,10 @@ export interface BlockRowProps {
 /**
  * Desktop-only table row for a single block. Owns no API calls — all
  * mutations dispatch via callbacks. The NumberInput uses local state
- * so invalid-but-rejected values can revert cleanly. The parent's
- * `orderError` prop renders directly — no local dismissal toggle.
- * The error persists as long as the prop is set and clears when the
- * prop clears (UX trade for simpler state; the previous showError
- * toggle had too many edge cases with React effect ordering and
- * Mantine controlled-value behavior).
+ * so invalid-but-rejected values can revert cleanly. Feedback for
+ * rejected commits (e.g. duplicate order) is surfaced by the parent
+ * via a toast, not an inline error on this row — matches today's
+ * main behavior.
  *
  * No drag handle — Phase 1 ordering is NumberInput-only per D1.
  *
@@ -118,7 +115,6 @@ export function BlockRow({
   selected,
   isSaving = false,
   isExpanded = false,
-  orderError,
   onToggleSelect,
   onToggleStatus,
   onOrderCommit,
@@ -235,7 +231,6 @@ export function BlockRow({
           value={localOrder}
           onChange={handleOrderChange}
           onBlur={handleOrderBlur}
-          error={orderError}
           hideControls
           allowDecimal={false}
           w={70}
