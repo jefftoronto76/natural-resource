@@ -1,0 +1,207 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Sage.AI — Blocks Redesign</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="mantine.css" />
+  <style>
+    #root { min-height: 100vh; }
+    /* Variation switcher pill */
+    .variation-switcher {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--mantine-color-dark-8);
+      color: var(--mantine-color-white);
+      border-radius: 999px;
+      padding: 4px;
+      display: flex;
+      gap: 2px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      z-index: 30;
+    }
+    .variation-switcher button {
+      background: transparent; color: var(--mantine-color-dark-1);
+      border: none; padding: 7px 14px; border-radius: 999px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      font-family: inherit; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .variation-switcher button:hover { color: white; }
+    .variation-switcher button.is-active {
+      background: var(--mantine-color-blue-6); color: white;
+    }
+    .variation-switcher .vs-label {
+      color: var(--mantine-color-dark-2); font-size: 10px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0 10px; display: inline-flex; align-items: center;
+    }
+
+    /* Tweaks panel (per spec) */
+    .tweaks-panel {
+      position: fixed; bottom: 70px; right: 16px;
+      width: 280px; z-index: 40;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--mantine-radius-md);
+      box-shadow: var(--mantine-shadow-md);
+      font-family: var(--mantine-font-family);
+    }
+    .tweaks-panel__header {
+      padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .tweaks-panel__title { font-size: 13px; font-weight: 600; }
+    .tweaks-panel__body { padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+    .tweak-row { display: flex; flex-direction: column; gap: 6px; }
+    .tweak-row__label { font-size: 11px; color: var(--text-dimmed); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+    .tweak-row__control { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tweak-row__control button {
+      flex: 1; min-width: 0;
+      padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border-strong);
+      background: var(--surface); color: var(--text-muted);
+      font-size: 12px; font-family: inherit; cursor: pointer;
+    }
+    .tweak-row__control button.is-active {
+      background: var(--primary-light); color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* Density modes */
+    [data-density="compact"] td, [data-density="compact"] th { padding-top: 6px !important; padding-bottom: 6px !important; }
+    [data-density="compact"] .block-card { padding: 9px !important; }
+  </style>
+
+  <!-- React + Babel -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="shell.jsx"></script>
+  <script type="text/babel" src="variation-a.jsx"></script>
+  <script type="text/babel" src="variation-b.jsx"></script>
+  <script type="text/babel" src="variation-c.jsx"></script>
+
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "variation": "B",
+      "density": "comfortable",
+      "scheme": "light",
+      "showTokenPanel": true
+    }/*EDITMODE-END*/;
+
+    const { useState, useEffect } = React;
+
+    function App() {
+      // Load persisted variation from localStorage
+      const [variation, setVariation] = useState(() => localStorage.getItem("blocks_variation") || TWEAK_DEFAULTS.variation);
+      const [density, setDensity] = useState(() => localStorage.getItem("blocks_density") || TWEAK_DEFAULTS.density);
+      const [scheme, setScheme] = useState(() => localStorage.getItem("blocks_scheme") || TWEAK_DEFAULTS.scheme);
+      const [editMode, setEditMode] = useState(false);
+      const [showCompile, setShowCompile] = useState(false);
+
+      useEffect(() => { localStorage.setItem("blocks_variation", variation); }, [variation]);
+      useEffect(() => { localStorage.setItem("blocks_density", density); }, [density]);
+      useEffect(() => { localStorage.setItem("blocks_scheme", scheme); }, [scheme]);
+
+      useEffect(() => {
+        document.documentElement.setAttribute("data-mantine-color-scheme", scheme);
+        document.documentElement.setAttribute("data-density", density);
+      }, [scheme, density]);
+
+      // Tweak protocol
+      useEffect(() => {
+        const onMsg = (e) => {
+          if (e?.data?.type === "__activate_edit_mode") setEditMode(true);
+          if (e?.data?.type === "__deactivate_edit_mode") setEditMode(false);
+        };
+        window.addEventListener("message", onMsg);
+        window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+        return () => window.removeEventListener("message", onMsg);
+      }, []);
+
+      const setKey = (k, v) => {
+        const edits = { [k]: v };
+        window.parent.postMessage({ type: "__edit_mode_set_keys", edits }, "*");
+      };
+
+      const Variation = { A: VariationA, B: VariationB, C: VariationC }[variation];
+
+      return (
+        <div className="app-shell" data-screen-label={`Variation ${variation}`}>
+          <Sidebar />
+          <main className="app-shell__main">
+            <Variation onCompile={() => setShowCompile(true)} />
+          </main>
+
+          {/* Variation switcher — always visible; this is the primary exploration control */}
+          <div className="variation-switcher">
+            <span className="vs-label">Variation</span>
+            {[
+              { k: "A", l: "Enhanced table" },
+              { k: "B", l: "Split view" },
+              { k: "C", l: "Grouped stack" },
+            ].map(v => (
+              <button key={v.k} className={variation === v.k ? "is-active" : ""} onClick={() => { setVariation(v.k); setKey("variation", v.k); }}>
+                <span style={{ fontWeight: 700 }}>{v.k}</span>
+                <span>·</span>
+                <span>{v.l}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Tweaks panel */}
+          {editMode && (
+            <div className="tweaks-panel">
+              <div className="tweaks-panel__header">
+                <span className="tweaks-panel__title">Tweaks</span>
+                <span className="text-xs text-dimmed">Live</span>
+              </div>
+              <div className="tweaks-panel__body">
+                <div className="tweak-row">
+                  <div className="tweak-row__label">Variation</div>
+                  <div className="tweak-row__control">
+                    {["A", "B", "C"].map(v => (
+                      <button key={v} className={variation === v ? "is-active" : ""} onClick={() => { setVariation(v); setKey("variation", v); }}>{v}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="tweak-row">
+                  <div className="tweak-row__label">Density</div>
+                  <div className="tweak-row__control">
+                    {["comfortable", "compact"].map(d => (
+                      <button key={d} className={density === d ? "is-active" : ""} onClick={() => { setDensity(d); setKey("density", d); }} style={{ textTransform: "capitalize" }}>{d}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="tweak-row">
+                  <div className="tweak-row__label">Color scheme</div>
+                  <div className="tweak-row__control">
+                    {["light", "dark"].map(s => (
+                      <button key={s} className={scheme === s ? "is-active" : ""} onClick={() => { setScheme(s); setKey("scheme", s); }} style={{ textTransform: "capitalize" }}>{s}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="tweak-row">
+                  <div className="tweak-row__label">Quick action</div>
+                  <div className="tweak-row__control">
+                    <button onClick={() => setShowCompile(true)}>Open Compile preview</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showCompile && <CompileModal blocks={BLOCKS} budget={TOKEN_BUDGET} onClose={() => setShowCompile(false)} />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
