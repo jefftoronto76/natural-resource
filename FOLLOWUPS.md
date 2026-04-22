@@ -7,6 +7,18 @@ has a date, source commit or step, description, and disposition.
 
 ## 2026-04-22
 
+### Order clearing UX + API support
+
+- **Source:** Step 16 live verification (post-fix, same session).
+- **Observation:** Clearing the order input silently reverts to the
+  prior value; there is no API path to set order back to null.
+- **Disposition:** Revisit alongside broader UX reconciliation against
+  the Image 1 target. See investigation notes in the session history —
+  both `BlockRow.handleOrderBlur` and `BlocksTable.handleOrderBlur`
+  early-return on `nextValue === null`, and `/api/admin/blocks/[id]`
+  PATCH doesn't accept null. Both would need coordinated changes for a
+  "clear my order" flow. Parked.
+
 ### SegmentedTokenMeter — warning label color not visually shifting at 5000–8000 tokens
 
 - **Source:** Step 13 live verification (commit `5b8f22a`).

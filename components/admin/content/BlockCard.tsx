@@ -73,16 +73,10 @@ export function BlockCard({
   const [localOrder, setLocalOrder] = useState<string | number>(
     block.order ?? '',
   )
-  const [showError, setShowError] = useState(true)
 
   useEffect(() => {
     setLocalOrder(block.order ?? '')
-    setShowError(true)
   }, [block.order])
-
-  useEffect(() => {
-    if (orderError) setShowError(true)
-  }, [orderError])
 
   async function handleOrderBlur() {
     const parsed =
@@ -112,7 +106,6 @@ export function BlockCard({
 
   function handleOrderChange(v: string | number) {
     setLocalOrder(v)
-    if (showError) setShowError(false)
   }
 
   function handleStatusToggle(checked: boolean) {
@@ -223,7 +216,7 @@ export function BlockCard({
             value={localOrder}
             onChange={handleOrderChange}
             onBlur={handleOrderBlur}
-            error={showError ? orderError : undefined}
+            error={orderError}
             hideControls
             allowDecimal={false}
             size="sm"

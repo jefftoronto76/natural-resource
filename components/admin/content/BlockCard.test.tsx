@@ -96,7 +96,7 @@ describe('BlockCard', () => {
     ).toBeInTheDocument()
   })
 
-  it('order error: suppressed after user types (Option B UX)', async () => {
+  it('order error: persists while prop set, clears when prop clears', async () => {
     const user = userEvent.setup()
     const { rerender } = render(
       <BlockCard
@@ -112,13 +112,28 @@ describe('BlockCard', () => {
     )
     expect(screen.getByText(/order already used/i)).toBeInTheDocument()
 
-    // User types → error suppresses immediately
+    // User types — error keeps showing. No dismiss-on-type.
     const input = screen.getByRole('textbox', { name: 'Order' })
     await user.type(input, '9')
 
+    expect(screen.getByText(/order already used/i)).toBeInTheDocument()
+
+    // Parent clears orderError (e.g. on successful commit) → error disappears.
+    rerender(
+      <BlockCard
+        block={block}
+        selected={false}
+        orderError={undefined}
+        onToggleSelect={vi.fn()}
+        onToggleStatus={vi.fn()}
+        onOrderCommit={vi.fn().mockResolvedValue(true)}
+        onOpenEdit={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    )
     expect(screen.queryByText(/order already used/i)).not.toBeInTheDocument()
 
-    // Parent sends a fresh orderError → it displays again
+    // Parent sets a fresh orderError → it displays.
     rerender(
       <BlockCard
         block={block}

@@ -24,6 +24,7 @@ import { SegmentedTokenMeter } from '@/components/admin/content/SegmentedTokenMe
 import { BulkActionsBar } from '@/components/admin/content/BulkActionsBar'
 import { BlockRow as DesktopBlockRow } from '@/components/admin/content/BlockRow'
 import type { BlockType } from '@/components/admin/content/blockTypes'
+import { isOrdered } from '@/lib/blockOrder'
 
 const TYPE_COLORS: Record<string, string> = {
   identity: 'violet',
@@ -238,9 +239,14 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
       return false
     }
 
-    const conflict = items.find(
-      b => b.id !== id && b.type === current.type && b.order === nextValue,
-    )
+    // Only run the uniqueness check when the user is setting a meaningful
+    // ordinal. 0 and null are "unset" (see src/lib/blockOrder.ts) and
+    // multiple blocks of the same type can legitimately share them.
+    const conflict = isOrdered(nextValue)
+      ? items.find(
+          b => b.id !== id && b.type === current.type && b.order === nextValue,
+        )
+      : null
     console.log('[BlocksTable] order duplicate check:', {
       id,
       type: current.type,

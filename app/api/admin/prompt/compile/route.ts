@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { getAuthContext } from '@/lib/get-auth-context'
+import { isOrdered } from '@/lib/blockOrder'
 
 // Fixed compile sequence — mirrors the TYPE_LABELS ordinal order on the
 // Blocks page. Within each type bucket: blocks with `order > 0` come
@@ -48,9 +49,6 @@ export async function POST() {
   const typeOrderIndex = new Map<string, number>(
     COMPILE_ORDER.map((t, i) => [t, i]),
   )
-
-  const isOrdered = (n: number | null): boolean =>
-    typeof n === 'number' && Number.isFinite(n) && n > 0
 
   const sorted = [...rows]
     .filter(b => typeOrderIndex.has(b.type))

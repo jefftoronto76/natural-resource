@@ -100,9 +100,12 @@ export interface BlockRowProps {
 /**
  * Desktop-only table row for a single block. Owns no API calls — all
  * mutations dispatch via callbacks. The NumberInput uses local state
- * so invalid-but-rejected values can revert cleanly, and an internal
- * showError toggle suppresses the parent's orderError on the user's
- * next keystroke (Option B UX: error stays lit until user edits).
+ * so invalid-but-rejected values can revert cleanly. The parent's
+ * `orderError` prop renders directly — no local dismissal toggle.
+ * The error persists as long as the prop is set and clears when the
+ * prop clears (UX trade for simpler state; the previous showError
+ * toggle had too many edge cases with React effect ordering and
+ * Mantine controlled-value behavior).
  *
  * No drag handle — Phase 1 ordering is NumberInput-only per D1.
  *
@@ -126,21 +129,12 @@ export function BlockRow({
   const [localOrder, setLocalOrder] = useState<string | number>(
     block.order ?? '',
   )
-  const [showError, setShowError] = useState(true)
 
   // Server value changed (commit succeeded, external update) — sync
-  // local state and re-enable error display for any future parent
-  // error.
+  // local input state.
   useEffect(() => {
     setLocalOrder(block.order ?? '')
-    setShowError(true)
   }, [block.order])
-
-  // New error from the parent — make sure we show it even if the user
-  // had dismissed a previous one by typing.
-  useEffect(() => {
-    if (orderError) setShowError(true)
-  }, [orderError])
 
   async function handleOrderBlur() {
     const parsed =
@@ -171,7 +165,6 @@ export function BlockRow({
 
   function handleOrderChange(v: string | number) {
     setLocalOrder(v)
-    if (showError) setShowError(false)
   }
 
   function handleStatusToggle(checked: boolean) {
@@ -242,7 +235,7 @@ export function BlockRow({
           value={localOrder}
           onChange={handleOrderChange}
           onBlur={handleOrderBlur}
-          error={showError ? orderError : undefined}
+          error={orderError}
           hideControls
           allowDecimal={false}
           w={70}
