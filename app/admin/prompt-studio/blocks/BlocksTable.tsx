@@ -21,6 +21,8 @@ import { BlockCard } from '@/components/admin/content/BlockCard'
 import { BlockEditDrawer } from '@/components/admin/content/BlockEditDrawer'
 import { BlockEditSheet } from '@/components/admin/content/BlockEditSheet'
 import { BlockEditForm } from '@/components/admin/content/BlockEditForm'
+import { BlocksToolbar } from '@/components/admin/content/BlocksToolbar'
+import { useBlocksFilters } from '@/components/admin/content/useBlocksFilters'
 import type { BlockType } from '@/lib/blockTypes'
 import { isOrdered } from '@/lib/blockOrder'
 
@@ -49,6 +51,18 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
+  // URL-synced filter state — query/type/status come from ?q=, ?type=,
+  // ?status=. Filtering below uses these values; the toolbar consumes
+  // them for controlled inputs.
+  const {
+    query,
+    setQuery,
+    typeFilter,
+    setTypeFilter,
+    statusFilter,
+    setStatusFilter,
+  } = useBlocksFilters()
+
   // useMediaQuery returns undefined on first render (SSR) and true/false
   // after mount. Treat undefined as "not mobile" so the drawer is the
   // first-paint default. Mobile visitors see a brief flash of the drawer
@@ -70,8 +84,6 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   }
 
   const selectedCount = selectedIds.size
-  const allSelected = items.length > 0 && selectedCount === items.length
-  const someSelected = selectedCount > 0 && selectedCount < items.length
 
   function toggleSelect(id: string) {
     setSelectedIds(prev => {
@@ -82,13 +94,9 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     })
   }
 
-  function toggleSelectAll() {
-    if (selectedIds.size === items.length) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(items.map(b => b.id)))
-    }
-  }
+  // allSelected / someSelected / toggleSelectAll are defined below,
+  // after `filtered` is derived — select-all is scoped to the
+  // currently-visible (filtered) set, not the full items list.
 
   async function handleBulkStatusChange(value: string | null) {
     if (value !== 'active' && value !== 'disabled') return
@@ -275,6 +283,69 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
       body: b.body ?? '',
     }))
 
+  // View-level filter. Runs synchronously on every render — `query` is
+  // local to useBlocksFilters (instant keystroke feedback), and the
+  // three filter guards short-circuit in cheapest-first order. The
+  // meter above is intentionally NOT filtered; it measures reality,
+  // not the current view.
+  const filtered = items.filter(b => {
+    if (typeFilter !== 'all' && b.type !== typeFilter) return false
+    if (statusFilter !== 'all' && b.status !== statusFilter) return false
+    if (query.trim()) {
+      const q = query.trim().toLowerCase()
+      const hay = `${b.title} ${b.body ?? ''}`.toLowerCase()
+      if (!hay.includes(q)) return false
+    }
+    return true
+  })
+
+  // Select-all is scoped to the currently-visible (filtered) set.
+  // Bulk actions still operate on all selectedIds — so selections
+  // made outside the current filter persist when filters change.
+  const filteredSelectedCount = filtered.reduce(
+    (n, b) => (selectedIds.has(b.id) ? n + 1 : n),
+    0,
+  )
+  const allSelected =
+    filtered.length > 0 && filteredSelectedCount === filtered.length
+  const someSelected =
+    filteredSelectedCount > 0 && filteredSelectedCount < filtered.length
+
+  function toggleSelectAll() {
+    console.log('[BlocksTable] toggle select-all (filtered)', {
+      filteredCount: filtered.length,
+      filteredSelectedCount,
+    })
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (filteredSelectedCount > 0) {
+        // Any visible selection → clear ALL visible (both full and partial).
+        for (const b of filtered) next.delete(b.id)
+      } else {
+        // None visible selected → select all visible.
+        for (const b of filtered) next.add(b.id)
+      }
+      return next
+    })
+  }
+
+  // Expand-all / Collapse-all operates on the currently-filtered set.
+  // "Expand all" in a filter context means "expand everything I can
+  // see." Collapse wipes the expanded set entirely (no point keeping
+  // hidden rows expanded).
+  const allExpanded =
+    filtered.length > 0 && filtered.every(b => expandedIds.has(b.id))
+
+  function handleExpandAll() {
+    console.log('[BlocksTable] expand all', { count: filtered.length })
+    setExpandedIds(new Set(filtered.map(b => b.id)))
+  }
+
+  function handleCollapseAll() {
+    console.log('[BlocksTable] collapse all')
+    setExpandedIds(new Set())
+  }
+
   return (
     <>
       {/* Segmented token meter — one segment per active block, colored by type */}
@@ -290,6 +361,24 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
 
       {items.length > 0 && (
         <>
+          {/* Desktop/tablet filter toolbar — mobile gets its own UX in PR 4. */}
+          <Box visibleFrom="md" mb="md">
+            <BlocksToolbar
+              query={query}
+              onQueryChange={setQuery}
+              typeFilter={typeFilter}
+              onTypeFilterChange={setTypeFilter}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              allExpanded={allExpanded}
+              onToggleExpandAll={
+                allExpanded ? handleCollapseAll : handleExpandAll
+              }
+              filteredCount={filtered.length}
+              totalCount={items.length}
+            />
+          </Box>
+
           {/* Bulk action bar */}
           {selectedCount > 0 && (
             <BulkActionsBar
@@ -325,7 +414,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {items.map(block => (
+                {filtered.map(block => (
                   <DesktopBlockRow
                     key={block.id}
                     block={{ ...block, type: block.type as BlockType }}
@@ -346,7 +435,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
 
           {/* Mobile: Card stack */}
           <Stack gap="sm" hiddenFrom="md">
-            {items.map(block => (
+            {filtered.map(block => (
               <BlockCard
                 key={block.id}
                 block={{ ...block, type: block.type as BlockType }}
