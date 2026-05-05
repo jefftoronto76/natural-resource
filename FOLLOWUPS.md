@@ -5,6 +5,28 @@ has a date, source commit or step, description, and disposition.
 
 ---
 
+## 2026-05-05
+
+### Duplicate endpoint accumulates monotonic order values
+
+- **Source:** PR 2 PR2_PLAN.md, Step 16 design discussion.
+- **Observation:** The `POST /api/admin/blocks/duplicate` endpoint
+  computes `order = MAX(order WHERE tenant_id AND type) + 1`. Over
+  time, as duplicates accumulate (and source rows get deleted or
+  disabled), the per-type order monotonically grows. After heavy use
+  the numbers become large (e.g., `127`) even when only a handful of
+  blocks remain.
+- **Blocking?** No. Sort behavior is unchanged — the compile route
+  uses `order` as a sort key, not a magnitude. Display via the
+  zero-padded order prefix shows `127` instead of `12` which looks
+  odd at scale.
+- **Disposition:** Consider an order normalization or compaction
+  strategy in a future phase. Options to consider: (a) on-duplicate
+  re-pack the per-type sequence to 1..N, (b) periodic admin "reorder"
+  action, (c) store a sparse fractional index instead of integers.
+
+---
+
 ## 2026-04-22
 
 ### Order clearing UX + API support

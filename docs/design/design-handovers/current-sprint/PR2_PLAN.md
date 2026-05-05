@@ -14,6 +14,19 @@
 
 ---
 
+## Resolved decisions (recorded from review)
+
+- **F1 — Schema migration:** No migrations file in the repo. SQL output to chat for manual execution against Supabase before Step 12.
+- **F2 — New-block flow:** Approach (a) approved. Extend `BlockEditForm` with `mode: 'edit' | 'new'`. One form, two modes; reuses safety-check flow.
+- **F3 — Duplicate endpoint:** Path is `POST /api/admin/blocks/duplicate` (not `/api/admin/blocks`). New file `app/api/admin/blocks/duplicate/route.ts`.
+- **F4 — Page header migration:** Migrate `page.tsx` header to Mantine in Step 6, dropping the Tailwind wrapper.
+- **Item 5 — Manual order edit:** Move from inline `NumberInput` to `BlockEditForm` order field. Drop the inline NumberInput entirely. Form gains an `order` field rendered in both `'edit'` and `'new'` modes. Per-type uniqueness check still fires on save (parent-side, before PATCH). Conflict surfacing details resolved in Step 12 implementation.
+- **Item 6 — Null author display:** Omit "by …" entirely when `author` is null. Display reduces to "Updated 2d ago". The `updated_at` backfill from `created_at` keeps the timestamp meaningful even on legacy rows.
+
+A new FOLLOWUPS entry has been added (2026-05-05) for the duplicate-endpoint order-accumulation concern.
+
+---
+
 ## Out of scope
 
 Explicitly NOT in this PR:
@@ -26,7 +39,9 @@ Explicitly NOT in this PR:
 
 ## Flags surfaced before any step starts
 
-### F1. Schema migration required (BLOCKS Step 12)
+(All 6 resolved — see "Resolved decisions" section above. Original flag wording retained below for context.)
+
+### F1. Schema migration required (BLOCKS Step 12) — RESOLVED
 
 `blocks.updated_at` and `blocks.updated_by` do not exist. The "Updated {time} by {author}" meta line (Step 12) cannot be implemented without them.
 
@@ -58,7 +73,7 @@ CREATE TRIGGER blocks_updated_at_trigger
 
 **Migration must run before Step 12.** Step 12 is the only step that depends on these columns; all earlier steps are unblocked.
 
-### F2. New-block flow — ambiguity (BLOCKS Step 7)
+### F2. New-block flow — ambiguity (BLOCKS Step 7) — RESOLVED
 
 Your spec says: "+ New block opens BlockEditDrawer/BlockEditSheet with empty draft."
 
@@ -71,11 +86,11 @@ Plan defaults to (a) — minimum new components, reuses the form's safety-check 
 
 Endpoint: I'll reuse the existing `POST /api/admin/blocks/save` (designed for the Composer create flow but generic enough). If you want a dedicated `/api/admin/blocks` POST, flag.
 
-### F3. Duplicate endpoint path
+### F3. Duplicate endpoint path — RESOLVED (`/api/admin/blocks/duplicate`)
 
 Your spec: `POST /api/admin/blocks`. Current state: that route file (`app/api/admin/blocks/route.ts`) has GET only. Plan adds a POST handler at that path. If you'd prefer `/api/admin/blocks/duplicate` for clearer naming, flag — minor change.
 
-### F4. `page.tsx` Tailwind layout
+### F4. `page.tsx` Tailwind layout — RESOLVED (migrate in Step 6)
 
 The existing `app/admin/prompt-studio/blocks/page.tsx` uses Tailwind classes for the page-header `<div>`. Your standing rules say "Mantine primitives only in admin components, no Tailwind." Plan migrates the page header to Mantine (`<Group>` + `<Stack>`) as part of Step 6 (subtitle work). If you'd rather leave the legacy Tailwind wrapper alone, flag.
 
@@ -93,15 +108,15 @@ Foundation → page chrome → meter → toolbar → row restructuring → dupli
 
 ### Foundation: data layer
 
-#### Step 1 — Run schema migration
+#### Step 1 — Run schema migration (no commit)
 
-**Files:** `supabase/migrations/{timestamp}_blocks_updated_at_updated_by.sql` (new) — or wherever existing migrations live in the project.
+**Files:** none. Per resolved F1, migration SQL is output to chat for manual execution in the Supabase SQL Editor. No file lands in the repo.
 
-**Build:** SQL per F1. Plan is to ship the migration as a file in the repo and have you run it against Supabase before Step 12. If migrations live elsewhere (Supabase dashboard only), I'll output the SQL for you to apply manually.
+**Build:** SQL per F1. After execution, `\d blocks` should show two new columns plus the `blocks_updated_at_trigger`.
 
-**Verification:** column exists; constraint resolves; backfill complete. `npm run build` unchanged (no code change yet).
+**Verification:** Reviewer runs the SQL, confirms columns + trigger exist, backfill applied. No code change in the repo for this step — Step 1 completion is signaled by reviewer approval after manual execution.
 
-**Depends on:** nothing (independent of code; required for Step 12).
+**Depends on:** nothing.
 
 ---
 
@@ -184,7 +199,7 @@ This step adds the subtitle but leaves the new-block button as a comment placeho
 
 ---
 
-#### Step 7 — New block button + form mode (BLOCKED on F2)
+#### Step 7 — New block button + form mode
 
 **Files:**
 - `components/admin/content/BlockEditForm.tsx` (modified, ~25-line delta) — add optional `mode: 'edit' | 'new'` prop; render title/type/topic fields when `mode === 'new'`.
@@ -192,11 +207,13 @@ This step adds the subtitle but leaves the new-block button as a comment placeho
 - `components/admin/content/NewBlockButton.tsx` (new, ~50 lines) — client component: button + EditContainer (Drawer/Sheet picker) + form in 'new' mode. Owns its own open state.
 - `app/admin/prompt-studio/blocks/page.tsx` (modified) — replace the placeholder with `<NewBlockButton />`.
 
-**Build:** Per F2, default approach is extending `BlockEditForm`. Pause point before this step — confirm flow before I touch the form.
+**Build:** Per resolved F2, approach (a) confirmed: extend `BlockEditForm` with a `mode: 'edit' | 'new'` prop. In new mode, render `title`, `type`, `topic_id` fields above the body Textarea. Order is NOT part of Step 7 — newly created blocks save with `order = null` (the existing Postgres default). Step 12 later adds the order field to the form, visible in both modes.
 
-**Verification:** Click "+ New block" → drawer/sheet opens with title/type/body inputs. Save → POST to existing endpoint → block appears in list (page revalidates or we push to client state). Cancel discards.
+Save POSTs to existing `POST /api/admin/blocks/save` (Composer create endpoint). Required fields per that endpoint: `type`, `topic_id`, `title`, `body`. New `body` from form draft; `type` from form select; `title` from form input; `topic_id` from a select sourced via `GET /api/admin/topics`.
 
-**Depends on:** F2 resolution.
+**Verification:** Click "+ New block" → drawer/sheet opens with title/type/topic/body inputs (no order yet). Save → POST → block appears in list (page revalidates). Cancel discards.
+
+**Depends on:** nothing data-side. Step 12 adds order to the form afterwards — independent.
 
 ---
 
@@ -267,19 +284,37 @@ This step adds the subtitle but leaves the new-block button as a comment placeho
 
 ---
 
-#### Step 12 — Drop Order column; show order as monospace prefix in Title
+#### Step 12 — Drop Order column; show order as monospace prefix in Title; move order edit to drawer
 
 **Files:**
-- `components/admin/content/BlockRow.tsx` (modified, ~25-line delta) — remove the Order Table.Td (NumberInput); add an order-prefix span inside the Title cell.
-- `app/admin/prompt-studio/blocks/BlocksTable.tsx` (modified, ~3-line delta) — drop the Order Table.Th. Update colSpan to 5.
+- `components/admin/content/BlockRow.tsx` (modified, ~25-line delta) — remove the Order Table.Td and its inline `NumberInput`; add an order-prefix span inside the Title cell.
+- `app/admin/prompt-studio/blocks/BlocksTable.tsx` (modified, ~10-line delta) — drop the Order Table.Th. Update colSpan to 5. `handleOrderBlur` becomes unused as a row-level handler; reuse its conflict-detection predicate inside the new save path (see below) and delete the row-blur path.
+- `components/admin/content/BlockEditForm.tsx` (modified, ~30-line delta) — add `order` field rendered as `NumberInput` alongside body. Visible in both `'edit'` and `'new'` modes (per Item 5).
+- `components/admin/content/useBlockEditForm.ts` (modified, ~15-line delta) — extend hook draft state with `order: number | null`. Save callbacks now receive `{ body, order }`.
 
-**Build:**
-- Title cell becomes `<Group gap="xs"><span className="mono-prefix">{padded}</span><Text variant="label">{title}</Text></Group>` where `padded = String(order).padStart(2, '0')` (e.g., '01', '02') or `'—'` for null/0.
-- Manual order edit moves to the inline preview pane (the expanded body view) — keep a `NumberInput` there for power-user editing. Or: drop manual editing entirely from the row and surface it only in the edit drawer (form gains an "Order" field). Plan leans toward the latter; flag if you want the inline NumberInput preserved somewhere.
+**Build (display side):**
+- Title cell becomes `<Group gap="xs"><span style="{font-family: var(--mantine-font-family-monospace), color: dimmed}">{padded}</span><Text variant="label">{title}</Text></Group>` where `padded = String(order).padStart(2, '0')` (e.g. `'01'`, `'02'`) or `'—'` for null/0.
+- Inline `NumberInput` for order is removed entirely from `BlockRow`. No replacement on the row.
 
-**Verification:** Live: rows show "01 Block title", "02 Other block", etc. Order editing moved to drawer (need to add to BlockEditForm if not already). Per-type uniqueness check still fires from the drawer Save path via `handleOrderBlur`-equivalent logic.
+**Build (edit side):**
+- `BlockEditForm` renders an order `NumberInput` field above the body Textarea (visible in both edit and new modes).
+- `useBlockEditForm` adds `order` to draft state, seeded from `block.order` on edit, defaulting to `null` on new.
+- Save callback signature changes from `onSave({ body })` to `onSave({ body, order })`. Same for `onSaveAnyway`.
+- BlocksTable's `handleFormSave` / `handleFormSaveAnyway` unchanged structurally but now run an order conflict check before PATCHing:
+  ```ts
+  if (order !== editingBlock.order && isOrdered(order)) {
+    const conflict = items.find(b => b.id !== editingId && b.type === editingBlock.type && b.order === order)
+    if (conflict) {
+      notifications.show({ color: 'red', title: 'Duplicate order number', message: `…used by ${conflict.title}…` })
+      throw new Error('Order conflict')   // hook catches → editor stays open
+    }
+  }
+  ```
+  This reuses the exact conflict predicate from PR 1's `handleOrderBlur`. The toast is reused; surfacing the error inside the form (e.g., `NumberInput.error`) is a possible polish but not required for V1 — toast matches today's UX.
 
-**Depends on:** none for the visual; if order moves to the drawer, depends on BlockEditForm extension.
+**Verification:** Live: rows show "01 Block title", "02 Other block", etc. Editing a block opens the drawer with an order field. Per-type uniqueness check fires when Save is clicked with a conflicting order — toast appears, drawer stays open.
+
+**Depends on:** Step 11 (column slot frees up).
 
 ---
 
@@ -305,11 +340,13 @@ This step adds the subtitle but leaves the new-block button as a comment placeho
 **Files:** `components/admin/content/BlockRow.tsx` (modified, ~10-line delta).
 
 **Build:**
-- Below the title in the Title cell: `<Text variant="muted" size="xs">Updated {relative} by {author?.name ?? 'unknown'}</Text>`.
-- Relative time via lightweight helper or `Intl.RelativeTimeFormat`. No new deps.
-- Legacy rows with null `updated_by` show "by unknown" (or omit the "by …" portion entirely — flag preference).
+- Below the title in the Title cell, render two strings depending on author presence:
+  - With author: `<Text variant="muted" size="xs">Updated {relative} by {author.name}</Text>`
+  - Null author (legacy rows): `<Text variant="muted" size="xs">Updated {relative}</Text>` — omit the "by …" entirely per Item 6.
+- Relative time via `Intl.RelativeTimeFormat` (no new deps). Helper computes `now - updated_at` and picks the largest unit (e.g., "2d ago", "5m ago", "just now" if < 1m).
+- `updated_at` always has a value post-migration (backfilled from `created_at`), so the timestamp is meaningful even on legacy rows.
 
-**Verification:** Build green. Live: rows show "Updated 5m ago by Jane Doe" beneath title.
+**Verification:** Build green. Live: rows show "Updated 5m ago by Jane Doe" or "Updated 5m ago" (legacy) beneath title.
 
 **Depends on:** Steps 1, 4, 5. Cannot ship without the migration.
 
@@ -336,25 +373,25 @@ This step adds the subtitle but leaves the new-block button as a comment placeho
 
 #### Step 16 — Duplicate endpoint
 
-**Files:** `app/api/admin/blocks/route.ts` (modified, ~50-line delta — add POST handler).
+**Files:** `app/api/admin/blocks/duplicate/route.ts` (new, ~60 lines).
 
 **Build:**
-- Accept `{ source_id: string }`.
-- Fetch source via tenant-scoped `select`.
+- Accept `{ source_id: string }` in POST body.
+- Fetch source row via tenant-scoped select on `id, type, topic_id, title, body`.
 - Compute new fields:
   - `title = \`${source.title} (copy)\``
-  - `body, type, topic_id` from source
+  - `body`, `type`, `topic_id`, `owner_id`, `tenant_id` from source / authCtx
   - `status = 'disabled'`
-  - `order = (max order for that type) + 1` — query `MAX(order) WHERE tenant_id AND type` then +1; null/0 → 1
+  - `order = (max order for that type) + 1` — query `MAX(order) WHERE tenant_id AND type` then +1; null/0 max → 1
   - `updated_by = authCtx.owner_id`, `updated_at` auto via trigger
 - Insert and return the new row.
 - 401 on auth fail; 404 on missing source; 500 on insert error.
 
-**Per F3:** path is `/api/admin/blocks` per your spec. Flag if you want `/duplicate`.
+**Per resolved F3:** path is `/api/admin/blocks/duplicate`. New file under `app/api/admin/blocks/duplicate/route.ts`. The existing GET-only `app/api/admin/blocks/route.ts` is untouched.
 
 **Verification:** Build green. New API test: POSTing a known block id returns a copy row. Live: invoke from row Duplicate icon (Step 17).
 
-**Depends on:** Steps 1, 3 (so updated_by is meaningful).
+**Depends on:** Steps 1, 3 (so `updated_by` is meaningful).
 
 ---
 
@@ -362,7 +399,7 @@ This step adds the subtitle but leaves the new-block button as a comment placeho
 
 **Files:**
 - `components/admin/content/BlockRow.tsx` (modified, ~10-line delta) — `IconCopy` ActionIcon between Edit and Delete.
-- `app/admin/prompt-studio/blocks/BlocksTable.tsx` (modified, ~25-line delta) — add `handleDuplicate(id)`: POST `/api/admin/blocks`, on success prepend new row to `items`.
+- `app/admin/prompt-studio/blocks/BlocksTable.tsx` (modified, ~25-line delta) — add `handleDuplicate(id)`: POST `/api/admin/blocks/duplicate`, on success prepend new row to `items`.
 
 **Build:** Optimistic insert disabled — wait for server response so we have the real ID/order. Disable the Duplicate icon for the row while in flight.
 
@@ -419,7 +456,7 @@ This step adds the subtitle but leaves the new-block button as a comment placeho
 ### Schema / API
 - [ ] `blocks.updated_at` and `blocks.updated_by` columns exist with the migration applied.
 - [ ] PATCH `/api/admin/blocks/[id]` stamps `updated_by` on every write.
-- [ ] POST `/api/admin/blocks` accepts `{ source_id }` and returns a duplicated row.
+- [ ] POST `/api/admin/blocks/duplicate` accepts `{ source_id }` and returns a duplicated row.
 
 ### Build / tests
 - [ ] `npm run build` clean.
@@ -468,13 +505,6 @@ Steps 1, 2, 6, 9 can run in any order before their dependents.
 
 ---
 
-## Decisions needed before implementation starts
+## Decisions needed before implementation starts — RESOLVED
 
-1. **F1** — schema migration: confirm you'll run the SQL in Supabase before Step 12, or ask me to move it into the project's migration directory if one exists.
-2. **F2** — new-block flow: confirm the "extend BlockEditForm with mode prop" approach (or pick a different one).
-3. **F3** — duplicate endpoint path: `/api/admin/blocks` (your spec) or `/api/admin/blocks/duplicate` (clearer naming).
-4. **F4** — page.tsx Tailwind migration: do it as part of Step 6 (recommend), or leave the legacy wrapper.
-5. Step 12 — do we keep a `NumberInput` for manual order edit somewhere (inline preview, or in the edit drawer), or remove manual order editing entirely from this PR?
-6. Step 14 — if `author?.name` is null on legacy rows, what should display? "by unknown" / "by —" / omit "by …" entirely?
-
-Awaiting your responses; not starting implementation.
+All 6 closed in the "Resolved decisions" section near the top of this document. Implementation proceeds with Step 1 (output migration SQL).
