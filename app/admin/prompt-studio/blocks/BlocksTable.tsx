@@ -37,7 +37,9 @@ export interface BlockRow {
   is_default: boolean
   order: number | null
   created_at: string
+  updated_at: string
   topics: { name: string } | null
+  author: { name: string } | null
 }
 
 export function BlocksTable({ rows }: { rows: BlockRow[] }) {

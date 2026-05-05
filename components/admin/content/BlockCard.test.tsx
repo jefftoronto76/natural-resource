@@ -9,7 +9,9 @@ const block: BlockCardBlock = {
   body: 'body text',
   status: 'active',
   order: 3,
+  updated_at: '2026-04-22T12:00:00.000Z',
   topics: { name: 'Voice & tone' },
+  author: null,
 }
 
 function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> = {}) {

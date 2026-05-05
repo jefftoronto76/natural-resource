@@ -76,7 +76,9 @@ export interface BlockRowBlock {
   body: string
   status: 'active' | 'disabled' | 'deleted'
   order: number | null
+  updated_at: string
   topics: { name: string } | null
+  author: { name: string } | null
 }
 
 export interface BlockRowProps {
