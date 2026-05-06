@@ -363,8 +363,14 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
 
       {items.length > 0 && (
         <>
-          {/* Desktop/tablet filter toolbar — mobile gets its own UX in PR 4. */}
-          <Box visibleFrom="md" mb="md">
+          {/* Filter toolbar — visible at all viewports. The original PR 1
+              design gated this with visibleFrom="md" pending a separate
+              mobile filter UX (overlay + chip row) planned for the
+              originally-scoped PR 4. That PR 4 was cancelled when the
+              redesign rescoped to page rework, so the gate is removed.
+              Step 9 of the rework swaps the SegmentedControls for
+              Chip.Group, which wraps cleanly at narrow viewports. */}
+          <Box mb="md">
             <BlocksToolbar
               query={query}
               onQueryChange={setQuery}
