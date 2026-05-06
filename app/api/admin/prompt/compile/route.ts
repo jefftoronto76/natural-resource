@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { getAuthContext } from '@/lib/get-auth-context'
 import { isOrdered } from '@/lib/blockOrder'
+import { tokensFor } from '@/lib/tokenize'
 
 // Fixed compile sequence — mirrors the TYPE_LABELS ordinal order on the
 // Blocks page. Within each type bucket: blocks with `order > 0` come
@@ -80,7 +81,7 @@ export async function POST() {
 
   // 3. Compile — join bodies with double newlines.
   const content = sorted.map(b => (b.body ?? '').trim()).filter(Boolean).join('\n\n')
-  const tokenCount = Math.ceil(content.length / 4)
+  const tokenCount = tokensFor(content)
   console.log('[prompt/compile] compiled length:', content.length, 'tokens:', tokenCount)
 
   if (!content) {

@@ -26,7 +26,13 @@ export async function PATCH(
     return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const updates: { status?: BlockStatus; body?: string; active?: boolean; order?: number } = {}
+  const updates: {
+    status?: BlockStatus
+    body?: string
+    active?: boolean
+    order?: number
+    updated_by?: string
+  } = {}
 
   if (typeof body.status === 'string') {
     if (!VALID_STATUSES.includes(body.status as BlockStatus)) {
@@ -53,6 +59,10 @@ export async function PATCH(
   if (Object.keys(updates).length === 0) {
     return Response.json({ error: 'No updates provided' }, { status: 400 })
   }
+
+  // Stamp updated_by on every real write. updated_at is auto-set by
+  // the blocks_updated_at_trigger Postgres trigger — no client write.
+  updates.updated_by = authCtx.owner_id
 
   const supabase = getAdminClient()
   const { data, error } = await supabase

@@ -9,7 +9,9 @@ const block: BlockCardBlock = {
   body: 'body text',
   status: 'active',
   order: 3,
+  updated_at: '2026-04-22T12:00:00.000Z',
   topics: { name: 'Voice & tone' },
+  author: null,
 }
 
 function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> = {}) {
@@ -17,10 +19,12 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
     <BlockCard
       block={block}
       selected={false}
+      maxVisibleTokens={500}
+      highlight=""
       onToggleSelect={vi.fn()}
       onToggleStatus={vi.fn()}
-      onOrderCommit={vi.fn().mockResolvedValue(true)}
       onOpenEdit={vi.fn()}
+      onDuplicate={vi.fn()}
       onDelete={vi.fn()}
       {...overrides}
     />,
@@ -28,12 +32,16 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
 }
 
 describe('BlockCard', () => {
-  it('renders title, type badge, topic, and order value', () => {
+  it('renders title, type badge, order prefix, token count, and status label', () => {
     renderCard()
     expect(screen.getByText('Test block title')).toBeInTheDocument()
     expect(screen.getByText(/GUARDRAIL \(1st\)/)).toBeInTheDocument()
-    expect(screen.getByText('Voice & tone')).toBeInTheDocument()
-    expect(screen.getByRole('textbox', { name: 'Order' })).toHaveValue('3')
+    // Order=3 → "03" prefix rendered ahead of the title in the same paragraph.
+    expect(screen.getByText('03')).toBeInTheDocument()
+    // body='body text' → 9 chars → ceil(9/4) = 3 tokens (Step 13).
+    expect(screen.getByText('3 tokens')).toBeInTheDocument()
+    // status='active' → "Active" label next to the Switch (Step 15).
+    expect(screen.getByText('Active')).toBeInTheDocument()
   })
 
   it('tapping the card body calls onOpenEdit', async () => {
@@ -66,6 +74,30 @@ describe('BlockCard', () => {
     expect(onOpenEdit).not.toHaveBeenCalled()
   })
 
+  it('tapping the Duplicate icon does NOT bubble to onOpenEdit', async () => {
+    const user = userEvent.setup()
+    const onOpenEdit = vi.fn()
+    const onDuplicate = vi.fn()
+    renderCard({ onOpenEdit, onDuplicate })
+    await user.click(screen.getByRole('button', { name: /duplicate block/i }))
+    expect(onDuplicate).toHaveBeenCalledWith('b-1')
+    expect(onOpenEdit).not.toHaveBeenCalled()
+  })
+
+  it('highlights matching substring in title when highlight prop is set (Step 18)', () => {
+    // Fixture title is "Test block title" — querying "block" should
+    // wrap that substring in a <mark> element via Mantine Highlight.
+    const { container } = renderCard({ highlight: 'block' })
+    const marks = container.querySelectorAll('mark')
+    expect(marks.length).toBeGreaterThan(0)
+    expect(marks[0].textContent?.toLowerCase()).toBe('block')
+  })
+
+  it('does not render <mark> elements when highlight is empty', () => {
+    const { container } = renderCard({ highlight: '' })
+    expect(container.querySelectorAll('mark').length).toBe(0)
+  })
+
   it('tapping the Checkbox does NOT bubble to onOpenEdit', async () => {
     const user = userEvent.setup()
     const onOpenEdit = vi.fn()
@@ -76,16 +108,4 @@ describe('BlockCard', () => {
     expect(onOpenEdit).not.toHaveBeenCalled()
   })
 
-  it('order commit success: calls onOrderCommit with from/to values on blur', async () => {
-    const user = userEvent.setup()
-    const onOrderCommit = vi.fn().mockResolvedValue(true)
-    renderCard({ onOrderCommit })
-
-    const input = screen.getByRole('textbox', { name: 'Order' })
-    await user.clear(input)
-    await user.type(input, '7')
-    await user.tab()
-
-    expect(onOrderCommit).toHaveBeenCalledWith('b-1', 3, 7)
-  })
 })

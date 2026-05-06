@@ -3,7 +3,7 @@ import { render, screen, userEvent } from '@/test/render'
 import { BlockEditForm } from './BlockEditForm'
 import type { CheckIssue } from './useBlockEditForm'
 
-const block = { id: 'b-1', title: 'Test block', body: 'initial body' }
+const block = { id: 'b-1', title: 'Test block', body: 'initial body', order: 3 }
 
 function mockSafetyCheck(response: { ok: boolean; issues: CheckIssue[] }) {
   vi.stubGlobal(
@@ -38,7 +38,7 @@ describe('BlockEditForm', () => {
 
     await user.click(screen.getByRole('button', { name: /check & save/i }))
 
-    expect(onSave).toHaveBeenCalledWith({ body: 'initial body' })
+    expect(onSave).toHaveBeenCalledWith({ body: 'initial body', order: 3 })
     expect(onSave).toHaveBeenCalledTimes(1)
   })
 
@@ -71,7 +71,7 @@ describe('BlockEditForm', () => {
 
     await user.click(screen.getByRole('button', { name: /save anyway/i }))
 
-    expect(onSaveAnyway).toHaveBeenCalledWith({ body: 'initial body' })
+    expect(onSaveAnyway).toHaveBeenCalledWith({ body: 'initial body', order: 3 })
   })
 
   it('remove offending — AC7(c): strips text from textarea, removes issue from UI', async () => {
@@ -95,8 +95,12 @@ describe('BlockEditForm', () => {
 
     await user.click(screen.getByRole('button', { name: /^remove$/i }))
 
-    // Textarea value updated to reflect the strip
-    expect(screen.getByRole('textbox')).toHaveValue('body')
+    // Textarea value updated to reflect the strip. Disambiguate from
+    // the Order NumberInput (also `role="textbox"` after Step 12) via
+    // the body Textarea's aria-label.
+    expect(
+      screen.getByRole('textbox', { name: /edit body for test block/i }),
+    ).toHaveValue('body')
     // Issue was the only one — Alert disappears
     expect(screen.queryByText(/safety check flagged/i)).not.toBeInTheDocument()
   })

@@ -25,6 +25,7 @@ import { BlocksToolbar } from '@/components/admin/content/BlocksToolbar'
 import { useBlocksFilters } from '@/components/admin/content/useBlocksFilters'
 import type { BlockType } from '@/lib/blockTypes'
 import { isOrdered } from '@/lib/blockOrder'
+import { tokensFor } from '@/lib/tokenize'
 
 type BlockStatus = 'active' | 'disabled' | 'deleted'
 
@@ -37,13 +38,34 @@ export interface BlockRow {
   is_default: boolean
   order: number | null
   created_at: string
+  updated_at: string
   topics: { name: string } | null
+  author: { name: string } | null
+}
+
+// Shape of the bare block row returned by POST /api/admin/blocks/duplicate.
+// Step 16's endpoint matches POST /save's `.select()` posture — no joins —
+// so the UI synthesizes `topics: null` and `author: null` when prepending
+// the new row to local state. Neither field is rendered on the row after
+// Step 11 (Topic dropped) or Step 14 (Author display deferred), so null
+// is visually correct. They populate on the next page-level refresh.
+type DuplicateResponse = {
+  id: string
+  title: string
+  type: string
+  body: string
+  status: BlockStatus
+  is_default: boolean
+  order: number | null
+  created_at: string
+  updated_at: string
 }
 
 export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const [items, setItems] = useState<BlockRow[]>(rows)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -163,63 +185,6 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     }
   }
 
-  async function handleOrderBlur(
-    id: string,
-    oldValue: number | null,
-    nextValue: number | null,
-  ): Promise<boolean> {
-    console.log('[BlocksTable] order blur:', { id, oldValue, nextValue })
-    if (nextValue === null || !Number.isFinite(nextValue) || !Number.isInteger(nextValue)) {
-      console.log('[BlocksTable] order blur skipped — invalid value:', { id, nextValue })
-      return false
-    }
-    if (nextValue === oldValue) {
-      console.log('[BlocksTable] order blur skipped — no change:', { id, value: nextValue })
-      return true
-    }
-
-    const current = items.find(b => b.id === id)
-    if (!current) {
-      console.error('[BlocksTable] order blur — block not found in state:', { id })
-      return false
-    }
-
-    // Only run the uniqueness check when the user is setting a meaningful
-    // ordinal. 0 and null are "unset" (see src/lib/blockOrder.ts) and
-    // multiple blocks of the same type can legitimately share them.
-    const conflict = isOrdered(nextValue)
-      ? items.find(
-          b => b.id !== id && b.type === current.type && b.order === nextValue,
-        )
-      : null
-    console.log('[BlocksTable] order duplicate check:', {
-      id,
-      type: current.type,
-      nextValue,
-      hasConflict: Boolean(conflict),
-      conflictTitle: conflict?.title ?? null,
-      conflictId: conflict?.id ?? null,
-    })
-    if (conflict) {
-      notifications.show({
-        color: 'red',
-        title: 'Duplicate order number',
-        message: `Order number already used by ${conflict.title} in this type. Please choose a different number.`,
-      })
-      return false
-    }
-
-    console.log('[BlocksTable] order PATCH dispatch:', { id, oldValue, newValue: nextValue })
-    const ok = await patchBlock(id, { order: nextValue })
-    if (ok) {
-      console.log('[BlocksTable] order PATCH success:', { id, oldValue, newValue: nextValue })
-      setItems(prev => prev.map(b => (b.id === id ? { ...b, order: nextValue } : b)))
-      return true
-    }
-    console.error('[BlocksTable] order PATCH failure:', { id, oldValue, newValue: nextValue })
-    return false
-  }
-
   async function handleStatusChange(id: string, value: string | null) {
     if (value !== 'active' && value !== 'disabled') return
     setSavingId(id)
@@ -238,29 +203,130 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     setEditingId(null)
   }
 
+  // POST /api/admin/blocks/duplicate, prepend the response to items.
+  // Response-driven (not optimistic) — single round-trip, the new row
+  // is small and the API is fast enough that local-mutate-on-200 is
+  // simpler than reconciling an optimistic insert. The endpoint
+  // returns the bare block (no joined topics/author per Step 16); UI
+  // synthesizes null for those — they're not rendered on the row.
+  async function handleDuplicate(id: string) {
+    console.log('[BlocksTable] duplicate dispatch:', { id })
+    setDuplicatingId(id)
+    try {
+      const res = await fetch('/api/admin/blocks/duplicate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_id: id }),
+      })
+      if (!res.ok) {
+        console.error('[BlocksTable] duplicate failed:', { id, status: res.status })
+        throw new Error('Duplicate failed')
+      }
+      const data = (await res.json()) as DuplicateResponse
+      const newRow: BlockRow = { ...data, topics: null, author: null }
+      console.log('[BlocksTable] duplicate success:', { sourceId: id, newId: newRow.id })
+      setItems(prev => [newRow, ...prev])
+    } catch (err) {
+      console.error('[BlocksTable] duplicate error:', err)
+      notifications.show({
+        color: 'red',
+        title: 'Duplicate failed',
+        message: 'Could not duplicate this block. Try again.',
+      })
+    } finally {
+      setDuplicatingId(null)
+    }
+  }
+
   // Shared PATCH logic for both save paths from BlockEditForm's hook.
-  // Throws on failure so the hook's try/catch logs it as a failure
-  // rather than a silent success (useBlockEditForm awaits this callback
-  // and treats a resolved promise as "saved ok").
-  async function persistBody(body: string): Promise<void> {
+  // Atomic: body and order persist together in a single PATCH (Step 12
+  // of PR 2 — moved here from the inline NumberInput's onBlur path).
+  // Runs the per-type duplicate-order check before dispatch; on
+  // conflict, fires a red Mantine notification and throws so the
+  // form treats it as a failure (drawer stays open, user can fix).
+  // Throws on PATCH failure too — useBlockEditForm awaits this
+  // callback and treats a resolved promise as "saved ok".
+  async function persistEdit({
+    body,
+    order,
+  }: {
+    body: string
+    order: number | null
+  }): Promise<void> {
     if (!editingId) return
-    console.log('[BlocksTable] body PATCH dispatch:', { id: editingId })
-    const ok = await patchBlock(editingId, { body })
+
+    const current = items.find(b => b.id === editingId)
+    if (!current) {
+      console.error('[BlocksTable] persistEdit — block not found in state:', { id: editingId })
+      throw new Error('Block not found')
+    }
+
+    // Only run the uniqueness check when the user is setting a meaningful
+    // ordinal. 0 and null are "unset" (see src/lib/blockOrder.ts) and
+    // multiple blocks of the same type can legitimately share them.
+    const orderChanged = order !== current.order
+    const conflict =
+      orderChanged && isOrdered(order)
+        ? items.find(
+            b => b.id !== editingId && b.type === current.type && b.order === order,
+          )
+        : null
+    console.log('[BlocksTable] persistEdit duplicate check:', {
+      id: editingId,
+      type: current.type,
+      nextOrder: order,
+      orderChanged,
+      hasConflict: Boolean(conflict),
+      conflictTitle: conflict?.title ?? null,
+      conflictId: conflict?.id ?? null,
+    })
+    if (conflict) {
+      notifications.show({
+        color: 'red',
+        title: 'Duplicate order number',
+        message: `Order number already used by ${conflict.title} in this type. Please choose a different number.`,
+      })
+      throw new Error('Duplicate order number')
+    }
+
+    // Send only the fields that actually changed. The PATCH route
+    // requires at least one update, so we always send body (it's the
+    // dominant field; the form's primary purpose is body editing).
+    //
+    // Clearing order to null is intentionally a no-op against the API
+    // — the PATCH route accepts integer order only, matching the
+    // inline NumberInput's prior behavior (null was treated as
+    // "invalid, skip"). To avoid local-state desync, we only flip the
+    // local order when we actually sent the change.
+    const willSendOrder = orderChanged && order !== null
+    const updates: { body: string; order?: number } = { body }
+    if (willSendOrder) {
+      updates.order = order
+    }
+
+    console.log('[BlocksTable] persistEdit PATCH dispatch:', { id: editingId, willSendOrder })
+    const ok = await patchBlock(editingId, updates)
     if (!ok) {
-      console.error('[BlocksTable] body PATCH failed:', { id: editingId })
+      console.error('[BlocksTable] persistEdit PATCH failed:', { id: editingId })
       throw new Error('Save failed')
     }
-    console.log('[BlocksTable] body PATCH success:', { id: editingId })
-    setItems(prev => prev.map(b => (b.id === editingId ? { ...b, body } : b)))
+    console.log('[BlocksTable] persistEdit PATCH success:', { id: editingId })
+    setItems(prev =>
+      prev.map(b =>
+        b.id === editingId
+          ? { ...b, body, order: willSendOrder ? order : b.order }
+          : b,
+      ),
+    )
     setEditingId(null)
   }
 
-  async function handleFormSave({ body }: { body: string }) {
-    await persistBody(body)
+  async function handleFormSave({ body, order }: { body: string; order: number | null }) {
+    await persistEdit({ body, order })
   }
 
-  async function handleFormSaveAnyway({ body }: { body: string }) {
-    await persistBody(body)
+  async function handleFormSaveAnyway({ body, order }: { body: string; order: number | null }) {
+    await persistEdit({ body, order })
   }
 
   async function handleConfirmDelete() {
@@ -298,6 +364,16 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     }
     return true
   })
+
+  // Bar-width normalization for the per-row Tokens column (Step 13 of
+  // PR 2). Bars are sized relative to the heaviest currently-visible
+  // block, not the 8000-token budget — the page-level meter already
+  // covers absolute budget. Single pass over `filtered`; cheap enough
+  // at typical scale (~50 rows) that no useMemo is needed. Falls back
+  // to 0 when nothing is visible to avoid divide-by-zero downstream.
+  const maxVisibleTokens = filtered.length > 0
+    ? Math.max(0, ...filtered.map(b => tokensFor(b.body)))
+    : 0
 
   // Select-all is scoped to the currently-visible (filtered) set.
   // Bulk actions still operate on all selectedIds — so selections
@@ -361,8 +437,14 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
 
       {items.length > 0 && (
         <>
-          {/* Desktop/tablet filter toolbar — mobile gets its own UX in PR 4. */}
-          <Box visibleFrom="md" mb="md">
+          {/* Filter toolbar — visible at all viewports. The original PR 1
+              design gated this with visibleFrom="md" pending a separate
+              mobile filter UX (overlay + chip row) planned for the
+              originally-scoped PR 4. That PR 4 was cancelled when the
+              redesign rescoped to page rework, so the gate is removed.
+              Step 9 of the rework swaps the SegmentedControls for
+              Chip.Group, which wraps cleanly at narrow viewports. */}
+          <Box mb="md">
             <BlocksToolbar
               query={query}
               onQueryChange={setQuery}
@@ -408,8 +490,8 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                   <Table.Th style={{ width: 28 }} aria-hidden />
                   <Table.Th>Title</Table.Th>
                   <Table.Th>Type</Table.Th>
-                  <Table.Th>Topic</Table.Th>
-                  <Table.Th style={{ width: 90 }}>Order</Table.Th>
+                  <Table.Th>Tokens</Table.Th>
+                  <Table.Th>Status</Table.Th>
                   <Table.Th>Actions</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -419,12 +501,14 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                     key={block.id}
                     block={{ ...block, type: block.type as BlockType }}
                     selected={selectedIds.has(block.id)}
-                    isSaving={savingId === block.id}
+                    isSaving={savingId === block.id || duplicatingId === block.id}
                     isExpanded={expandedIds.has(block.id)}
+                    maxVisibleTokens={maxVisibleTokens}
+                    highlight={query}
                     onToggleSelect={toggleSelect}
                     onToggleStatus={handleStatusChange}
-                    onOrderCommit={handleOrderBlur}
                     onEdit={handleEdit}
+                    onDuplicate={handleDuplicate}
                     onDelete={setDeleteTargetId}
                     onToggleExpand={toggleExpand}
                   />
@@ -440,11 +524,13 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                 key={block.id}
                 block={{ ...block, type: block.type as BlockType }}
                 selected={selectedIds.has(block.id)}
-                isSaving={savingId === block.id}
+                isSaving={savingId === block.id || duplicatingId === block.id}
+                maxVisibleTokens={maxVisibleTokens}
+                highlight={query}
                 onToggleSelect={toggleSelect}
                 onToggleStatus={handleStatusChange}
-                onOrderCommit={handleOrderBlur}
                 onOpenEdit={handleEdit}
+                onDuplicate={handleDuplicate}
                 onDelete={setDeleteTargetId}
               />
             ))}
@@ -466,6 +552,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
               id: editingBlock.id,
               title: editingBlock.title,
               body: editingBlock.body,
+              order: editingBlock.order,
             }}
             onSave={handleFormSave}
             onSaveAnyway={handleFormSaveAnyway}
