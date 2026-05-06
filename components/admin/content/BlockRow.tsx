@@ -11,7 +11,7 @@ import {
   Switch,
   Table,
 } from '@mantine/core'
-import { IconChevronRight, IconPencil, IconTrash } from '@tabler/icons-react'
+import { IconChevronRight, IconCopy, IconPencil, IconTrash } from '@tabler/icons-react'
 import { Text } from '@/components/admin/primitives/Text'
 import {
   TYPE_COLORS,
@@ -98,6 +98,7 @@ export interface BlockRowProps {
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
   onEdit: (blockId: string) => void
+  onDuplicate: (blockId: string) => void
   onDelete: (blockId: string) => void
   onToggleExpand?: (blockId: string) => void
 }
@@ -125,6 +126,7 @@ export function BlockRow({
   onToggleSelect,
   onToggleStatus,
   onEdit,
+  onDuplicate,
   onDelete,
   onToggleExpand,
 }: BlockRowProps) {
@@ -143,6 +145,11 @@ export function BlockRow({
   function handleEdit() {
     console.log('[BlockRow] edit', { blockId: block.id })
     onEdit(block.id)
+  }
+
+  function handleDuplicate() {
+    console.log('[BlockRow] duplicate', { blockId: block.id })
+    onDuplicate(block.id)
   }
 
   function handleDelete() {
@@ -287,6 +294,16 @@ export function BlockRow({
             aria-label="Edit block"
           >
             <IconPencil size={16} />
+          </ActionIcon>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="md"
+            onClick={handleDuplicate}
+            disabled={isSaving}
+            aria-label="Duplicate block"
+          >
+            <IconCopy size={16} />
           </ActionIcon>
           <ActionIcon
             variant="subtle"

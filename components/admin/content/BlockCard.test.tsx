@@ -23,6 +23,7 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
       onToggleSelect={vi.fn()}
       onToggleStatus={vi.fn()}
       onOpenEdit={vi.fn()}
+      onDuplicate={vi.fn()}
       onDelete={vi.fn()}
       {...overrides}
     />,
@@ -69,6 +70,16 @@ describe('BlockCard', () => {
     renderCard({ onOpenEdit, onDelete })
     await user.click(screen.getByRole('button', { name: /delete block/i }))
     expect(onDelete).toHaveBeenCalledWith('b-1')
+    expect(onOpenEdit).not.toHaveBeenCalled()
+  })
+
+  it('tapping the Duplicate icon does NOT bubble to onOpenEdit', async () => {
+    const user = userEvent.setup()
+    const onOpenEdit = vi.fn()
+    const onDuplicate = vi.fn()
+    renderCard({ onOpenEdit, onDuplicate })
+    await user.click(screen.getByRole('button', { name: /duplicate block/i }))
+    expect(onDuplicate).toHaveBeenCalledWith('b-1')
     expect(onOpenEdit).not.toHaveBeenCalled()
   })
 

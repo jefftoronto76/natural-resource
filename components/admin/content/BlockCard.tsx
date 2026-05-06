@@ -11,7 +11,7 @@ import {
   Stack,
   Switch,
 } from '@mantine/core'
-import { IconTrash } from '@tabler/icons-react'
+import { IconCopy, IconTrash } from '@tabler/icons-react'
 import { Text } from '@/components/admin/primitives/Text'
 import {
   TYPE_COLORS,
@@ -37,6 +37,7 @@ export interface BlockCardProps {
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
   onOpenEdit: (blockId: string) => void
+  onDuplicate: (blockId: string) => void
   onDelete: (blockId: string) => void
 }
 
@@ -72,6 +73,7 @@ export function BlockCard({
   onToggleSelect,
   onToggleStatus,
   onOpenEdit,
+  onDuplicate,
   onDelete,
 }: BlockCardProps) {
   const tokens = tokensFor(block.body)
@@ -96,6 +98,12 @@ export function BlockCard({
       e.preventDefault()
       handleTapBody()
     }
+  }
+
+  function handleDuplicate(e: MouseEvent) {
+    e.stopPropagation()
+    console.log('[BlockCard] duplicate', { blockId: block.id })
+    onDuplicate(block.id)
   }
 
   function handleDelete(e: MouseEvent) {
@@ -249,8 +257,18 @@ export function BlockCard({
           />
         </Group>
 
-        {/* Actions */}
+        {/* Actions — Duplicate (non-destructive) before Delete (destructive) */}
         <Group justify="flex-end">
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="lg"
+            onClick={handleDuplicate}
+            disabled={isSaving}
+            aria-label="Duplicate block"
+          >
+            <IconCopy size={18} />
+          </ActionIcon>
           <ActionIcon
             variant="subtle"
             color="red"

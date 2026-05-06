@@ -43,10 +43,29 @@ export interface BlockRow {
   author: { name: string } | null
 }
 
+// Shape of the bare block row returned by POST /api/admin/blocks/duplicate.
+// Step 16's endpoint matches POST /save's `.select()` posture — no joins —
+// so the UI synthesizes `topics: null` and `author: null` when prepending
+// the new row to local state. Neither field is rendered on the row after
+// Step 11 (Topic dropped) or Step 14 (Author display deferred), so null
+// is visually correct. They populate on the next page-level refresh.
+type DuplicateResponse = {
+  id: string
+  title: string
+  type: string
+  body: string
+  status: BlockStatus
+  is_default: boolean
+  order: number | null
+  created_at: string
+  updated_at: string
+}
+
 export function BlocksTable({ rows }: { rows: BlockRow[] }) {
   const [items, setItems] = useState<BlockRow[]>(rows)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -182,6 +201,41 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
 
   function handleCancelEdit() {
     setEditingId(null)
+  }
+
+  // POST /api/admin/blocks/duplicate, prepend the response to items.
+  // Response-driven (not optimistic) — single round-trip, the new row
+  // is small and the API is fast enough that local-mutate-on-200 is
+  // simpler than reconciling an optimistic insert. The endpoint
+  // returns the bare block (no joined topics/author per Step 16); UI
+  // synthesizes null for those — they're not rendered on the row.
+  async function handleDuplicate(id: string) {
+    console.log('[BlocksTable] duplicate dispatch:', { id })
+    setDuplicatingId(id)
+    try {
+      const res = await fetch('/api/admin/blocks/duplicate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_id: id }),
+      })
+      if (!res.ok) {
+        console.error('[BlocksTable] duplicate failed:', { id, status: res.status })
+        throw new Error('Duplicate failed')
+      }
+      const data = (await res.json()) as DuplicateResponse
+      const newRow: BlockRow = { ...data, topics: null, author: null }
+      console.log('[BlocksTable] duplicate success:', { sourceId: id, newId: newRow.id })
+      setItems(prev => [newRow, ...prev])
+    } catch (err) {
+      console.error('[BlocksTable] duplicate error:', err)
+      notifications.show({
+        color: 'red',
+        title: 'Duplicate failed',
+        message: 'Could not duplicate this block. Try again.',
+      })
+    } finally {
+      setDuplicatingId(null)
+    }
   }
 
   // Shared PATCH logic for both save paths from BlockEditForm's hook.
@@ -447,12 +501,13 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                     key={block.id}
                     block={{ ...block, type: block.type as BlockType }}
                     selected={selectedIds.has(block.id)}
-                    isSaving={savingId === block.id}
+                    isSaving={savingId === block.id || duplicatingId === block.id}
                     isExpanded={expandedIds.has(block.id)}
                     maxVisibleTokens={maxVisibleTokens}
                     onToggleSelect={toggleSelect}
                     onToggleStatus={handleStatusChange}
                     onEdit={handleEdit}
+                    onDuplicate={handleDuplicate}
                     onDelete={setDeleteTargetId}
                     onToggleExpand={toggleExpand}
                   />
@@ -468,11 +523,12 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                 key={block.id}
                 block={{ ...block, type: block.type as BlockType }}
                 selected={selectedIds.has(block.id)}
-                isSaving={savingId === block.id}
+                isSaving={savingId === block.id || duplicatingId === block.id}
                 maxVisibleTokens={maxVisibleTokens}
                 onToggleSelect={toggleSelect}
                 onToggleStatus={handleStatusChange}
                 onOpenEdit={handleEdit}
+                onDuplicate={handleDuplicate}
                 onDelete={setDeleteTargetId}
               />
             ))}
