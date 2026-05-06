@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Group, Select, Stack, Textarea, TextInput } from '@mantine/core'
+import { Button, Group, NumberInput, Select, Stack, Textarea, TextInput } from '@mantine/core'
 import { SafetyCheckAlert } from './SafetyCheckAlert'
 import {
   useBlockEditForm,
@@ -29,12 +29,17 @@ export interface NewBlockDraft {
   topic_id: string
 }
 
+export interface EditBlockDraft {
+  body: string
+  order: number | null
+}
+
 type EditModeProps = {
   mode?: 'edit'
   block: BlockEditFormBlock
   topics?: undefined
-  onSave: (draft: { body: string }) => Promise<void>
-  onSaveAnyway: (draft: { body: string }) => Promise<void>
+  onSave: (draft: EditBlockDraft) => Promise<void>
+  onSaveAnyway: (draft: EditBlockDraft) => Promise<void>
   onCancel: () => void
 }
 
@@ -54,6 +59,17 @@ export type BlockEditFormProps = EditModeProps | NewModeProps
 const TYPE_SELECT_DATA = [...BLOCK_TYPES]
   .sort((a, b) => TYPE_COMPILE_ORDER[a] - TYPE_COMPILE_ORDER[b])
   .map(t => ({ value: t, label: TYPE_LABELS[t] }))
+
+// Mantine NumberInput onChange yields `string | number`. Empty / dash /
+// non-integer mid-edit states all map to null ("unordered"); valid
+// integers pass through. Mirrors the parser the inline NumberInput
+// used pre-Step-12 in BlockRow / BlockCard.
+function parseOrderInput(value: string | number): number | null {
+  if (value === '' || value === '-') return null
+  const n = typeof value === 'number' ? value : Number(value)
+  if (!Number.isFinite(n) || !Number.isInteger(n)) return null
+  return n
+}
 
 interface FieldErrors {
   title?: string
@@ -92,9 +108,18 @@ export function BlockEditForm(props: BlockEditFormProps) {
   const [topicId, setTopicId] = useState('')
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
-  // Bridge the parent's wider new-mode callback through to the hook's
-  // narrower body-only signature, adding title/type/topic_id from
-  // local state at dispatch time.
+  // 'edit' mode local state for the Order field — seeded from the
+  // existing block's order. Empty string is the "unordered" / cleared
+  // state, mirroring the value Mantine NumberInput emits when blank.
+  const [order, setOrder] = useState<string | number>(
+    props.mode !== 'new' ? props.block.order ?? '' : '',
+  )
+
+  // Bridge the parent's wider mode-specific callbacks through the
+  // hook's narrower body-only signature.
+  // - 'new' mode adds title/type/topic_id from local state.
+  // - 'edit' mode adds the parsed order value (single atomic PATCH —
+  //   body and order save together; see Step 12 of PR 2).
   const hookCallbacks = isNew
     ? {
         onSave: async ({ body }: { body: string }) => {
@@ -115,8 +140,18 @@ export function BlockEditForm(props: BlockEditFormProps) {
         },
       }
     : {
-        onSave: (props as EditModeProps).onSave,
-        onSaveAnyway: (props as EditModeProps).onSaveAnyway,
+        onSave: async ({ body }: { body: string }) => {
+          await (props as EditModeProps).onSave({
+            body,
+            order: parseOrderInput(order),
+          })
+        },
+        onSaveAnyway: async ({ body }: { body: string }) => {
+          await (props as EditModeProps).onSaveAnyway({
+            body,
+            order: parseOrderInput(order),
+          })
+        },
       }
 
   const hookBlock = isNew ? null : (props as EditModeProps).block
@@ -241,6 +276,20 @@ export function BlockEditForm(props: BlockEditFormProps) {
             : `Edit body for ${(props as EditModeProps).block.title}`
         }
       />
+      {!isNew && (
+        <NumberInput
+          label="Order"
+          description="Leave blank for unordered (sorts after numbered blocks of the same type)."
+          placeholder="Auto"
+          value={order}
+          onChange={setOrder}
+          hideControls
+          allowDecimal={false}
+          size="sm"
+          w={140}
+          disabled={busy}
+        />
+      )}
       <SafetyCheckAlert
         issues={issues}
         onRemoveOffending={onRemoveOffending}

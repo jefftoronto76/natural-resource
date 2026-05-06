@@ -21,7 +21,6 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
       selected={false}
       onToggleSelect={vi.fn()}
       onToggleStatus={vi.fn()}
-      onOrderCommit={vi.fn().mockResolvedValue(true)}
       onOpenEdit={vi.fn()}
       onDelete={vi.fn()}
       {...overrides}
@@ -30,11 +29,12 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
 }
 
 describe('BlockCard', () => {
-  it('renders title, type badge, and order value', () => {
+  it('renders title, type badge, and zero-padded order prefix', () => {
     renderCard()
     expect(screen.getByText('Test block title')).toBeInTheDocument()
     expect(screen.getByText(/GUARDRAIL \(1st\)/)).toBeInTheDocument()
-    expect(screen.getByRole('textbox', { name: 'Order' })).toHaveValue('3')
+    // Order=3 → "03" prefix rendered ahead of the title in the same paragraph.
+    expect(screen.getByText('03')).toBeInTheDocument()
   })
 
   it('tapping the card body calls onOpenEdit', async () => {
@@ -77,16 +77,4 @@ describe('BlockCard', () => {
     expect(onOpenEdit).not.toHaveBeenCalled()
   })
 
-  it('order commit success: calls onOrderCommit with from/to values on blur', async () => {
-    const user = userEvent.setup()
-    const onOrderCommit = vi.fn().mockResolvedValue(true)
-    renderCard({ onOrderCommit })
-
-    const input = screen.getByRole('textbox', { name: 'Order' })
-    await user.clear(input)
-    await user.type(input, '7')
-    await user.tab()
-
-    expect(onOrderCommit).toHaveBeenCalledWith('b-1', 3, 7)
-  })
 })

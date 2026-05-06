@@ -1,13 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import {
   ActionIcon,
   Badge,
   Button,
   Checkbox,
   Group,
-  NumberInput,
   Stack,
   Switch,
   Table,
@@ -19,9 +17,10 @@ import {
   formatTypeBadgeLabel,
   type BlockType,
 } from '@/lib/blockTypes'
+import { orderPrefix } from '@/lib/blockOrder'
 
 const PREVIEW_LINE_LIMIT = 8
-const COLUMN_COUNT = 7 // checkbox · chevron · title · type · order · status · actions
+const COLUMN_COUNT = 6 // checkbox · chevron · title · type · status · actions
 
 function BlockPreviewRow({
   body,
@@ -88,11 +87,6 @@ export interface BlockRowProps {
   isExpanded?: boolean
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
-  onOrderCommit: (
-    blockId: string,
-    oldValue: number | null,
-    nextValue: number | null,
-  ) => Promise<boolean>
   onEdit: (blockId: string) => void
   onDelete: (blockId: string) => void
   onToggleExpand?: (blockId: string) => void
@@ -100,17 +94,17 @@ export interface BlockRowProps {
 
 /**
  * Desktop-only table row for a single block. Owns no API calls — all
- * mutations dispatch via callbacks. The NumberInput uses local state
- * so invalid-but-rejected values can revert cleanly. Feedback for
- * rejected commits (e.g. duplicate order) is surfaced by the parent
- * via a toast, not an inline error on this row — matches today's
- * main behavior.
+ * mutations dispatch via callbacks.
  *
- * No drag handle — Phase 1 ordering is NumberInput-only per D1.
+ * Title cell carries an order-prefix span ("01", "02", …) for ordered
+ * blocks; unordered blocks reserve the gutter via a 2ch-wide empty
+ * span so titles stay vertically aligned across the table.
  *
- * Step 10: skeleton — no inline preview yet. The expand chevron is a
- * placeholder; body preview lands in Step 11 alongside an expanded
- * sibling row rendered by the parent.
+ * Order edit lives in the drawer/sheet form (Step 12 of PR 2) — there
+ * is no inline NumberInput on the row anymore. Feedback for rejected
+ * commits (duplicate order in the same type) is surfaced by the
+ * parent via a Mantine notification, raised from the form's save
+ * path.
  */
 export function BlockRow({
   block,
@@ -119,52 +113,10 @@ export function BlockRow({
   isExpanded = false,
   onToggleSelect,
   onToggleStatus,
-  onOrderCommit,
   onEdit,
   onDelete,
   onToggleExpand,
 }: BlockRowProps) {
-  const [localOrder, setLocalOrder] = useState<string | number>(
-    block.order ?? '',
-  )
-
-  // Server value changed (commit succeeded, external update) — sync
-  // local input state.
-  useEffect(() => {
-    setLocalOrder(block.order ?? '')
-  }, [block.order])
-
-  async function handleOrderBlur() {
-    const parsed =
-      typeof localOrder === 'number'
-        ? localOrder
-        : localOrder === '' || localOrder === '-'
-          ? null
-          : Number(localOrder)
-    const next =
-      parsed === null || Number.isNaN(parsed) ? null : parsed
-
-    const ok = await onOrderCommit(block.id, block.order, next)
-    if (ok) {
-      console.log('[BlockRow] order commit success', {
-        blockId: block.id,
-        from: block.order,
-        to: next,
-      })
-    } else {
-      console.log('[BlockRow] order commit rejected', {
-        blockId: block.id,
-        attempted: next,
-        from: block.order,
-      })
-      setLocalOrder(block.order ?? '')
-    }
-  }
-
-  function handleOrderChange(v: string | number) {
-    setLocalOrder(v)
-  }
-
   function handleStatusToggle(checked: boolean) {
     const nextStatus = checked ? 'active' : 'disabled'
     console.log('[BlockRow] status toggle', {
@@ -213,7 +165,22 @@ export function BlockRow({
         </ActionIcon>
       </Table.Td>
       <Table.Td>
-        <Text variant="label">{block.title}</Text>
+        <Text variant="label">
+          <span
+            aria-hidden
+            style={{
+              fontFamily: 'var(--mantine-font-family-monospace)',
+              fontSize: 'var(--mantine-font-size-xs)',
+              color: 'var(--mantine-color-dimmed)',
+              display: 'inline-block',
+              width: '2ch',
+              marginRight: 8,
+            }}
+          >
+            {orderPrefix(block.order)}
+          </span>
+          {block.title}
+        </Text>
       </Table.Td>
       <Table.Td>
         <Badge
@@ -224,18 +191,6 @@ export function BlockRow({
         >
           {formatTypeBadgeLabel(block.type)}
         </Badge>
-      </Table.Td>
-      <Table.Td style={{ width: 90 }}>
-        <NumberInput
-          value={localOrder}
-          onChange={handleOrderChange}
-          onBlur={handleOrderBlur}
-          hideControls
-          allowDecimal={false}
-          w={70}
-          size="xs"
-          aria-label="Order"
-        />
       </Table.Td>
       <Table.Td>
         <Switch

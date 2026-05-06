@@ -41,6 +41,13 @@ Each item is either polish, deferred refactor, or doc debt.
       function, four call sites, no logic risk — pure cosmetic
       cleanup.
 
+- [ ] **Auto-assign order on new block creation.** POST
+      /api/admin/blocks/save currently omits order, so new
+      blocks land at order=null. Modify route to look up
+      max(order) WHERE tenant_id=? AND type=? and insert
+      max+1. Small API change, deserves its own commit.
+      Step 12 deferred this to keep UI scope clean.
+
 ## Performance tracking
 
 - [ ] **First Load JS budget.** Step 6 baseline: 275 kB on

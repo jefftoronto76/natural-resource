@@ -4,6 +4,7 @@ export interface BlockEditFormBlock {
   id: string
   title: string
   body: string
+  order: number | null
 }
 
 export interface CheckIssue {

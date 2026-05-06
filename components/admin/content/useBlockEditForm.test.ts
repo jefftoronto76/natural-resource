@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useBlockEditForm, type CheckIssue } from './useBlockEditForm'
 
-const block = { id: 'b-1', title: 'Test block', body: 'initial body' }
+const block = { id: 'b-1', title: 'Test block', body: 'initial body', order: null }
 
 function mockFetchOnce(response: { ok: boolean; issues: CheckIssue[] }, httpOk = true) {
   vi.stubGlobal(
@@ -103,7 +103,7 @@ describe('useBlockEditForm', () => {
     mockFetchOnce({ ok: false, issues })
     const { result } = renderHook(() =>
       useBlockEditForm(
-        { id: 'b-1', title: 'Test', body: 'prefix remove me suffix' },
+        { id: 'b-1', title: 'Test', body: 'prefix remove me suffix', order: null },
         { onSave: vi.fn(), onSaveAnyway: vi.fn() },
       ),
     )

@@ -1,12 +1,11 @@
 'use client'
 
-import { useEffect, useState, type KeyboardEvent, type MouseEvent } from 'react'
+import { type KeyboardEvent, type MouseEvent } from 'react'
 import {
   ActionIcon,
   Badge,
   Checkbox,
   Group,
-  NumberInput,
   Paper,
   Stack,
   Switch,
@@ -17,6 +16,7 @@ import {
   TYPE_COLORS,
   formatTypeBadgeLabel,
 } from '@/lib/blockTypes'
+import { orderPrefix } from '@/lib/blockOrder'
 import type { BlockRowBlock } from './BlockRow'
 
 export type BlockCardBlock = BlockRowBlock
@@ -27,11 +27,6 @@ export interface BlockCardProps {
   isSaving?: boolean
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
-  onOrderCommit: (
-    blockId: string,
-    oldValue: number | null,
-    nextValue: number | null,
-  ) => Promise<boolean>
   onOpenEdit: (blockId: string) => void
   onDelete: (blockId: string) => void
 }
@@ -39,19 +34,22 @@ export interface BlockCardProps {
 /**
  * Mobile card for a single block. Own shape — not a mobile-ified row.
  * Information hierarchy:
- *   Primary   — checkbox · type badge · title · status Switch
- *   Dedicated — Order control (label + NumberInput), error stacked
- *               below the control (not inline-right)
- *   Actions   — Delete icon (Edit is implicit via tap-body)
+ *   Primary  — checkbox · type badge · order-prefix + title · status Switch
+ *   Actions  — Delete icon (Edit is implicit via tap-body)
+ *
+ * The "01" / "02" prefix on the title is monospace, muted, zero-padded
+ * to 2 digits — same convention as the desktop row. Unordered blocks
+ * (order = null / 0) render an empty 2ch gutter so titles stay
+ * vertically aligned across the card stack.
  *
  * Tap anywhere that's not an interactive control opens the edit
- * sheet. All interactive zones (checkbox, switch, order, delete)
- * stopPropagation to prevent the tap-body handler from firing.
+ * sheet. All interactive zones (checkbox, switch, delete) stopPropagation
+ * to prevent the tap-body handler from firing.
  *
  * No inline preview — Step 11's Fragment+sibling pattern doesn't
- * work in a card layout, so preview is dropped entirely on mobile
- * per the Step 12 constraints. Tapping the card routes to the edit
- * sheet which has the full body.
+ * work in a card layout, so preview is dropped entirely on mobile.
+ * Tapping the card routes to the edit sheet which has the full body
+ * and (Step 12) the editable Order field.
  *
  * Checkbox wrapper uses padding + negative margin to guarantee a
  * 44px tap target around Mantine's ~24px Checkbox without affecting
@@ -63,48 +61,9 @@ export function BlockCard({
   isSaving = false,
   onToggleSelect,
   onToggleStatus,
-  onOrderCommit,
   onOpenEdit,
   onDelete,
 }: BlockCardProps) {
-  const [localOrder, setLocalOrder] = useState<string | number>(
-    block.order ?? '',
-  )
-
-  useEffect(() => {
-    setLocalOrder(block.order ?? '')
-  }, [block.order])
-
-  async function handleOrderBlur() {
-    const parsed =
-      typeof localOrder === 'number'
-        ? localOrder
-        : localOrder === '' || localOrder === '-'
-          ? null
-          : Number(localOrder)
-    const next = parsed === null || Number.isNaN(parsed) ? null : parsed
-
-    const ok = await onOrderCommit(block.id, block.order, next)
-    if (ok) {
-      console.log('[BlockCard] order commit success', {
-        blockId: block.id,
-        from: block.order,
-        to: next,
-      })
-    } else {
-      console.log('[BlockCard] order commit rejected', {
-        blockId: block.id,
-        attempted: next,
-        from: block.order,
-      })
-      setLocalOrder(block.order ?? '')
-    }
-  }
-
-  function handleOrderChange(v: string | number) {
-    setLocalOrder(v)
-  }
-
   function handleStatusToggle(checked: boolean) {
     const nextStatus = checked ? 'active' : 'disabled'
     console.log('[BlockCard] status toggle', {
@@ -186,6 +145,20 @@ export function BlockCard({
                 whiteSpace: 'nowrap',
               }}
             >
+              <span
+                aria-hidden
+                style={{
+                  fontFamily: 'var(--mantine-font-family-monospace)',
+                  fontSize: 'var(--mantine-font-size-xs)',
+                  color: 'var(--mantine-color-dimmed)',
+                  display: 'inline-block',
+                  width: '2ch',
+                  marginRight: 8,
+                  flexShrink: 0,
+                }}
+              >
+                {orderPrefix(block.order)}
+              </span>
               {block.title}
             </Text>
           </Group>
@@ -202,21 +175,6 @@ export function BlockCard({
             />
           </div>
         </Group>
-
-        {/* Dedicated order control — stacked layout, error below */}
-        <Stack gap={4} onClick={stop}>
-          <Text variant="label">Order</Text>
-          <NumberInput
-            value={localOrder}
-            onChange={handleOrderChange}
-            onBlur={handleOrderBlur}
-            hideControls
-            allowDecimal={false}
-            size="sm"
-            w={100}
-            aria-label="Order"
-          />
-        </Stack>
 
         {/* Actions */}
         <Group justify="flex-end">
