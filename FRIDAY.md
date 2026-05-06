@@ -158,8 +158,8 @@ Not actioning during current step — re-evaluate after Step 9.
          textarea (custom component, not a small change)
       C. Show match-context snippets in the card itself when
          search is active (e.g., "...matched in body: ...keyword...")
-      Real design decision. Not a polish task. Resolve before
-      this PR merges.
+      Real design decision. Not a polish task. Resolve in
+      follow-up PR.
 
 ## Design decisions (continued)
 
@@ -174,7 +174,7 @@ Not actioning during current step — re-evaluate after Step 9.
       purely an editing concern surfaced in the expanded panel,
       (c) introduce a new question of whether row position is
       stable (filter changes shift it). Real design decision.
-      Resolve before merge or defer to a follow-up PR.
+      Resolve in follow-up PR.
 
 ## Theme-level changes
 
