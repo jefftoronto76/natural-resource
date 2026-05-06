@@ -19,72 +19,144 @@ import {
   formatTypeBadgeLabel,
   type BlockType,
 } from '@/lib/blockTypes'
-import { orderPrefix } from '@/lib/blockOrder'
+import { orderPrefix, isOrdered } from '@/lib/blockOrder'
 import { tokensFor } from '@/lib/tokenize'
 import { formatRelativeTime } from '@/lib/time'
 
 const PREVIEW_LINE_LIMIT = 8
 const COLUMN_COUNT = 7 // checkbox · chevron · title · type · tokens · status · actions
 
-function BlockPreviewRow({
-  body,
-  highlight,
-  onViewFull,
+// Metadata entry inside the right-hand panel of the expanded row.
+// Label-on-top muted/uppercase, value below. Mono toggle for numeric
+// fields (Tokens, Order). suppressHydrationWarning only used by the
+// Updated row whose value crosses bucket boundaries between SSR and
+// client hydration — see formatRelativeTime in src/lib/time.ts.
+function MetaItem({
+  label,
+  value,
+  mono = false,
+  hydrationSensitive = false,
 }: {
-  body: string
-  highlight: string
-  onViewFull: () => void
+  label: string
+  value: string
+  mono?: boolean
+  hydrationSensitive?: boolean
 }) {
-  const lines = body.split('\n')
+  return (
+    <Stack gap={2}>
+      <Text
+        variant="muted"
+        style={{
+          fontSize: 'var(--mantine-font-size-xs)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}
+      >
+        {label}
+      </Text>
+      <Text
+        style={{
+          fontSize: 'var(--mantine-font-size-sm)',
+          fontFamily: mono
+            ? 'var(--mantine-font-family-monospace)'
+            : undefined,
+        }}
+        suppressHydrationWarning={hydrationSensitive}
+      >
+        {value}
+      </Text>
+    </Stack>
+  )
+}
+
+function ExpandedRowPanel({
+  block,
+  highlight,
+  onEdit,
+}: {
+  block: BlockRowBlock
+  highlight: string
+  onEdit: () => void
+}) {
+  const lines = block.body.split('\n')
   const preview = lines.slice(0, PREVIEW_LINE_LIMIT).join('\n')
   const hasMore = lines.length > PREVIEW_LINE_LIMIT
   const previewText = preview + (hasMore ? '\n…' : '')
+  const tokens = tokensFor(block.body)
 
   return (
-    <Stack gap="xs" p="sm">
-      {body ? (
-        <pre
+    <Group align="flex-start" wrap="nowrap" gap="xl" py="md">
+      {/* Left — block content + Edit button */}
+      <Stack gap="sm" style={{ flex: 1, minWidth: 0 }}>
+        <Text
+          variant="muted"
           style={{
-            fontFamily: 'var(--mantine-font-family-monospace)',
             fontSize: 'var(--mantine-font-size-xs)',
-            color: 'var(--mantine-color-dark-7)',
-            backgroundColor: 'var(--mantine-color-gray-0)',
-            padding: 'var(--mantine-spacing-sm)',
-            borderRadius: 'var(--mantine-radius-sm)',
-            margin: 0,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
           }}
         >
-          {/*
-            Step 18 — search highlighting. When a query is active,
-            wrap the preview in Mantine Highlight (rendered inline as
-            a span so the <pre>'s whitespace-preservation context
-            still applies through the child). Empty/whitespace query
-            short-circuits to the plain string to avoid the regex
-            machinery and reduce DOM noise.
-          */}
-          {highlight.trim() ? (
-            <Highlight component="span" highlight={highlight}>
-              {previewText}
-            </Highlight>
-          ) : (
-            previewText
-          )}
-        </pre>
-      ) : (
-        <Text variant="muted">(empty)</Text>
-      )}
-      <Button
-        variant="subtle"
-        color="gray"
-        size="xs"
-        onClick={onViewFull}
-        style={{ alignSelf: 'flex-start' }}
-      >
-        View full
-      </Button>
-    </Stack>
+          Block content
+        </Text>
+        {block.body ? (
+          <pre
+            style={{
+              fontFamily: 'var(--mantine-font-family-monospace)',
+              fontSize: 'var(--mantine-font-size-xs)',
+              color: 'var(--mantine-color-dark-7)',
+              backgroundColor: 'var(--mantine-color-gray-0)',
+              padding: 'var(--mantine-spacing-sm)',
+              borderRadius: 'var(--mantine-radius-sm)',
+              margin: 0,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
+            {/*
+              Step 18 — search highlighting. When a query is active,
+              wrap the preview in Mantine Highlight (rendered inline
+              as a span so the <pre>'s whitespace-preservation
+              context still applies through the child). Empty /
+              whitespace query short-circuits to the plain string.
+            */}
+            {highlight.trim() ? (
+              <Highlight component="span" highlight={highlight}>
+                {previewText}
+              </Highlight>
+            ) : (
+              previewText
+            )}
+          </pre>
+        ) : (
+          <Text variant="muted">(empty)</Text>
+        )}
+        <Button
+          variant="default"
+          size="sm"
+          leftSection={<IconPencil size={14} />}
+          onClick={onEdit}
+          style={{ alignSelf: 'flex-start' }}
+        >
+          Edit
+        </Button>
+      </Stack>
+
+      {/* Right — metadata panel */}
+      <Stack gap="md" w={220} style={{ flexShrink: 0 }}>
+        <MetaItem label="Tokens" value={tokens.toLocaleString()} mono />
+        <MetaItem label="Author" value={block.author?.name ?? '—'} />
+        <MetaItem
+          label="Updated"
+          value={formatRelativeTime(block.updated_at)}
+          hydrationSensitive
+        />
+        <MetaItem
+          label="Order"
+          value={isOrdered(block.order) ? String(block.order) : '—'}
+          mono
+        />
+      </Stack>
+    </Group>
   )
 }
 
@@ -359,11 +431,20 @@ export function BlockRow({
     </Table.Tr>
     {isExpanded && (
       <Table.Tr>
-        <Table.Td colSpan={COLUMN_COUNT}>
-          <BlockPreviewRow
-            body={block.body}
+        {/*
+          Two empty leading cells inherit the Checkbox + Chevron
+          column widths (40 + 28). The colSpan starts at column 3,
+          aligning the expanded panel content with the Title column
+          above. Cleaner than a magic-number paddingLeft on the
+          panel itself.
+        */}
+        <Table.Td />
+        <Table.Td />
+        <Table.Td colSpan={COLUMN_COUNT - 2}>
+          <ExpandedRowPanel
+            block={block}
             highlight={highlight}
-            onViewFull={handleEdit}
+            onEdit={handleEdit}
           />
         </Table.Td>
       </Table.Tr>
