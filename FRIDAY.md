@@ -142,3 +142,21 @@ Not actioning during current step — re-evaluate after Step 9.
       between Step 3 merge and Step 7 merge have NULL `updated_by`.
       Run a one-time backfill query if Step 14's author attribution
       shows missing data. Likely zero rows in production, but verify.
+
+## Design decisions
+
+- [ ] **Mobile search experience.** When a body matches but the
+      title doesn't, mobile users have no visual indicator of
+      why a card matched the query. Desktop has the expanded
+      row body preview which Step 18 highlights; mobile dropped
+      that surface in Step 11 and only has the edit sheet
+      (textarea — can't render <mark> tags inside an input).
+      Three approaches:
+      A. Add a read-only body preview to mobile cards (changes
+         card design, makes Step 18 highlights work consistently)
+      B. Build an overlay highlight system for the edit sheet
+         textarea (custom component, not a small change)
+      C. Show match-context snippets in the card itself when
+         search is active (e.g., "...matched in body: ...keyword...")
+      Real design decision. Not a polish task. Resolve before
+      this PR merges.

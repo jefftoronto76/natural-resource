@@ -6,6 +6,7 @@ import {
   Button,
   Checkbox,
   Group,
+  Highlight,
   Progress,
   Stack,
   Switch,
@@ -27,14 +28,17 @@ const COLUMN_COUNT = 7 // checkbox · chevron · title · type · tokens · stat
 
 function BlockPreviewRow({
   body,
+  highlight,
   onViewFull,
 }: {
   body: string
+  highlight: string
   onViewFull: () => void
 }) {
   const lines = body.split('\n')
   const preview = lines.slice(0, PREVIEW_LINE_LIMIT).join('\n')
   const hasMore = lines.length > PREVIEW_LINE_LIMIT
+  const previewText = preview + (hasMore ? '\n…' : '')
 
   return (
     <Stack gap="xs" p="sm">
@@ -52,8 +56,21 @@ function BlockPreviewRow({
             wordBreak: 'break-word',
           }}
         >
-          {preview}
-          {hasMore && '\n…'}
+          {/*
+            Step 18 — search highlighting. When a query is active,
+            wrap the preview in Mantine Highlight (rendered inline as
+            a span so the <pre>'s whitespace-preservation context
+            still applies through the child). Empty/whitespace query
+            short-circuits to the plain string to avoid the regex
+            machinery and reduce DOM noise.
+          */}
+          {highlight.trim() ? (
+            <Highlight component="span" highlight={highlight}>
+              {previewText}
+            </Highlight>
+          ) : (
+            previewText
+          )}
         </pre>
       ) : (
         <Text variant="muted">(empty)</Text>
@@ -95,6 +112,15 @@ export interface BlockRowProps {
    * parent and passed down so rows don't all re-iterate the visible set.
    */
   maxVisibleTokens: number
+  /**
+   * Active search query. When non-empty, the title and the expanded
+   * body preview wrap their text in Mantine `Highlight` so matches
+   * render with a yellow `<mark>` background. Empty / whitespace
+   * skips the regex machinery and renders plain text. Match
+   * semantics mirror useBlocksFilters' `hay.includes(q)` — single
+   * substring (phrase), not per-word.
+   */
+  highlight: string
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
   onEdit: (blockId: string) => void
@@ -123,6 +149,7 @@ export function BlockRow({
   isSaving = false,
   isExpanded = false,
   maxVisibleTokens,
+  highlight,
   onToggleSelect,
   onToggleStatus,
   onEdit,
@@ -201,7 +228,19 @@ export function BlockRow({
             >
               {orderPrefix(block.order)}
             </span>
-            {block.title}
+            {/*
+              Step 18 — search highlighting. Order prefix stays plain
+              so numeric queries don't tag the prefix digits; only the
+              title text is wrapped. Empty query short-circuits to
+              plain text.
+            */}
+            {highlight.trim() ? (
+              <Highlight component="span" highlight={highlight}>
+                {block.title}
+              </Highlight>
+            ) : (
+              block.title
+            )}
           </Text>
           {/*
             Relative timestamp under the title. Pure render-time
@@ -321,7 +360,11 @@ export function BlockRow({
     {isExpanded && (
       <Table.Tr>
         <Table.Td colSpan={COLUMN_COUNT}>
-          <BlockPreviewRow body={block.body} onViewFull={handleEdit} />
+          <BlockPreviewRow
+            body={block.body}
+            highlight={highlight}
+            onViewFull={handleEdit}
+          />
         </Table.Td>
       </Table.Tr>
     )}

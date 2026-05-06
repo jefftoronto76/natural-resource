@@ -20,6 +20,7 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
       block={block}
       selected={false}
       maxVisibleTokens={500}
+      highlight=""
       onToggleSelect={vi.fn()}
       onToggleStatus={vi.fn()}
       onOpenEdit={vi.fn()}
@@ -81,6 +82,20 @@ describe('BlockCard', () => {
     await user.click(screen.getByRole('button', { name: /duplicate block/i }))
     expect(onDuplicate).toHaveBeenCalledWith('b-1')
     expect(onOpenEdit).not.toHaveBeenCalled()
+  })
+
+  it('highlights matching substring in title when highlight prop is set (Step 18)', () => {
+    // Fixture title is "Test block title" — querying "block" should
+    // wrap that substring in a <mark> element via Mantine Highlight.
+    const { container } = renderCard({ highlight: 'block' })
+    const marks = container.querySelectorAll('mark')
+    expect(marks.length).toBeGreaterThan(0)
+    expect(marks[0].textContent?.toLowerCase()).toBe('block')
+  })
+
+  it('does not render <mark> elements when highlight is empty', () => {
+    const { container } = renderCard({ highlight: '' })
+    expect(container.querySelectorAll('mark').length).toBe(0)
   })
 
   it('tapping the Checkbox does NOT bubble to onOpenEdit', async () => {

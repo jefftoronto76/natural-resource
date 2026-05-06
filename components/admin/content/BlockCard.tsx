@@ -6,6 +6,7 @@ import {
   Badge,
   Checkbox,
   Group,
+  Highlight,
   Paper,
   Progress,
   Stack,
@@ -34,6 +35,15 @@ export interface BlockCardProps {
    * desktop Tokens column. Computed once at the parent and passed down.
    */
   maxVisibleTokens: number
+  /**
+   * Active search query. When non-empty, the title wraps in Mantine
+   * `Highlight` for the matching substring. Empty / whitespace skips
+   * the regex machinery and renders plain text. Body is NOT
+   * highlighted on mobile cards — there's no body preview surface
+   * here (Step 11 dropped it). Mobile body-match visibility is
+   * tracked as a design decision in FRIDAY.md.
+   */
+  highlight: string
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
   onOpenEdit: (blockId: string) => void
@@ -70,6 +80,7 @@ export function BlockCard({
   selected,
   isSaving = false,
   maxVisibleTokens,
+  highlight,
   onToggleSelect,
   onToggleStatus,
   onOpenEdit,
@@ -180,7 +191,19 @@ export function BlockCard({
                 >
                   {orderPrefix(block.order)}
                 </span>
-                {block.title}
+                {/*
+                  Step 18 — search highlighting. Same pattern as the
+                  desktop row: prefix stays plain so numeric queries
+                  don't tag the prefix digits, only the title text is
+                  wrapped. Empty query short-circuits to plain.
+                */}
+                {highlight.trim() ? (
+                  <Highlight component="span" highlight={highlight}>
+                    {block.title}
+                  </Highlight>
+                ) : (
+                  block.title
+                )}
               </Text>
               {/*
                 Relative timestamp under the title. Pure render-time

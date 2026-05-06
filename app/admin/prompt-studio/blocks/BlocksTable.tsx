@@ -504,6 +504,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                     isSaving={savingId === block.id || duplicatingId === block.id}
                     isExpanded={expandedIds.has(block.id)}
                     maxVisibleTokens={maxVisibleTokens}
+                    highlight={query}
                     onToggleSelect={toggleSelect}
                     onToggleStatus={handleStatusChange}
                     onEdit={handleEdit}
@@ -525,6 +526,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                 selected={selectedIds.has(block.id)}
                 isSaving={savingId === block.id || duplicatingId === block.id}
                 maxVisibleTokens={maxVisibleTokens}
+                highlight={query}
                 onToggleSelect={toggleSelect}
                 onToggleStatus={handleStatusChange}
                 onOpenEdit={handleEdit}
