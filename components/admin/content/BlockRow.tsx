@@ -21,7 +21,7 @@ import {
 } from '@/lib/blockTypes'
 
 const PREVIEW_LINE_LIMIT = 8
-const COLUMN_COUNT = 8 // checkbox · chevron · title · type · topic · order · status · actions
+const COLUMN_COUNT = 7 // checkbox · chevron · title · type · order · status · actions
 
 function BlockPreviewRow({
   body,
@@ -224,9 +224,6 @@ export function BlockRow({
         >
           {formatTypeBadgeLabel(block.type)}
         </Badge>
-      </Table.Td>
-      <Table.Td>
-        <Text variant="muted">{block.topics?.name ?? '—'}</Text>
       </Table.Td>
       <Table.Td style={{ width: 90 }}>
         <NumberInput

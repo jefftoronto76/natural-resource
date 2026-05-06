@@ -30,11 +30,10 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
 }
 
 describe('BlockCard', () => {
-  it('renders title, type badge, topic, and order value', () => {
+  it('renders title, type badge, and order value', () => {
     renderCard()
     expect(screen.getByText('Test block title')).toBeInTheDocument()
     expect(screen.getByText(/GUARDRAIL \(1st\)/)).toBeInTheDocument()
-    expect(screen.getByText('Voice & tone')).toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: 'Order' })).toHaveValue('3')
   })
 

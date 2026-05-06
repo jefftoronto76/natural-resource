@@ -40,7 +40,6 @@ export interface BlockCardProps {
  * Mobile card for a single block. Own shape — not a mobile-ified row.
  * Information hierarchy:
  *   Primary   — checkbox · type badge · title · status Switch
- *   Secondary — topic · type meta
  *   Dedicated — Order control (label + NumberInput), error stacked
  *               below the control (not inline-right)
  *   Actions   — Delete icon (Edit is implicit via tap-body)
@@ -203,9 +202,6 @@ export function BlockCard({
             />
           </div>
         </Group>
-
-        {/* Secondary meta */}
-        <Text variant="muted">{block.topics?.name ?? '—'}</Text>
 
         {/* Dedicated order control — stacked layout, error below */}
         <Stack gap={4} onClick={stop}>
