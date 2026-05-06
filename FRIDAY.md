@@ -99,6 +99,18 @@ Not actioning during current step — re-evaluate after Step 9.
       unknown — could be a debug artifact, stray FAB, or
       Mantine notification. Investigate before merging this PR.
 
+- [ ] **Stale Step 9 comment in BlocksTable.tsx:366-372** uses
+      forward-looking tense ("Step 9 of the rework swaps...")
+      now that Step 9 has shipped. Update to past tense during
+      the Friday comment pass.
+
+- [ ] **Chip check icon visual review.** Mantine v7 has no
+      clean `hideCheckIcon` prop for single-select Chip.Group.
+      If the six type chips with check icons feel noisy at
+      390px on Jeff's eyeball test, wire
+      `styles={{ iconWrapper: { display: 'none' } }}`.
+      If they look fine, no action.
+
 ## Verification protocol additions
 
 (populate as Steps 8–18 surface them)
