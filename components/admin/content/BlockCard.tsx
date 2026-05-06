@@ -19,6 +19,7 @@ import {
 } from '@/lib/blockTypes'
 import { orderPrefix } from '@/lib/blockOrder'
 import { tokensFor } from '@/lib/tokenize'
+import { formatRelativeTime } from '@/lib/time'
 import type { BlockRowBlock } from './BlockRow'
 
 export type BlockCardBlock = BlockRowBlock
@@ -147,32 +148,46 @@ export function BlockCard({
             >
               {formatTypeBadgeLabel(block.type)}
             </Badge>
-            <Text
-              variant="label"
-              style={{
-                flex: 1,
-                minWidth: 0,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <span
-                aria-hidden
+            <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
+              <Text
+                variant="label"
                 style={{
-                  fontFamily: 'var(--mantine-font-family-monospace)',
-                  fontSize: 'var(--mantine-font-size-xs)',
-                  color: 'var(--mantine-color-dimmed)',
-                  display: 'inline-block',
-                  width: '2ch',
-                  marginRight: 8,
-                  flexShrink: 0,
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                {orderPrefix(block.order)}
-              </span>
-              {block.title}
-            </Text>
+                <span
+                  aria-hidden
+                  style={{
+                    fontFamily: 'var(--mantine-font-family-monospace)',
+                    fontSize: 'var(--mantine-font-size-xs)',
+                    color: 'var(--mantine-color-dimmed)',
+                    display: 'inline-block',
+                    width: '2ch',
+                    marginRight: 8,
+                    flexShrink: 0,
+                  }}
+                >
+                  {orderPrefix(block.order)}
+                </span>
+                {block.title}
+              </Text>
+              {/*
+                Relative timestamp under the title. Pure render-time
+                computation — no interval tick. suppressHydrationWarning
+                covers boundary-crossing edge cases between SSR and
+                client hydration.
+              */}
+              <Text
+                variant="muted"
+                style={{ fontSize: 'var(--mantine-font-size-xs)' }}
+                suppressHydrationWarning
+              >
+                Updated {formatRelativeTime(block.updated_at)}
+              </Text>
+            </Stack>
           </Group>
           <div onClick={stop} style={{ display: 'inline-flex' }}>
             <Switch

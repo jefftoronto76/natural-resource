@@ -20,6 +20,7 @@ import {
 } from '@/lib/blockTypes'
 import { orderPrefix } from '@/lib/blockOrder'
 import { tokensFor } from '@/lib/tokenize'
+import { formatRelativeTime } from '@/lib/time'
 
 const PREVIEW_LINE_LIMIT = 8
 const COLUMN_COUNT = 7 // checkbox · chevron · title · type · tokens · status · actions
@@ -178,22 +179,37 @@ export function BlockRow({
         </ActionIcon>
       </Table.Td>
       <Table.Td>
-        <Text variant="label">
-          <span
-            aria-hidden
-            style={{
-              fontFamily: 'var(--mantine-font-family-monospace)',
-              fontSize: 'var(--mantine-font-size-xs)',
-              color: 'var(--mantine-color-dimmed)',
-              display: 'inline-block',
-              width: '2ch',
-              marginRight: 8,
-            }}
+        <Stack gap={2}>
+          <Text variant="label">
+            <span
+              aria-hidden
+              style={{
+                fontFamily: 'var(--mantine-font-family-monospace)',
+                fontSize: 'var(--mantine-font-size-xs)',
+                color: 'var(--mantine-color-dimmed)',
+                display: 'inline-block',
+                width: '2ch',
+                marginRight: 8,
+              }}
+            >
+              {orderPrefix(block.order)}
+            </span>
+            {block.title}
+          </Text>
+          {/*
+            Relative timestamp under the title. Pure render-time
+            computation — no interval tick. suppressHydrationWarning
+            covers the rare case where the row crosses a bucket
+            boundary (e.g., 59s → 1m) between SSR and client hydration.
+          */}
+          <Text
+            variant="muted"
+            style={{ fontSize: 'var(--mantine-font-size-xs)' }}
+            suppressHydrationWarning
           >
-            {orderPrefix(block.order)}
-          </span>
-          {block.title}
-        </Text>
+            Updated {formatRelativeTime(block.updated_at)}
+          </Text>
+        </Stack>
       </Table.Td>
       <Table.Td>
         <Badge
