@@ -66,6 +66,39 @@ Each item is either polish, deferred refactor, or doc debt.
 
 - [ ]
 
+## Polish items (continued)
+
+UX observations captured from Step 8.5 mobile screenshot at 390px.
+Not actioning during current step — re-evaluate after Step 9.
+
+- [ ] **Mobile information density on /admin/prompt-studio/blocks.**
+      At 390px the vertical stack is: header (title + subtitle +
+      2 buttons) → meter (label + bar + 5 wrapping badges) → search
+      → type chips → status chips → counter + expand → first card.
+      Seven UI clusters before content. Information is correct;
+      density isn't optimal. Re-evaluate after Step 9 lands the
+      Chip.Group swap, then decide if further consolidation is
+      worth a dedicated mobile pass.
+
+- [ ] **Compile & Publish visual weight on mobile.** Green filled
+      button stacks below "+ New block" outlined and dominates the
+      header. On desktop the inline layout balances; on mobile
+      stacked it eats the viewport. Consider: smaller variant on
+      mobile, or move Compile & Publish to a different location
+      entirely (page footer? collapsed menu?). Defer until full
+      mobile pass.
+
+- [ ] **Two "All" chips stack ambiguously.** Type's "All" and
+      Status's "All" appear as duplicate controls visually.
+      Consider: "All types" / "All statuses" labels, or visual
+      divider between the two chip groups. Step 9 may already
+      address this depending on the Chip.Group implementation.
+
+- [ ] **Unidentified floating black circle, right side of meter
+      area.** Visible in Step 8.5 mobile screenshot. Source
+      unknown — could be a debug artifact, stray FAB, or
+      Mantine notification. Investigate before merging this PR.
+
 ## Verification protocol additions
 
 (populate as Steps 8–18 surface them)
