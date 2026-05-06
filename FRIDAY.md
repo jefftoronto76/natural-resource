@@ -30,6 +30,17 @@ Each item is either polish, deferred refactor, or doc debt.
       blocks instead of the drawer. Make the call from the live page,
       not in the abstract.
 
+## Refactors (continued)
+
+- [ ] **Centralize `tokensFor()` utility.** Currently duplicated
+      in SegmentedTokenMeter.tsx, PromptFullnessMeter.tsx, and
+      /api/admin/prompt/compile/route.ts. Step 13 will add a
+      fourth site (BlockRow Tokens column). Best moment to
+      centralize is Step 13 itself; if it doesn't happen there,
+      do it Friday. Target: src/lib/tokenize.ts. Three-line
+      function, four call sites, no logic risk — pure cosmetic
+      cleanup.
+
 ## Performance tracking
 
 - [ ] **First Load JS budget.** Step 6 baseline: 275 kB on
