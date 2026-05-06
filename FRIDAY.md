@@ -160,3 +160,40 @@ Not actioning during current step — re-evaluate after Step 9.
          search is active (e.g., "...matched in body: ...keyword...")
       Real design decision. Not a polish task. Resolve before
       this PR merges.
+
+## Design decisions (continued)
+
+- [ ] **Row prefix as position vs order-value.** The prototype
+      shows two numbers per expanded block: a row prefix ("01")
+      that appears to be position-in-current-view, and an Order
+      value ("81") in the metadata panel. Today's working
+      version uses the prefix to display the order field —
+      which means unordered blocks show an empty gutter.
+      Changing the prefix to row position would: (a) eliminate
+      the empty gutter for unordered blocks, (b) make Order
+      purely an editing concern surfaced in the expanded panel,
+      (c) introduce a new question of whether row position is
+      stable (filter changes shift it). Real design decision.
+      Resolve before merge or defer to a follow-up PR.
+
+## Theme-level changes
+
+- [ ] **Bar redesign.** Per prototype: thinner bar, integrated
+      legend with type-color dots and per-type token counts
+      inline to the right of the bar. Replaces today's full-width
+      bar + Badge legend below.
+
+- [ ] **Shading and contrast.** Stronger separation between page
+      canvas and component panels (cards, drawers, expanded rows).
+      Today's Mantine defaults give soft borders on a near-uniform
+      cream background; the prototype has more deliberate elevation
+      treatment.
+
+- [ ] **Square vs rounded corners.** Tighter, less Mantine-default
+      look. Buttons, inputs, panels — all currently rounded by
+      Mantine theme. Squarer corners propagate via Mantine theme
+      override; not a per-component change.
+
+These are theme-level concerns that touch every admin page,
+not just blocks. Worth doing as a single dedicated commit after
+the expanded row consolidation lands.
