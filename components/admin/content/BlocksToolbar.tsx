@@ -2,8 +2,8 @@
 
 import {
   Button,
+  Chip,
   Group,
-  SegmentedControl,
   Text,
   TextInput,
 } from '@mantine/core'
@@ -14,6 +14,7 @@ import {
 } from '@tabler/icons-react'
 import {
   BLOCK_TYPES,
+  TYPE_COLORS,
   TYPE_COMPILE_ORDER,
   TYPE_LABELS,
   type BlockType,
@@ -36,24 +37,12 @@ export interface BlocksToolbarProps {
   totalCount: number
 }
 
-// Type filter options — derived from BLOCK_TYPES sorted by compile
-// order so the toolbar UI matches the ordinal suffix on the row
-// badges (GUARDRAIL 1st, IDENTITY 2nd, …). Single source of truth:
-// TYPE_COMPILE_ORDER in @/lib/blockTypes.
+// Type chips render in compile order so the toolbar matches the
+// ordinal suffix on the row badges (GUARDRAIL 1st, IDENTITY 2nd, …).
+// Single source of truth: TYPE_COMPILE_ORDER in @/lib/blockTypes.
 const ORDERED_TYPES: BlockType[] = [...BLOCK_TYPES].sort(
   (a, b) => TYPE_COMPILE_ORDER[a] - TYPE_COMPILE_ORDER[b],
 )
-
-const TYPE_FILTER_DATA: ReadonlyArray<{ value: string; label: string }> = [
-  { value: 'all', label: 'All' },
-  ...ORDERED_TYPES.map(t => ({ value: t, label: TYPE_LABELS[t] })),
-]
-
-const STATUS_FILTER_DATA: ReadonlyArray<{ value: string; label: string }> = [
-  { value: 'all', label: 'All' },
-  { value: 'active', label: 'Active' },
-  { value: 'disabled', label: 'Disabled' },
-]
 
 /**
  * Desktop/tablet filter toolbar for the Blocks admin page.
@@ -79,13 +68,21 @@ export function BlocksToolbar({
   filteredCount,
   totalCount,
 }: BlocksToolbarProps) {
+  // Mantine Chip.Group in single-select mode renders chips as native
+  // radio inputs, so clicking the active chip can't fire onChange with
+  // an empty string under current Mantine v7 behavior. The empty-string
+  // guard is defensive — preserves the no-op intent if Mantine ever
+  // adds a deselectable single-select variant. The explicit "All" chip
+  // remains the reset path either way.
   function handleTypeChange(value: string) {
+    if (value === '') return
     const narrowed = value as TypeFilter
     console.log('[BlocksToolbar] type filter', { value: narrowed })
     onTypeFilterChange(narrowed)
   }
 
   function handleStatusChange(value: string) {
+    if (value === '') return
     const narrowed = value as StatusFilter
     console.log('[BlocksToolbar] status filter', { value: narrowed })
     onStatusFilterChange(narrowed)
@@ -107,21 +104,42 @@ export function BlocksToolbar({
         w={280}
         aria-label="Search blocks"
       />
-      <Group gap="sm" wrap="wrap">
-        <SegmentedControl
-          data={TYPE_FILTER_DATA as { value: string; label: string }[]}
-          value={typeFilter}
-          onChange={handleTypeChange}
-          size="xs"
-          aria-label="Filter by type"
-        />
-        <SegmentedControl
-          data={STATUS_FILTER_DATA as { value: string; label: string }[]}
-          value={statusFilter}
-          onChange={handleStatusChange}
-          size="xs"
-          aria-label="Filter by status"
-        />
+      <Group gap="md" wrap="wrap">
+        {/*
+          Filter chips, not legend badges. The Step 8 SegmentedTokenMeter
+          legend uses Mantine `Badge` (read-only labels). These are Mantine
+          `Chip`s — toggle controls bound to the URL filter state. Both
+          pull from TYPE_COLORS so the meter and filter share a visual
+          language; do not consolidate the two primitives.
+
+          Chip.Group renders no DOM of its own (context provider only); the
+          inner <Group> handles layout + wrapping at narrow viewports.
+        */}
+        <Chip.Group multiple={false} value={typeFilter} onChange={handleTypeChange}>
+          <Group gap="xs" wrap="wrap" role="group" aria-label="Filter by type">
+            <Chip value="all" size="sm">
+              All
+            </Chip>
+            {ORDERED_TYPES.map(t => (
+              <Chip key={t} value={t} size="sm" color={TYPE_COLORS[t]}>
+                {TYPE_LABELS[t]}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
+        <Chip.Group multiple={false} value={statusFilter} onChange={handleStatusChange}>
+          <Group gap="xs" wrap="wrap" role="group" aria-label="Filter by status">
+            <Chip value="all" size="sm">
+              All
+            </Chip>
+            <Chip value="active" size="sm" color="green">
+              Active
+            </Chip>
+            <Chip value="disabled" size="sm">
+              Disabled
+            </Chip>
+          </Group>
+        </Chip.Group>
       </Group>
       <Group gap="sm" wrap="nowrap" align="center">
         <Text size="sm" c="dimmed" aria-live="polite">
