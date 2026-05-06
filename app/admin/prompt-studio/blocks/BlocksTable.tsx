@@ -437,6 +437,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                   <Table.Th>Title</Table.Th>
                   <Table.Th>Type</Table.Th>
                   <Table.Th>Tokens</Table.Th>
+                  <Table.Th>Status</Table.Th>
                   <Table.Th>Actions</Table.Th>
                 </Table.Tr>
               </Table.Thead>

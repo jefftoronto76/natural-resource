@@ -30,7 +30,7 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
 }
 
 describe('BlockCard', () => {
-  it('renders title, type badge, order prefix, and token count', () => {
+  it('renders title, type badge, order prefix, token count, and status label', () => {
     renderCard()
     expect(screen.getByText('Test block title')).toBeInTheDocument()
     expect(screen.getByText(/GUARDRAIL \(1st\)/)).toBeInTheDocument()
@@ -38,6 +38,8 @@ describe('BlockCard', () => {
     expect(screen.getByText('03')).toBeInTheDocument()
     // body='body text' → 9 chars → ceil(9/4) = 3 tokens (Step 13).
     expect(screen.getByText('3 tokens')).toBeInTheDocument()
+    // status='active' → "Active" label next to the Switch (Step 15).
+    expect(screen.getByText('Active')).toBeInTheDocument()
   })
 
   it('tapping the card body calls onOpenEdit', async () => {

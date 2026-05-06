@@ -189,17 +189,40 @@ export function BlockCard({
               </Text>
             </Stack>
           </Group>
+          {/*
+            Status — Switch followed by visible label ("Active" /
+            "Disabled"). Same composition as the desktop row; xs label
+            on mobile to keep the primary row light. aria-hidden on the
+            label since the Switch's aria-label is the canonical
+            accessible name. Wrapper div stops tap-bubble to the
+            edit-on-tap handler.
+          */}
           <div onClick={stop} style={{ display: 'inline-flex' }}>
-            <Switch
-              checked={block.status === 'active'}
-              onChange={e => handleStatusToggle(e.currentTarget.checked)}
-              color="green"
-              size="md"
-              disabled={isSaving}
-              aria-label={`${
-                block.status === 'active' ? 'Disable' : 'Enable'
-              } ${block.title}`}
-            />
+            <Group gap="xs" wrap="nowrap" align="center">
+              <Switch
+                checked={block.status === 'active'}
+                onChange={e => handleStatusToggle(e.currentTarget.checked)}
+                color="green"
+                size="md"
+                disabled={isSaving}
+                aria-label={`${
+                  block.status === 'active' ? 'Disable' : 'Enable'
+                } ${block.title}`}
+              />
+              <Text
+                aria-hidden
+                variant={block.status === 'active' ? 'body' : 'muted'}
+                style={{
+                  fontSize: 'var(--mantine-font-size-xs)',
+                  color:
+                    block.status === 'active'
+                      ? 'var(--mantine-color-green-7)'
+                      : undefined,
+                }}
+              >
+                {block.status === 'active' ? 'Active' : 'Disabled'}
+              </Text>
+            </Group>
           </div>
         </Group>
 

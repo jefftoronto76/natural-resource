@@ -245,15 +245,36 @@ export function BlockRow({
         </Group>
       </Table.Td>
       <Table.Td>
-        <Switch
-          checked={block.status === 'active'}
-          onChange={e => handleStatusToggle(e.currentTarget.checked)}
-          color="green"
-          disabled={isSaving}
-          aria-label={`${
-            block.status === 'active' ? 'Disable' : 'Enable'
-          } ${block.title}`}
-        />
+        {/*
+          Status cell — Switch followed by a visible label ("Active" /
+          "Disabled"). The Switch's aria-label is the canonical
+          accessible name; the label is decorative for sighted users
+          and aria-hidden so screen readers don't double-read.
+        */}
+        <Group gap="xs" wrap="nowrap" align="center">
+          <Switch
+            checked={block.status === 'active'}
+            onChange={e => handleStatusToggle(e.currentTarget.checked)}
+            color="green"
+            disabled={isSaving}
+            aria-label={`${
+              block.status === 'active' ? 'Disable' : 'Enable'
+            } ${block.title}`}
+          />
+          <Text
+            aria-hidden
+            variant={block.status === 'active' ? 'body' : 'muted'}
+            style={{
+              fontSize: 'var(--mantine-font-size-sm)',
+              color:
+                block.status === 'active'
+                  ? 'var(--mantine-color-green-7)'
+                  : undefined,
+            }}
+          >
+            {block.status === 'active' ? 'Active' : 'Disabled'}
+          </Text>
+        </Group>
       </Table.Td>
       <Table.Td>
         <Group gap="xs" wrap="nowrap">
