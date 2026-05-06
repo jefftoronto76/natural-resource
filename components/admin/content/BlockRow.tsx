@@ -6,6 +6,7 @@ import {
   Button,
   Checkbox,
   Group,
+  Progress,
   Stack,
   Switch,
   Table,
@@ -18,9 +19,10 @@ import {
   type BlockType,
 } from '@/lib/blockTypes'
 import { orderPrefix } from '@/lib/blockOrder'
+import { tokensFor } from '@/lib/tokenize'
 
 const PREVIEW_LINE_LIMIT = 8
-const COLUMN_COUNT = 6 // checkbox · chevron · title · type · status · actions
+const COLUMN_COUNT = 7 // checkbox · chevron · title · type · tokens · status · actions
 
 function BlockPreviewRow({
   body,
@@ -85,6 +87,13 @@ export interface BlockRowProps {
   selected: boolean
   isSaving?: boolean
   isExpanded?: boolean
+  /**
+   * Highest token count among the currently visible (filtered) blocks.
+   * Drives the Tokens column bar width — each row's bar is rendered as
+   * (this row's tokens / maxVisibleTokens) * 100. Computed once at the
+   * parent and passed down so rows don't all re-iterate the visible set.
+   */
+  maxVisibleTokens: number
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
   onEdit: (blockId: string) => void
@@ -111,12 +120,16 @@ export function BlockRow({
   selected,
   isSaving = false,
   isExpanded = false,
+  maxVisibleTokens,
   onToggleSelect,
   onToggleStatus,
   onEdit,
   onDelete,
   onToggleExpand,
 }: BlockRowProps) {
+  const tokens = tokensFor(block.body)
+  const barPct = maxVisibleTokens > 0 ? (tokens / maxVisibleTokens) * 100 : 0
+
   function handleStatusToggle(checked: boolean) {
     const nextStatus = checked ? 'active' : 'disabled'
     console.log('[BlockRow] status toggle', {
@@ -191,6 +204,29 @@ export function BlockRow({
         >
           {formatTypeBadgeLabel(block.type)}
         </Badge>
+      </Table.Td>
+      <Table.Td>
+        <Group gap="xs" wrap="nowrap" align="center">
+          <Text
+            style={{
+              fontFamily: 'var(--mantine-font-family-monospace)',
+              fontSize: 'var(--mantine-font-size-xs)',
+              color: 'var(--mantine-color-dimmed)',
+              minWidth: '4ch',
+              textAlign: 'right',
+            }}
+          >
+            {tokens.toLocaleString()}
+          </Text>
+          <Progress
+            value={barPct}
+            color="gray"
+            size="sm"
+            radius="sm"
+            w={80}
+            aria-label={`${tokens} tokens`}
+          />
+        </Group>
       </Table.Td>
       <Table.Td>
         <Switch

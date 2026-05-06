@@ -25,6 +25,7 @@ import { BlocksToolbar } from '@/components/admin/content/BlocksToolbar'
 import { useBlocksFilters } from '@/components/admin/content/useBlocksFilters'
 import type { BlockType } from '@/lib/blockTypes'
 import { isOrdered } from '@/lib/blockOrder'
+import { tokensFor } from '@/lib/tokenize'
 
 type BlockStatus = 'active' | 'disabled' | 'deleted'
 
@@ -310,6 +311,16 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
     return true
   })
 
+  // Bar-width normalization for the per-row Tokens column (Step 13 of
+  // PR 2). Bars are sized relative to the heaviest currently-visible
+  // block, not the 8000-token budget — the page-level meter already
+  // covers absolute budget. Single pass over `filtered`; cheap enough
+  // at typical scale (~50 rows) that no useMemo is needed. Falls back
+  // to 0 when nothing is visible to avoid divide-by-zero downstream.
+  const maxVisibleTokens = filtered.length > 0
+    ? Math.max(0, ...filtered.map(b => tokensFor(b.body)))
+    : 0
+
   // Select-all is scoped to the currently-visible (filtered) set.
   // Bulk actions still operate on all selectedIds — so selections
   // made outside the current filter persist when filters change.
@@ -425,6 +436,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                   <Table.Th style={{ width: 28 }} aria-hidden />
                   <Table.Th>Title</Table.Th>
                   <Table.Th>Type</Table.Th>
+                  <Table.Th>Tokens</Table.Th>
                   <Table.Th>Actions</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -436,6 +448,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                     selected={selectedIds.has(block.id)}
                     isSaving={savingId === block.id}
                     isExpanded={expandedIds.has(block.id)}
+                    maxVisibleTokens={maxVisibleTokens}
                     onToggleSelect={toggleSelect}
                     onToggleStatus={handleStatusChange}
                     onEdit={handleEdit}
@@ -455,6 +468,7 @@ export function BlocksTable({ rows }: { rows: BlockRow[] }) {
                 block={{ ...block, type: block.type as BlockType }}
                 selected={selectedIds.has(block.id)}
                 isSaving={savingId === block.id}
+                maxVisibleTokens={maxVisibleTokens}
                 onToggleSelect={toggleSelect}
                 onToggleStatus={handleStatusChange}
                 onOpenEdit={handleEdit}

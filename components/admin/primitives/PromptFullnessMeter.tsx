@@ -2,6 +2,7 @@
 
 import { Progress, Stack } from '@mantine/core'
 import { Text } from '@/components/admin/primitives/Text'
+import { tokensFor } from '@/lib/tokenize'
 
 const TOKEN_LIMIT = 8000
 const YELLOW_THRESHOLD = 5000
@@ -16,14 +17,18 @@ export interface PromptFullnessMeterProps {
  * divided by 4. Takes an array of block body strings and sums their
  * lengths.
  *
+ * Concat-then-tokenize semantics: ceil(totalChars / 4), not the sum of
+ * per-body ceil values. The two diverge by one token whenever any body
+ * length is not a multiple of 4. Centralized via `tokensFor` from
+ * src/lib/tokenize.ts in Step 13 of PR 2.
+ *
  * Color thresholds:
  * - green:  < 5000 tokens
  * - yellow: 5000–8000 tokens
  * - red:    > 8000 tokens
  */
 export function PromptFullnessMeter({ bodies }: PromptFullnessMeterProps) {
-  const totalChars = bodies.reduce((sum, b) => sum + (b?.length ?? 0), 0)
-  const tokens = Math.ceil(totalChars / 4)
+  const tokens = tokensFor(bodies.join(''))
   const percent = Math.min((tokens / TOKEN_LIMIT) * 100, 100)
 
   const color =

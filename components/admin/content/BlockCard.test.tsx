@@ -19,6 +19,7 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
     <BlockCard
       block={block}
       selected={false}
+      maxVisibleTokens={500}
       onToggleSelect={vi.fn()}
       onToggleStatus={vi.fn()}
       onOpenEdit={vi.fn()}
@@ -29,12 +30,14 @@ function renderCard(overrides: Partial<React.ComponentProps<typeof BlockCard>> =
 }
 
 describe('BlockCard', () => {
-  it('renders title, type badge, and zero-padded order prefix', () => {
+  it('renders title, type badge, order prefix, and token count', () => {
     renderCard()
     expect(screen.getByText('Test block title')).toBeInTheDocument()
     expect(screen.getByText(/GUARDRAIL \(1st\)/)).toBeInTheDocument()
     // Order=3 → "03" prefix rendered ahead of the title in the same paragraph.
     expect(screen.getByText('03')).toBeInTheDocument()
+    // body='body text' → 9 chars → ceil(9/4) = 3 tokens (Step 13).
+    expect(screen.getByText('3 tokens')).toBeInTheDocument()
   })
 
   it('tapping the card body calls onOpenEdit', async () => {

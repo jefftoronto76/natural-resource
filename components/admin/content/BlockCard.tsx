@@ -7,6 +7,7 @@ import {
   Checkbox,
   Group,
   Paper,
+  Progress,
   Stack,
   Switch,
 } from '@mantine/core'
@@ -17,6 +18,7 @@ import {
   formatTypeBadgeLabel,
 } from '@/lib/blockTypes'
 import { orderPrefix } from '@/lib/blockOrder'
+import { tokensFor } from '@/lib/tokenize'
 import type { BlockRowBlock } from './BlockRow'
 
 export type BlockCardBlock = BlockRowBlock
@@ -25,6 +27,12 @@ export interface BlockCardProps {
   block: BlockCardBlock
   selected: boolean
   isSaving?: boolean
+  /**
+   * Highest token count among the currently visible (filtered) blocks.
+   * Drives the metadata-row bar width — same normalization as the
+   * desktop Tokens column. Computed once at the parent and passed down.
+   */
+  maxVisibleTokens: number
   onToggleSelect: (blockId: string) => void
   onToggleStatus: (blockId: string, nextStatus: 'active' | 'disabled') => void
   onOpenEdit: (blockId: string) => void
@@ -59,11 +67,15 @@ export function BlockCard({
   block,
   selected,
   isSaving = false,
+  maxVisibleTokens,
   onToggleSelect,
   onToggleStatus,
   onOpenEdit,
   onDelete,
 }: BlockCardProps) {
+  const tokens = tokensFor(block.body)
+  const barPct = maxVisibleTokens > 0 ? (tokens / maxVisibleTokens) * 100 : 0
+
   function handleStatusToggle(checked: boolean) {
     const nextStatus = checked ? 'active' : 'disabled'
     console.log('[BlockCard] status toggle', {
@@ -174,6 +186,29 @@ export function BlockCard({
               } ${block.title}`}
             />
           </div>
+        </Group>
+
+        {/* Tokens metadata — count + bar, same normalization as the
+            desktop Tokens column (max-of-visible). Bar fills remaining
+            width so the count reads as a small label on the left. */}
+        <Group gap="xs" wrap="nowrap" align="center">
+          <Text
+            variant="muted"
+            style={{
+              fontFamily: 'var(--mantine-font-family-monospace)',
+              fontSize: 'var(--mantine-font-size-xs)',
+            }}
+          >
+            {tokens.toLocaleString()} tokens
+          </Text>
+          <Progress
+            value={barPct}
+            color="gray"
+            size="xs"
+            radius="sm"
+            style={{ flex: 1 }}
+            aria-label={`${tokens} tokens`}
+          />
         </Group>
 
         {/* Actions */}

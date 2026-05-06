@@ -9,10 +9,10 @@ import {
   TYPE_LABELS,
   type BlockType,
 } from '@/lib/blockTypes'
+import { tokensFor } from '@/lib/tokenize'
 
 const TOKEN_LIMIT = 8000
 const YELLOW_THRESHOLD = 5000
-const CHARS_PER_TOKEN = 4
 
 export interface SegmentedTokenMeterBlock {
   id: string
@@ -23,10 +23,6 @@ export interface SegmentedTokenMeterBlock {
 
 export interface SegmentedTokenMeterProps {
   blocks: SegmentedTokenMeterBlock[]
-}
-
-function tokensFor(body: string): number {
-  return Math.ceil((body?.length ?? 0) / CHARS_PER_TOKEN)
 }
 
 // Stable left-to-right order — matches TYPE_COMPILE_ORDER everywhere
