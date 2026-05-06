@@ -4,6 +4,7 @@ import {
   Button,
   Chip,
   Group,
+  Stack,
   Text,
   TextInput,
 } from '@mantine/core'
@@ -98,7 +99,7 @@ export function BlocksToolbar({
       <TextInput
         value={query}
         onChange={e => onQueryChange(e.currentTarget.value)}
-        placeholder="Search title or body"
+        placeholder="Search blocks"
         leftSection={<IconSearch size={14} />}
         size="sm"
         w={280}
@@ -141,12 +142,16 @@ export function BlocksToolbar({
           </Group>
         </Chip.Group>
       </Group>
-      <Group gap="sm" wrap="nowrap" align="center">
+      {/*
+        Stacked counter + expand toggle. Counter renders as muted
+        secondary text above the green-link expand button — vertical
+        rhythm reads cleaner than the prior inline "47 / 47 · Expand
+        all" row, especially on mobile. Right-aligned within the
+        stack so both lines hug the toolbar's right edge.
+      */}
+      <Stack gap={2} align="flex-end">
         <Text size="sm" c="dimmed" aria-live="polite">
           {filteredCount} / {totalCount}
-        </Text>
-        <Text size="sm" c="dimmed" aria-hidden>
-          ·
         </Text>
         <Button
           variant="subtle"
@@ -162,7 +167,7 @@ export function BlocksToolbar({
         >
           {allExpanded ? 'Collapse all' : 'Expand all'}
         </Button>
-      </Group>
+      </Stack>
     </Group>
   )
 }
