@@ -70,26 +70,33 @@ async function runSafetyCheck(blockId: string, body: string): Promise<CheckResul
  * Parent save callbacks come in via the `callbacks` argument; the
  * hook returns its own wrapped `onSave` / `onSaveAnyway` that combine
  * the safety check with the parent's save contract.
+ *
+ * `block` is nullable so the same hook backs both edit mode (existing
+ * row passed in) and new mode (null — draft starts empty, log id is
+ * 'new'). Wider title/type/topic_id state lives in the form component
+ * for new mode, not in this hook — the hook only owns body + safety
+ * check.
  */
 export function useBlockEditForm(
-  block: BlockEditFormBlock,
+  block: BlockEditFormBlock | null,
   callbacks: UseBlockEditFormCallbacks,
 ): UseBlockEditFormReturn {
-  const [draft, setDraft] = useState(block.body)
+  const blockId = block?.id ?? 'new'
+  const [draft, setDraft] = useState(block?.body ?? '')
   const [checking, setChecking] = useState(false)
   const [saving, setSaving] = useState(false)
   const [issues, setIssues] = useState<CheckIssue[]>([])
 
   async function onSave() {
-    console.log('[BlockEditForm] save dispatch', { blockId: block.id, bodyLength: draft.length })
+    console.log('[BlockEditForm] save dispatch', { blockId, bodyLength: draft.length })
     setIssues([])
     setChecking(true)
-    const result = await runSafetyCheck(block.id, draft)
+    const result = await runSafetyCheck(blockId, draft)
     setChecking(false)
 
     if (!result.ok && result.issues.length > 0) {
       console.log('[BlockEditForm] save blocked by safety check', {
-        blockId: block.id,
+        blockId,
         count: result.issues.length,
       })
       setIssues(result.issues)
@@ -99,9 +106,9 @@ export function useBlockEditForm(
     setSaving(true)
     try {
       await callbacks.onSave({ body: draft })
-      console.log('[BlockEditForm] save success', { blockId: block.id })
+      console.log('[BlockEditForm] save success', { blockId })
     } catch (err) {
-      console.error('[BlockEditForm] save failed', { blockId: block.id, err })
+      console.error('[BlockEditForm] save failed', { blockId, err })
     } finally {
       setSaving(false)
     }
@@ -109,16 +116,16 @@ export function useBlockEditForm(
 
   async function onSaveAnyway() {
     console.log('[BlockEditForm] save anyway dispatch', {
-      blockId: block.id,
+      blockId,
       bodyLength: draft.length,
     })
     setSaving(true)
     try {
       await callbacks.onSaveAnyway({ body: draft })
-      console.log('[BlockEditForm] save anyway success', { blockId: block.id })
+      console.log('[BlockEditForm] save anyway success', { blockId })
       setIssues([])
     } catch (err) {
-      console.error('[BlockEditForm] save anyway failed', { blockId: block.id, err })
+      console.error('[BlockEditForm] save anyway failed', { blockId, err })
     } finally {
       setSaving(false)
     }
@@ -126,7 +133,7 @@ export function useBlockEditForm(
 
   function onRemoveOffending(offendingText: string) {
     console.log('[BlockEditForm] remove offending', {
-      blockId: block.id,
+      blockId,
       length: offendingText.length,
     })
     setDraft(prev => prev.replace(offendingText, ''))

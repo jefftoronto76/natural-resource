@@ -1,9 +1,10 @@
 import type { CSSProperties } from 'react'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { getAuthContext } from '@/lib/get-auth-context'
-import { Box, Button, Center, Flex, Stack, Title } from '@mantine/core'
-import { IconPlus } from '@tabler/icons-react'
+import { Box, Center, Flex, Stack, Title } from '@mantine/core'
 import { Text } from '@/components/admin/primitives/Text'
+import { NewBlockButton } from '@/components/admin/content/NewBlockButton'
+import type { Topic } from '@/components/admin/content/BlockEditForm'
 import { BlocksTable, type BlockRow } from './BlocksTable'
 import { PublishButton } from './PublishButton'
 
@@ -60,18 +61,32 @@ export default async function BlocksPage() {
 
   const supabase = getAdminClient()
 
-  const { data: blocks, error } = await supabase
-    .from('blocks')
-    .select('id, title, type, body, status, is_default, order, created_at, updated_at, topics(name), author:users!blocks_updated_by_fkey(name)')
-    .eq('tenant_id', tenantId)
-    .neq('status', 'deleted')
-    .order('created_at', { ascending: false })
+  // Fetch blocks and topics in parallel — topics feed the New block
+  // drawer's topic Select; pre-fetching avoids a network round-trip
+  // every time the user opens the drawer.
+  const [blocksResult, topicsResult] = await Promise.all([
+    supabase
+      .from('blocks')
+      .select('id, title, type, body, status, is_default, order, created_at, updated_at, topics(name), author:users!blocks_updated_by_fkey(name)')
+      .eq('tenant_id', tenantId)
+      .neq('status', 'deleted')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('topics')
+      .select('id, name, type')
+      .eq('tenant_id', tenantId)
+      .order('name'),
+  ])
 
-  if (error) {
-    console.error('[blocks] fetch error:', error.message)
+  if (blocksResult.error) {
+    console.error('[blocks] fetch error:', blocksResult.error.message)
+  }
+  if (topicsResult.error) {
+    console.error('[blocks] topics fetch error:', topicsResult.error.message)
   }
 
-  const rows = (blocks as BlockRow[] | null) ?? []
+  const rows = (blocksResult.data as BlockRow[] | null) ?? []
+  const topics = (topicsResult.data as Topic[] | null) ?? []
 
   return (
     <Stack h="100%" gap={0}>
@@ -93,15 +108,8 @@ export default async function BlocksPage() {
           </Text>
         </Stack>
 
-        {/* Step 7 will replace this disabled placeholder with <NewBlockButton />. */}
         <Flex direction={{ base: 'column', sm: 'row' }} gap="sm" align="flex-start">
-          <Button
-            variant="default"
-            disabled
-            leftSection={<IconPlus size={14} />}
-          >
-            New block
-          </Button>
+          <NewBlockButton topics={topics} />
           <PublishButton />
         </Flex>
       </Flex>

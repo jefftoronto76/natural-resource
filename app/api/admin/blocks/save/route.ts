@@ -73,6 +73,10 @@ export async function POST(req: Request) {
       tenant_id: authCtx.tenant_id,
       active: true,
       is_default: is_default ?? false,
+      // Stamp updated_by on create for consistency with the PATCH route
+      // (Step 3 of PR 2). updated_at is auto-set by the
+      // blocks_updated_at_trigger Postgres trigger.
+      updated_by: authCtx.owner_id,
     })
     .select()
     .single()
