@@ -197,3 +197,20 @@ Not actioning during current step — re-evaluate after Step 9.
 These are theme-level concerns that touch every admin page,
 not just blocks. Worth doing as a single dedicated commit after
 the expanded row consolidation lands.
+
+## Cosmetic clean-up (post-merge)
+
+- [ ] **Type cell ordinal redundancy.** Type column shows
+      "PROCESS (3RD)" — the (3RD) duplicates the title's monospace
+      order prefix. Drop the ordinal from the Type cell; type
+      label only.
+
+- [ ] **Expanded panel visual separation.** Block content and
+      metadata panel currently inherit the page background with
+      no elevation cue. Theme-level treatment (covered in the
+      pending theme commit) should add subtle separation.
+
+- [ ] **Active toggle column width.** The Status column's "Active"
+      label + Switch combination is wider than the "Status" header
+      text above it; visual centering looks off. Adjust column
+      width or label sizing.
