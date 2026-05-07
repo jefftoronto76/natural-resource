@@ -1,21 +1,31 @@
 import { getAdminClient } from '@/lib/supabase-admin'
+import { getAuthContext } from '@/lib/get-auth-context'
 import { InboundChatsTable, type ChatSession } from './InboundChatsTable'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminPage() {
-  const supabase = getAdminClient()
+  let rows: ChatSession[] = []
 
-  const { data: sessions, error } = await supabase
-    .from('chat_sessions')
-    .select('*')
-    .order('updated_at', { ascending: false })
+  try {
+    const { tenant_id } = await getAuthContext()
+    const supabase = getAdminClient()
 
-  if (error) {
-    console.error('[admin/page] fetch error:', error)
+    const { data: sessions, error } = await supabase
+      .from('chat_sessions')
+      .select('*')
+      .eq('tenant_id', tenant_id)
+      .eq('session_type', 'prospect')
+      .order('updated_at', { ascending: false })
+
+    if (error) {
+      console.error('[admin/page] fetch error:', error)
+    } else {
+      rows = (sessions as ChatSession[] | null) ?? []
+    }
+  } catch (err) {
+    console.error('[admin/page] auth failed:', err instanceof Error ? err.message : err)
   }
-
-  const rows = (sessions as ChatSession[] | null) ?? []
 
   return (
     <div>
