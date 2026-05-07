@@ -48,6 +48,12 @@ Each item is either polish, deferred refactor, or doc debt.
       max+1. Small API change, deserves its own commit.
       Step 12 deferred this to keep UI scope clean.
 
+- [ ] **`sage_parameters.value` legacy column.** Round-tripped on
+      every PATCH to `/api/admin/sage-parameters` but never
+      surfaced in UI or set by users. CLAUDE.md notes it as
+      legacy. Either remove from schema and the round-trip
+      payload, or document its intended use. Decide which.
+
 ## Performance tracking
 
 - [ ] **First Load JS budget.** Step 6 baseline: 275 kB on
@@ -70,6 +76,13 @@ Each item is either polish, deferred refactor, or doc debt.
 ## Polish items
 
 (populate as Steps 8–18 surface them)
+
+- [ ] **Inbound page header uses raw HTML.** `app/admin/page.tsx`
+      renders the "Inbound Chats" page header with raw `<h1>` and
+      `<p>` plus inline styles, not Mantine `Title` and `Text`.
+      Inconsistent with the AdminShell pattern. Replace with
+      Mantine primitives in PR 4 OR sooner as part of the broader
+      admin layout refactor.
 
 - [ ]
 
@@ -197,6 +210,15 @@ Not actioning during current step — re-evaluate after Step 9.
 These are theme-level concerns that touch every admin page,
 not just blocks. Worth doing as a single dedicated commit after
 the expanded row consolidation lands.
+
+## Production readiness
+
+- [ ] **Clerk on development keys.** Clerk is loaded with development
+      keys on Vercel preview (and possibly production). Console
+      warning: "Development instances have strict usage limits and
+      should not be used when deploying your application to
+      production." Migrate to production Clerk keys before public
+      launch / Tenant 2 onboarding. Not blocking at current scale.
 
 ## Cosmetic clean-up (post-merge)
 

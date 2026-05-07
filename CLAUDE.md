@@ -147,6 +147,30 @@ session start.
    schema. If CC encounters a missing column or table during code work,
    stop and flag — do not attempt to add it.
 
+4. **PR DESCRIPTIONS ARE MANDATORY**: Every PR must have a description
+   written when the PR is opened. Descriptions follow a three-section
+   format:
+
+   - **What & Why**: What changed and why — not how. The diff shows how.
+     Plain language summary of the change and the reason for it.
+   - **Reference**: Link to the relevant ticket, spec, design doc, or
+     session notes. If none exists, note "no spec, ad-hoc".
+   - **Reviewer attention**: Anything specific the reviewer should pay
+     attention to — tricky decisions, gotchas, deferred items, manual
+     verification steps needed.
+
+   Descriptions are concise. Do not duplicate what the diff shows. Do not
+   list every commit (the commit history shows that). Focus on the human
+   context the diff cannot convey.
+
+5. **DIVISION OF LABOR**: Jeff is responsible exclusively for Supabase
+   Studio work — schema migrations, data backfills, direct database
+   inspection. CC is responsible for everything else — code changes,
+   opening PRs, writing PR descriptions, merging, deployment configuration,
+   GitHub workflow operations. CC does not ask Jeff to perform git
+   operations, GitHub UI operations, or deployment management. CC drives
+   the workflow end to end with Jeff's approval gates.
+
 ---
 
 ## Design System
