@@ -1,4 +1,5 @@
 import { getAdminClient } from '@/lib/supabase-admin'
+import { getAuthContext } from '@/lib/get-auth-context'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -27,12 +28,23 @@ export default async function SessionPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+
+  let tenantId: string
+  try {
+    const authCtx = await getAuthContext()
+    tenantId = authCtx.tenant_id
+  } catch (err) {
+    console.error('[admin/sessions/[id]] auth failed:', err instanceof Error ? err.message : err)
+    notFound()
+  }
+
   const supabase = getAdminClient()
 
   const { data: session, error } = await supabase
     .from('chat_sessions')
     .select('*')
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single()
 
   if (error || !session) {
@@ -162,6 +174,11 @@ export default async function SessionPage({
         </div>
       )}
 
+      {/*
+        TODO(reinforcement-loop): this reads chat_sessions.corrective_feedback
+        which is non-canonical. Wire to chat_corrections table when
+        reinforcement loop sprint ships. Do not delete — preserves UI intent.
+      */}
       {/* Corrective feedback (Step 5) */}
       {session.corrective_feedback && (
         <div style={{

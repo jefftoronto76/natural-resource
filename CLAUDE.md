@@ -122,6 +122,57 @@ starts.
 
 ---
 
+## Development Workflow Rules
+
+These rules apply to all future sessions and should be re-read at every
+session start.
+
+1. **PUSH CADENCE**: Every commit must be pushed to origin immediately.
+   Verification happens on Vercel preview deployments, never on local-only
+   branches. Do not batch pushes to end of PR. Do not say "push after all
+   commits approved." After each commit: git push, surface the preview URL
+   if known, pause for approval.
+
+2. **VERIFICATION SURFACE**: Verification of runtime behavior happens on
+   Vercel preview URLs, not local dev. Static checks (build, tsc, tests)
+   happen in the sandbox. Manual verification (page renders, query returns
+   right rows, UI looks correct) happens against preview. Do not ask Jeff
+   to run `npm run dev` locally as a default verification step.
+
+3. **SCHEMA MIGRATIONS**: All Supabase schema changes are done by Jeff in
+   Supabase Studio, not by CC. CC does not write migration files, does not
+   run `ALTER TABLE` statements, does not modify database schema directly.
+   When a sprint requires schema changes, those happen first (Jeff in
+   Studio), then CC's code work proceeds against the already-migrated
+   schema. If CC encounters a missing column or table during code work,
+   stop and flag — do not attempt to add it.
+
+4. **PR DESCRIPTIONS ARE MANDATORY**: Every PR must have a description
+   written when the PR is opened. Descriptions follow a three-section
+   format:
+
+   - **What & Why**: What changed and why — not how. The diff shows how.
+     Plain language summary of the change and the reason for it.
+   - **Reference**: Link to the relevant ticket, spec, design doc, or
+     session notes. If none exists, note "no spec, ad-hoc".
+   - **Reviewer attention**: Anything specific the reviewer should pay
+     attention to — tricky decisions, gotchas, deferred items, manual
+     verification steps needed.
+
+   Descriptions are concise. Do not duplicate what the diff shows. Do not
+   list every commit (the commit history shows that). Focus on the human
+   context the diff cannot convey.
+
+5. **DIVISION OF LABOR**: Jeff is responsible exclusively for Supabase
+   Studio work — schema migrations, data backfills, direct database
+   inspection. CC is responsible for everything else — code changes,
+   opening PRs, writing PR descriptions, merging, deployment configuration,
+   GitHub workflow operations. CC does not ask Jeff to perform git
+   operations, GitHub UI operations, or deployment management. CC drives
+   the workflow end to end with Jeff's approval gates.
+
+---
+
 ## Design System
 
 - **Admin interface:** Mantine v7 — components in `/components/admin/`
@@ -328,14 +379,14 @@ Row Level Security is enforced at the Supabase layer.
 
 | Table | Key Columns |
 |-------|-------------|
-| `tenants` | id, parent_id, name, slug, type, settings, domain (text) |
+| `tenants` | id, parent_id, name, slug, type, settings, domain (text), chat_in_progress_idle_seconds (integer NOT NULL default 300 — idle threshold in seconds before an `in_progress` chat flips to `active`), chat_active_idle_seconds (integer NOT NULL default 86400 — idle threshold in seconds before an `active` chat flips to `abandoned`) |
 | `tenant_users` | tenant_id, user_id, role |
 | `users` | id, clerk_id, email, name |
 | `blocks` | id, topic_id, owner_id, tenant_id, type, title, body, active, status (text default 'active': 'active' \| 'disabled' \| 'deleted'), order (integer, nullable — actively used: within each type, blocks with `order > 0` sort ascending by order, blocks with `order` = 0 or null sort last by title ascending; consumed by `/api/admin/prompt/compile` and the Blocks page inline Order input), is_default (bool default false), default_edited_at (timestamptz), default_edited_by (uuid references users(id)), default_action (text: 'edited' \| 'deleted'), default_acknowledged (bool default false), default_acknowledged_at (timestamptz), created_at (timestamptz), updated_at (timestamptz NOT NULL default now() — auto-set on every UPDATE via the `blocks_updated_at_trigger` Postgres trigger; do not write client-side), updated_by (uuid references users(id), nullable — application-managed; PATCH `/api/admin/blocks/[id]` stamps it from `authCtx.owner_id` on every write; null for legacy rows) |
 | `topics` | id, tenant_id, type, name |
 | `content` | id, owner_id, tenant_id, block_id, type, name, raw, storage_path |
-| `chat_sessions` | id, tenant_id, visitor_name, messages, status, message_count, session_type (text default 'prospect': 'prospect' \| 'composer' \| 'client'), session_subtype (text nullable: 'block' \| 'wizard'), block_id (uuid references blocks(id)) |
-| `chat_corrections` | id, session_id, tenant_id, block_id, jeff_note |
+| `chat_sessions` | id, tenant_id, visitor_name, messages, status, message_count (integer, GENERATED ALWAYS AS `jsonb_array_length(messages)` STORED — read-only, always reflects messages array length), session_type (text default 'prospect': 'prospect' \| 'composer' \| 'client'), session_subtype (text nullable: 'block' \| 'wizard'), block_id (uuid references blocks(id)), reviewed (boolean NOT NULL default false — owner-set triage flag indicating whether Jeff has reviewed this chat), input_tokens (integer NOT NULL default 0 — cumulative input tokens consumed by this session, visitor + system), output_tokens (integer NOT NULL default 0 — cumulative output tokens generated by Sage in this session), corrective_feedback (text, nullable — non-canonical, slated for retirement when reinforcement loop ships; canonical store is the `chat_corrections` table) |
+| `chat_corrections` | id, session_id, tenant_id, block_id, jeff_note. Documented and exists in DB but currently unused — reserved for the reinforcement loop sprint. |
 | `do_not_engage` | id, owner_id, tenant_id, content, version |
 | `master_prompt` | id, tenant_id, content, version, safety_check_result, updated_at (timestamptz), last_safety_check (timestamptz) |
 | `master_prompt_history` | id, prompt_id, tenant_id, content, version |

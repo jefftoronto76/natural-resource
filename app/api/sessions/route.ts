@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { getTenantFromRequest } from '@/lib/get-tenant-from-request'
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -8,13 +9,28 @@ function getAdminClient() {
   return createClient(url!, key!)
 }
 
-export async function POST() {
+export async function POST(req: Request) {
   console.log('[sessions/route] POST called')
+
+  const tenantId = await getTenantFromRequest(req)
+  if (!tenantId) {
+    console.error('[sessions/route] tenant resolution failed for host:', req.headers.get('host'))
+    return NextResponse.json(
+      { error: 'Unable to resolve tenant for this domain' },
+      { status: 400 },
+    )
+  }
+
   const supabase = getAdminClient()
 
   const { data, error } = await supabase
     .from('chat_sessions')
-    .insert({ messages: [], status: 'active' })
+    .insert({
+      tenant_id: tenantId,
+      messages: [],
+      status: 'active',
+      session_type: 'prospect',
+    })
     .select('id')
     .single()
 
@@ -23,6 +39,6 @@ export async function POST() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  console.log('[sessions/route] created session:', data.id)
+  console.log('[sessions/route] created session:', data.id, '| tenant_id:', tenantId)
   return NextResponse.json({ id: data.id })
 }
