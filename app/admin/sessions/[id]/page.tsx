@@ -174,6 +174,11 @@ export default async function SessionPage({
         </div>
       )}
 
+      {/*
+        TODO(reinforcement-loop): this reads chat_sessions.corrective_feedback
+        which is non-canonical. Wire to chat_corrections table when
+        reinforcement loop sprint ships. Do not delete — preserves UI intent.
+      */}
       {/* Corrective feedback (Step 5) */}
       {session.corrective_feedback && (
         <div style={{
