@@ -1,4 +1,4 @@
-import { streamText } from 'ai'
+import { streamText, generateText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { DEFAULT_SYSTEM_PROMPT } from '@/lib/sage-prompt'
@@ -19,31 +19,62 @@ interface SageParameterRow {
   url: string | null
 }
 
-// Server-side first-name extraction from Sage's assembled reply. Conservative
-// by design: only fires on a small set of explicit acknowledgement phrases
-// followed by a capitalized token, with a stopword list to filter generics.
-// False negatives (no write) are preferred over false positives (wrong name
-// persisted to the row). Patterns sit close to where they're called so the
-// behaviour is reviewable in one place.
-const NAME_STOPWORDS: ReadonlySet<string> = new Set([
-  'There', 'Everyone', 'Everybody', 'Anyone', 'Friend', 'Friends',
-  'Folks', 'Guys', 'Sir', 'Madam', 'You', 'Back', 'Again',
-])
+// Server-side first-name extraction. A single Haiku call against the last
+// few turns of the conversation is cheaper to maintain than a regex tree and
+// covers the four scenarios (visitor names self up-front, visitor responds
+// to a name-ask, visitor ignores, visitor names self mid-conversation).
+// Cost is bounded by the chat_sessions.visitor_name pre-check in onFinish:
+// once captured, no further Haiku calls fire for that session.
+const HAIKU_NAME_EXTRACTOR_SYSTEM =
+  "You are extracting one piece of structured data. Given the conversation below, return ONLY the visitor's first name if they have clearly stated it. If the name is unstated or unclear, return the word EMPTY and nothing else. No punctuation, no explanation."
 
-const NAME_PATTERNS: ReadonlyArray<RegExp> = [
-  /(?:[Gg]ood to meet you|[Nn]ice to meet you|[Pp]leased to meet you|[Ll]ovely to meet you)[,!\s]+([A-Z][a-z]{1,30})\b/,
-  /(?:[Tt]hanks for sharing|[Ww]elcome|[Aa]ppreciate that)[,!\s]+([A-Z][a-z]{1,30})\b/,
-  /(?:^|[.!?\n]\s+)(?:[Hh]ey|[Hh]i|[Hh]ello)(?:\s+there)?[,!\s]+([A-Z][a-z]{1,30})\b/,
-]
-
-function extractFirstName(text: string): string | null {
-  for (const pattern of NAME_PATTERNS) {
-    const match = pattern.exec(text)
-    if (match && typeof match[1] === 'string' && !NAME_STOPWORDS.has(match[1])) {
-      return match[1]
-    }
+function isPlausibleName(candidate: string): boolean {
+  if (candidate.length < 2 || candidate.length > 30) return false
+  if (!/^[A-Z][a-zA-Z'-]+$/.test(candidate)) return false
+  const upper = candidate.toUpperCase()
+  if (
+    upper === 'EMPTY' ||
+    upper === 'NONE' ||
+    upper === 'UNKNOWN' ||
+    upper === 'VISITOR' ||
+    upper === 'USER'
+  ) {
+    return false
   }
-  return null
+  return true
+}
+
+async function extractNameWithHaiku(
+  recentMessages: { role: 'user' | 'assistant'; content: string }[],
+): Promise<string | null> {
+  try {
+    const conversationStr = recentMessages
+      .map(m => `${m.role === 'user' ? 'Visitor' : 'Sage'}: ${m.content}`)
+      .join('\n\n')
+
+    const result = await generateText({
+      model: anthropic('claude-haiku-4-5'),
+      system: HAIKU_NAME_EXTRACTOR_SYSTEM,
+      messages: [{ role: 'user', content: conversationStr }],
+      maxTokens: 20,
+    })
+
+    const candidate = result.text.trim()
+    console.log('[sage/route] haiku extractor returned:', JSON.stringify(candidate))
+
+    if (candidate === 'EMPTY' || candidate.length === 0) return null
+    if (!isPlausibleName(candidate)) {
+      console.log('[sage/route] haiku candidate rejected by shape check:', candidate)
+      return null
+    }
+    return candidate
+  } catch (err) {
+    console.error(
+      '[sage/route] haiku extractor failed:',
+      err instanceof Error ? err.message : err,
+    )
+    return null
+  }
 }
 
 async function persistVisitorName(sessionId: string, name: string): Promise<void> {
@@ -239,12 +270,53 @@ export async function POST(req: Request) {
           console.log('[sage/route] onFinish: no session_id, skipping name extraction')
           return
         }
-        const name = extractFirstName(text)
-        if (!name) {
-          console.log('[sage/route] onFinish: no name pattern matched')
+
+        // Pre-check: skip the Haiku call entirely if visitor_name is already
+        // populated. This is what bounds extraction cost to ~one call per
+        // session in the steady state.
+        try {
+          const { data, error } = await getAdminClient()
+            .from('chat_sessions')
+            .select('visitor_name')
+            .eq('id', sessionId)
+            .maybeSingle()
+
+          if (error) {
+            console.error(
+              '[sage/route] onFinish: visitor_name pre-check failed:',
+              error.message,
+            )
+            return
+          }
+          if (!data) {
+            console.warn('[sage/route] onFinish: session not found:', sessionId)
+            return
+          }
+          if (typeof data.visitor_name === 'string' && data.visitor_name.length > 0) {
+            console.log('[sage/route] onFinish: visitor_name already set, skipping extraction')
+            return
+          }
+        } catch (err) {
+          console.error(
+            '[sage/route] onFinish: pre-check threw:',
+            err instanceof Error ? err.message : err,
+          )
           return
         }
-        console.log('[sage/route] onFinish: candidate name extracted:', name)
+
+        // Last 4 turns: up to 3 trailing entries from the conversation we
+        // sent in, plus the assistant message that just finished streaming.
+        const recent = [
+          ...conversationMessages.slice(-3),
+          { role: 'assistant' as const, content: text },
+        ].slice(-4)
+
+        const name = await extractNameWithHaiku(recent)
+        if (!name) {
+          console.log('[sage/route] onFinish: haiku extracted no name')
+          return
+        }
+        console.log('[sage/route] onFinish: haiku extracted candidate:', name)
         await persistVisitorName(sessionId, name)
       },
     })
