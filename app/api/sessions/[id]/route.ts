@@ -19,25 +19,19 @@ export async function PATCH(
 
   const supabase = getAdminClient()
 
-  // Both `messages` and `visitorName` are independently optional on this
-  // route. The Chat client typically PATCHes `messages` (and `visitorName:
-  // null`) after each turn; the record_visitor_name tool in /api/sage
-  // PATCHes `visitorName` only. Build the update payload conditionally so
-  // partial PATCHes don't clobber the other field.
+  // Only write visitor_name when the client sends a non-empty string. The
+  // server-side name extractor in /api/sage may have already populated it
+  // from Sage's response, and client PATCHes still send `visitorName: null`
+  // until front-end name capture lands — so unconditionally writing would
+  // clobber the server's value.
   const trimmedName = typeof visitorName === 'string' ? visitorName.trim() : ''
-  const update: {
-    messages?: unknown
-    visitor_name?: string
-    updated_at: string
-  } = {
+  const baseUpdate = {
+    messages,
     updated_at: new Date().toISOString(),
   }
-  if (Array.isArray(messages)) {
-    update.messages = messages
-  }
-  if (trimmedName.length > 0) {
-    update.visitor_name = trimmedName
-  }
+  const update = trimmedName.length > 0
+    ? { ...baseUpdate, visitor_name: trimmedName }
+    : baseUpdate
 
   const { error } = await supabase
     .from('chat_sessions')
