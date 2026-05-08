@@ -47,10 +47,14 @@ function isPlausibleName(candidate: string): boolean {
 async function extractNameWithHaiku(
   recentMessages: { role: 'user' | 'assistant'; content: string }[],
 ): Promise<string | null> {
+  console.log('[sage/route] extractNameWithHaiku entry — message_count:', recentMessages.length)
   try {
     const conversationStr = recentMessages
       .map(m => `${m.role === 'user' ? 'Visitor' : 'Sage'}: ${m.content}`)
       .join('\n\n')
+
+    console.log('[sage/route] haiku conversation chars:', conversationStr.length)
+    console.log('[sage/route] haiku conversation preview:', conversationStr.slice(0, 500))
 
     const result = await generateText({
       model: anthropic('claude-haiku-4-5'),
@@ -59,11 +63,17 @@ async function extractNameWithHaiku(
       maxTokens: 20,
     })
 
+    console.log('[sage/route] haiku raw text:', JSON.stringify(result.text))
     const candidate = result.text.trim()
-    console.log('[sage/route] haiku extractor returned:', JSON.stringify(candidate))
+    console.log('[sage/route] haiku trimmed candidate:', JSON.stringify(candidate))
 
-    if (candidate === 'EMPTY' || candidate.length === 0) return null
-    if (!isPlausibleName(candidate)) {
+    if (candidate === 'EMPTY' || candidate.length === 0) {
+      console.log('[sage/route] haiku returned EMPTY/empty — no name')
+      return null
+    }
+    const passes = isPlausibleName(candidate)
+    console.log('[sage/route] haiku candidate', JSON.stringify(candidate), 'passes shape check:', passes)
+    if (!passes) {
       console.log('[sage/route] haiku candidate rejected by shape check:', candidate)
       return null
     }
@@ -78,6 +88,7 @@ async function extractNameWithHaiku(
 }
 
 async function persistVisitorName(sessionId: string, name: string): Promise<void> {
+  console.log('[sage/route] persistVisitorName entry:', { session_id: sessionId, name })
   try {
     const supabase = getAdminClient()
     const { data, error: selectError } = await supabase
@@ -266,6 +277,12 @@ export async function POST(req: Request) {
       messages: conversationMessages,
       maxTokens: 1000,
       onFinish: async ({ text }) => {
+        console.log('[sage/route] onFinish fired:', {
+          session_id: sessionId,
+          text_length: text.length,
+          text_preview: text.slice(0, 120),
+        })
+
         if (!sessionId) {
           console.log('[sage/route] onFinish: no session_id, skipping name extraction')
           return
@@ -293,9 +310,10 @@ export async function POST(req: Request) {
             return
           }
           if (typeof data.visitor_name === 'string' && data.visitor_name.length > 0) {
-            console.log('[sage/route] onFinish: visitor_name already set, skipping extraction')
+            console.log('[sage/route] onFinish: visitor_name already set, skipping extraction:', data.visitor_name)
             return
           }
+          console.log('[sage/route] onFinish: pre-check passed — visitor_name is currently null, proceeding to Haiku')
         } catch (err) {
           console.error(
             '[sage/route] onFinish: pre-check threw:',
@@ -311,12 +329,18 @@ export async function POST(req: Request) {
           { role: 'assistant' as const, content: text },
         ].slice(-4)
 
+        console.log('[sage/route] onFinish: recent messages for haiku:', {
+          count: recent.length,
+          shape: recent.map(m => ({ role: m.role, length: m.content.length, preview: m.content.slice(0, 80) })),
+        })
+
         const name = await extractNameWithHaiku(recent)
+        console.log('[sage/route] onFinish: extractNameWithHaiku returned:', name)
         if (!name) {
-          console.log('[sage/route] onFinish: haiku extracted no name')
+          console.log('[sage/route] onFinish: haiku extracted no name (or rejected by shape check)')
           return
         }
-        console.log('[sage/route] onFinish: haiku extracted candidate:', name)
+        console.log('[sage/route] onFinish: haiku extracted candidate:', name, '— calling persistVisitorName')
         await persistVisitorName(sessionId, name)
       },
     })
