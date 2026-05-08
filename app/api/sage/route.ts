@@ -19,6 +19,77 @@ interface SageParameterRow {
   url: string | null
 }
 
+// Server-side first-name extraction from Sage's assembled reply. Conservative
+// by design: only fires on a small set of explicit acknowledgement phrases
+// followed by a capitalized token, with a stopword list to filter generics.
+// False negatives (no write) are preferred over false positives (wrong name
+// persisted to the row). Patterns sit close to where they're called so the
+// behaviour is reviewable in one place.
+const NAME_STOPWORDS: ReadonlySet<string> = new Set([
+  'There', 'Everyone', 'Everybody', 'Anyone', 'Friend', 'Friends',
+  'Folks', 'Guys', 'Sir', 'Madam', 'You', 'Back', 'Again',
+])
+
+const NAME_PATTERNS: ReadonlyArray<RegExp> = [
+  /(?:[Gg]ood to meet you|[Nn]ice to meet you|[Pp]leased to meet you|[Ll]ovely to meet you)[,!\s]+([A-Z][a-z]{1,30})\b/,
+  /(?:[Tt]hanks for sharing|[Ww]elcome|[Aa]ppreciate that)[,!\s]+([A-Z][a-z]{1,30})\b/,
+  /(?:^|[.!?\n]\s+)(?:[Hh]ey|[Hh]i|[Hh]ello)(?:\s+there)?[,!\s]+([A-Z][a-z]{1,30})\b/,
+]
+
+function extractFirstName(text: string): string | null {
+  for (const pattern of NAME_PATTERNS) {
+    const match = pattern.exec(text)
+    if (match && typeof match[1] === 'string' && !NAME_STOPWORDS.has(match[1])) {
+      return match[1]
+    }
+  }
+  return null
+}
+
+async function persistVisitorName(sessionId: string, name: string): Promise<void> {
+  try {
+    const supabase = getAdminClient()
+    const { data, error: selectError } = await supabase
+      .from('chat_sessions')
+      .select('visitor_name')
+      .eq('id', sessionId)
+      .maybeSingle()
+
+    if (selectError) {
+      console.error('[sage/route] visitor_name select failed:', selectError.message)
+      return
+    }
+
+    if (!data) {
+      console.warn('[sage/route] visitor_name persist skipped — session not found:', sessionId)
+      return
+    }
+
+    if (data.visitor_name && data.visitor_name.length > 0) {
+      console.log('[sage/route] visitor_name already set, skipping write:', {
+        session_id: sessionId,
+        existing: data.visitor_name,
+        extracted: name,
+      })
+      return
+    }
+
+    const { error: updateError } = await supabase
+      .from('chat_sessions')
+      .update({ visitor_name: name })
+      .eq('id', sessionId)
+
+    if (updateError) {
+      console.error('[sage/route] visitor_name update failed:', updateError.message)
+      return
+    }
+
+    console.log('[sage/route] visitor_name written:', { session_id: sessionId, name })
+  } catch (err) {
+    console.error('[sage/route] persistVisitorName threw:', err instanceof Error ? err.message : err)
+  }
+}
+
 async function getBookingCardSection(tenantId: string): Promise<string> {
   try {
     const { data, error } = await getAdminClient()
@@ -108,7 +179,11 @@ export async function POST(req: Request) {
   const tenantId = await getTenantFromRequest(req)
   console.log('[sage/route] resolved tenant_id:', tenantId)
 
-  let body: { messages: { role: string; content: string }[]; mode?: string | null }
+  let body: {
+    messages: { role: string; content: string }[]
+    mode?: string | null
+    session_id?: string | null
+  }
   try {
     body = await req.json()
   } catch {
@@ -117,7 +192,11 @@ export async function POST(req: Request) {
 
   const { messages } = body
   const questionMode = body.mode === 'question'
-  console.log('[sage/route] mode:', questionMode ? 'question' : 'default')
+  const sessionId =
+    typeof body.session_id === 'string' && body.session_id.length > 0
+      ? body.session_id
+      : null
+  console.log('[sage/route] mode:', questionMode ? 'question' : 'default', '| session_id:', sessionId)
 
   let conversationMessages: { role: 'user' | 'assistant'; content: string }[]
 
@@ -155,6 +234,19 @@ export async function POST(req: Request) {
       system: systemPrompt,
       messages: conversationMessages,
       maxTokens: 1000,
+      onFinish: async ({ text }) => {
+        if (!sessionId) {
+          console.log('[sage/route] onFinish: no session_id, skipping name extraction')
+          return
+        }
+        const name = extractFirstName(text)
+        if (!name) {
+          console.log('[sage/route] onFinish: no name pattern matched')
+          return
+        }
+        console.log('[sage/route] onFinish: candidate name extracted:', name)
+        await persistVisitorName(sessionId, name)
+      },
     })
     return result.toDataStreamResponse()
   } catch (error) {
