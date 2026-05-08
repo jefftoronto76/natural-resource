@@ -401,7 +401,7 @@ export function Chat() {
     try {
       await streamSageResponse(msgsToSend, (chunk: string) => {
         updateLastMessage(chunk)
-      }, { mode })
+      }, { mode, sessionId: activeSessionId })
     } catch (error) {
       updateLastMessage('')
       setIsError(true)
@@ -432,7 +432,7 @@ export function Chat() {
     try {
       await streamSageResponse(retryMsgsRef.current, (chunk: string) => {
         updateLastMessage(chunk)
-      }, { mode })
+      }, { mode, sessionId: retrySessionIdRef.current })
     } catch (error) {
       updateLastMessage('')
       setIsError(true)

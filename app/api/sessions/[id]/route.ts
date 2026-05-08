@@ -19,13 +19,23 @@ export async function PATCH(
 
   const supabase = getAdminClient()
 
+  // Only write visitor_name when the client sends a non-empty string. The
+  // server-side name extractor in /api/sage may have already populated it
+  // from Sage's response, and client PATCHes still send `visitorName: null`
+  // until front-end name capture lands — so unconditionally writing would
+  // clobber the server's value.
+  const trimmedName = typeof visitorName === 'string' ? visitorName.trim() : ''
+  const baseUpdate = {
+    messages,
+    updated_at: new Date().toISOString(),
+  }
+  const update = trimmedName.length > 0
+    ? { ...baseUpdate, visitor_name: trimmedName }
+    : baseUpdate
+
   const { error } = await supabase
     .from('chat_sessions')
-    .update({
-      messages,
-      visitor_name: visitorName ?? null,
-      updated_at: new Date().toISOString(),
-    })
+    .update(update)
     .eq('id', id)
 
   if (error) {

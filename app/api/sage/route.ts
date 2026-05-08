@@ -1,4 +1,4 @@
-import { streamText } from 'ai'
+import { streamText, generateText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { DEFAULT_SYSTEM_PROMPT } from '@/lib/sage-prompt'
@@ -17,6 +17,108 @@ interface SageParameterRow {
   description: string | null
   cta_label: string | null
   url: string | null
+}
+
+// Server-side first-name extraction. A single Haiku call against the last
+// few turns of the conversation is cheaper to maintain than a regex tree and
+// covers the four scenarios (visitor names self up-front, visitor responds
+// to a name-ask, visitor ignores, visitor names self mid-conversation).
+// Cost is bounded by the chat_sessions.visitor_name pre-check in onFinish:
+// once captured, no further Haiku calls fire for that session.
+const HAIKU_NAME_EXTRACTOR_SYSTEM =
+  "You are extracting one piece of structured data. Given the conversation below, return ONLY the visitor's first name if they have clearly stated it. If the name is unstated or unclear, return the word EMPTY and nothing else. No punctuation, no explanation."
+
+function isPlausibleName(candidate: string): boolean {
+  if (candidate.length < 2 || candidate.length > 30) return false
+  if (!/^[A-Z][a-zA-Z'-]+$/.test(candidate)) return false
+  const upper = candidate.toUpperCase()
+  if (
+    upper === 'EMPTY' ||
+    upper === 'NONE' ||
+    upper === 'UNKNOWN' ||
+    upper === 'VISITOR' ||
+    upper === 'USER'
+  ) {
+    return false
+  }
+  return true
+}
+
+async function extractNameWithHaiku(
+  recentMessages: { role: 'user' | 'assistant'; content: string }[],
+): Promise<string | null> {
+  try {
+    const conversationStr = recentMessages
+      .map(m => `${m.role === 'user' ? 'Visitor' : 'Sage'}: ${m.content}`)
+      .join('\n\n')
+
+    const result = await generateText({
+      model: anthropic('claude-haiku-4-5'),
+      system: HAIKU_NAME_EXTRACTOR_SYSTEM,
+      messages: [{ role: 'user', content: conversationStr }],
+      maxTokens: 20,
+    })
+
+    const candidate = result.text.trim()
+    console.log('[sage/route] haiku extractor returned:', JSON.stringify(candidate))
+
+    if (candidate === 'EMPTY' || candidate.length === 0) return null
+    if (!isPlausibleName(candidate)) {
+      console.log('[sage/route] haiku candidate rejected by shape check:', candidate)
+      return null
+    }
+    return candidate
+  } catch (err) {
+    console.error(
+      '[sage/route] haiku extractor failed:',
+      err instanceof Error ? err.message : err,
+    )
+    return null
+  }
+}
+
+async function persistVisitorName(sessionId: string, name: string): Promise<void> {
+  try {
+    const supabase = getAdminClient()
+    const { data, error: selectError } = await supabase
+      .from('chat_sessions')
+      .select('visitor_name')
+      .eq('id', sessionId)
+      .maybeSingle()
+
+    if (selectError) {
+      console.error('[sage/route] visitor_name select failed:', selectError.message)
+      return
+    }
+
+    if (!data) {
+      console.warn('[sage/route] visitor_name persist skipped — session not found:', sessionId)
+      return
+    }
+
+    if (data.visitor_name && data.visitor_name.length > 0) {
+      console.log('[sage/route] visitor_name already set, skipping write:', {
+        session_id: sessionId,
+        existing: data.visitor_name,
+        extracted: name,
+      })
+      return
+    }
+
+    const { error: updateError } = await supabase
+      .from('chat_sessions')
+      .update({ visitor_name: name })
+      .eq('id', sessionId)
+
+    if (updateError) {
+      console.error('[sage/route] visitor_name update failed:', updateError.message)
+      return
+    }
+
+    console.log('[sage/route] visitor_name written:', { session_id: sessionId, name })
+  } catch (err) {
+    console.error('[sage/route] persistVisitorName threw:', err instanceof Error ? err.message : err)
+  }
 }
 
 async function getBookingCardSection(tenantId: string): Promise<string> {
@@ -108,7 +210,11 @@ export async function POST(req: Request) {
   const tenantId = await getTenantFromRequest(req)
   console.log('[sage/route] resolved tenant_id:', tenantId)
 
-  let body: { messages: { role: string; content: string }[]; mode?: string | null }
+  let body: {
+    messages: { role: string; content: string }[]
+    mode?: string | null
+    session_id?: string | null
+  }
   try {
     body = await req.json()
   } catch {
@@ -117,7 +223,11 @@ export async function POST(req: Request) {
 
   const { messages } = body
   const questionMode = body.mode === 'question'
-  console.log('[sage/route] mode:', questionMode ? 'question' : 'default')
+  const sessionId =
+    typeof body.session_id === 'string' && body.session_id.length > 0
+      ? body.session_id
+      : null
+  console.log('[sage/route] mode:', questionMode ? 'question' : 'default', '| session_id:', sessionId)
 
   let conversationMessages: { role: 'user' | 'assistant'; content: string }[]
 
@@ -155,6 +265,60 @@ export async function POST(req: Request) {
       system: systemPrompt,
       messages: conversationMessages,
       maxTokens: 1000,
+      onFinish: async ({ text }) => {
+        if (!sessionId) {
+          console.log('[sage/route] onFinish: no session_id, skipping name extraction')
+          return
+        }
+
+        // Pre-check: skip the Haiku call entirely if visitor_name is already
+        // populated. This is what bounds extraction cost to ~one call per
+        // session in the steady state.
+        try {
+          const { data, error } = await getAdminClient()
+            .from('chat_sessions')
+            .select('visitor_name')
+            .eq('id', sessionId)
+            .maybeSingle()
+
+          if (error) {
+            console.error(
+              '[sage/route] onFinish: visitor_name pre-check failed:',
+              error.message,
+            )
+            return
+          }
+          if (!data) {
+            console.warn('[sage/route] onFinish: session not found:', sessionId)
+            return
+          }
+          if (typeof data.visitor_name === 'string' && data.visitor_name.length > 0) {
+            console.log('[sage/route] onFinish: visitor_name already set, skipping extraction')
+            return
+          }
+        } catch (err) {
+          console.error(
+            '[sage/route] onFinish: pre-check threw:',
+            err instanceof Error ? err.message : err,
+          )
+          return
+        }
+
+        // Last 4 turns: up to 3 trailing entries from the conversation we
+        // sent in, plus the assistant message that just finished streaming.
+        const recent = [
+          ...conversationMessages.slice(-3),
+          { role: 'assistant' as const, content: text },
+        ].slice(-4)
+
+        const name = await extractNameWithHaiku(recent)
+        if (!name) {
+          console.log('[sage/route] onFinish: haiku extracted no name')
+          return
+        }
+        console.log('[sage/route] onFinish: haiku extracted candidate:', name)
+        await persistVisitorName(sessionId, name)
+      },
     })
     return result.toDataStreamResponse()
   } catch (error) {
