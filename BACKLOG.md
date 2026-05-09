@@ -236,3 +236,28 @@ the expanded row consolidation lands.
       label + Switch combination is wider than the "Status" header
       text above it; visual centering looks off. Adjust column
       width or label sizing.
+
+## Sage capture & onboarding
+
+- [ ] **Transition visitor name capture to full LLM.** Replace the
+      Haiku extractor in `app/api/sage/route.ts` with direct tool
+      use from Sage — when she learns the visitor's name during
+      conversation, she calls a `record_visitor_name` tool herself
+      rather than relying on a second-pass extractor reading the
+      transcript after each turn. Removes the per-turn Haiku call,
+      consolidates capture into a single model, and gives Sage
+      explicit awareness of when the name was captured.
+
+- [ ] **Custom pill URL parameters.** Ability to pass a URL
+      parameter that pre-seeds chat suggestion pills for campaigns
+      and referral links. Marketing can deep-link visitors into
+      Sage with a tailored set of starter prompts (e.g.
+      `?pills=coaching,team-offsite`) without changing the master
+      prompt or admin config per campaign.
+
+- [ ] **Custom pills in admin.** Configure suggestion pills and
+      their linked blocks per tenant. Admin UI to define the pill
+      label, the prompt that fires on click, and the block(s) that
+      should be activated for that conversation path. Pairs with
+      the URL-parameter feature above — admin defines the catalog,
+      URL params select which subset to show.
