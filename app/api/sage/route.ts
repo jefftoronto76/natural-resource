@@ -55,7 +55,10 @@ function scanForCalendarOffer(text: string): boolean {
 
 async function extractNameWithHaiku(
   recentMessages: { role: 'user' | 'assistant'; content: string }[],
-): Promise<string | null> {
+): Promise<{
+  name: string | null
+  usage: { promptTokens: number; completionTokens: number } | null
+}> {
   try {
     const conversationStr = recentMessages
       .map(m => `${m.role === 'user' ? 'Visitor' : 'Sage'}: ${m.content}`)
@@ -68,10 +71,15 @@ async function extractNameWithHaiku(
       maxTokens: 20,
     })
 
-    const raw = result.text.trim()
-    console.log('[sage/route] haiku extractor returned:', JSON.stringify(raw))
+    const usage = {
+      promptTokens: result.usage.promptTokens,
+      completionTokens: result.usage.completionTokens,
+    }
 
-    if (raw === 'EMPTY' || raw.length === 0) return null
+    const raw = result.text.trim()
+    console.log('[sage/route] haiku extractor returned:', JSON.stringify(raw), '| usage:', usage)
+
+    if (raw === 'EMPTY' || raw.length === 0) return { name: null, usage }
 
     // Titlecase before the shape check. Haiku tends to preserve the
     // visitor's casing ("ronald" stays "ronald"), but isPlausibleName
@@ -80,15 +88,15 @@ async function extractNameWithHaiku(
 
     if (!isPlausibleName(candidate)) {
       console.log('[sage/route] haiku candidate rejected by shape check:', candidate)
-      return null
+      return { name: null, usage }
     }
-    return candidate
+    return { name: candidate, usage }
   } catch (err) {
     console.error(
       '[sage/route] haiku extractor failed:',
       err instanceof Error ? err.message : err,
     )
-    return null
+    return { name: null, usage: null }
   }
 }
 
@@ -153,6 +161,64 @@ async function persistCalendarOffered(sessionId: string): Promise<void> {
   } catch (err) {
     console.error(
       '[sage/route] persistCalendarOffered threw:',
+      err instanceof Error ? err.message : err,
+    )
+  }
+}
+
+// Increments the cumulative input_tokens / output_tokens counters on the
+// session row by the given deltas. Read-modify-write — fine for a single
+// visitor's serialized turns; not safe under concurrent writes for the
+// same session, but no caller produces that pattern.
+async function persistTokenUsage(
+  sessionId: string,
+  inputDelta: number,
+  outputDelta: number,
+): Promise<void> {
+  if (inputDelta <= 0 && outputDelta <= 0) return
+  try {
+    const supabase = getAdminClient()
+    const { data, error: selectError } = await supabase
+      .from('chat_sessions')
+      .select('input_tokens, output_tokens')
+      .eq('id', sessionId)
+      .maybeSingle()
+
+    if (selectError) {
+      console.error('[sage/route] token usage select failed:', selectError.message)
+      return
+    }
+
+    if (!data) {
+      console.warn('[sage/route] token usage skipped — session not found:', sessionId)
+      return
+    }
+
+    const currentInput = typeof data.input_tokens === 'number' ? data.input_tokens : 0
+    const currentOutput = typeof data.output_tokens === 'number' ? data.output_tokens : 0
+    const nextInput = currentInput + Math.max(0, Math.floor(inputDelta))
+    const nextOutput = currentOutput + Math.max(0, Math.floor(outputDelta))
+
+    const { error: updateError } = await supabase
+      .from('chat_sessions')
+      .update({ input_tokens: nextInput, output_tokens: nextOutput })
+      .eq('id', sessionId)
+
+    if (updateError) {
+      console.error('[sage/route] token usage update failed:', updateError.message)
+      return
+    }
+
+    console.log('[sage/route] token usage written:', {
+      session_id: sessionId,
+      input_delta: inputDelta,
+      output_delta: outputDelta,
+      input_total: nextInput,
+      output_total: nextOutput,
+    })
+  } catch (err) {
+    console.error(
+      '[sage/route] persistTokenUsage threw:',
       err instanceof Error ? err.message : err,
     )
   }
@@ -302,10 +368,16 @@ export async function POST(req: Request) {
       system: systemPrompt,
       messages: conversationMessages,
       maxTokens: 1000,
-      onFinish: async ({ text }) => {
+      onFinish: async ({ text, usage }) => {
         if (!sessionId) {
           console.log('[sage/route] onFinish: no session_id, skipping detection flows')
           return
+        }
+
+        // Token usage — main streamText turn. Persisted before any other
+        // flow so its short-circuits cannot bypass the metric.
+        if (usage) {
+          await persistTokenUsage(sessionId, usage.promptTokens, usage.completionTokens)
         }
 
         // Calendar offer detection. Pre-check bounds cost: once true for a
@@ -383,7 +455,14 @@ export async function POST(req: Request) {
           { role: 'assistant' as const, content: text },
         ].slice(-4)
 
-        const name = await extractNameWithHaiku(recent)
+        const { name, usage: haikuUsage } = await extractNameWithHaiku(recent)
+        if (haikuUsage) {
+          await persistTokenUsage(
+            sessionId,
+            haikuUsage.promptTokens,
+            haikuUsage.completionTokens,
+          )
+        }
         if (!name) {
           console.log('[sage/route] onFinish: haiku extracted no name')
           return
