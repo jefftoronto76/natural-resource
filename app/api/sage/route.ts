@@ -44,6 +44,15 @@ function isPlausibleName(candidate: string): boolean {
   return true
 }
 
+// Detects whether Sage offered a calendar/booking link in the streamed
+// assistant message. Two shapes are covered: the structured booking card
+// (always emitted on its own line at the end of a message) and a raw
+// calendly.com URL in prose (escape hatch for the discovery-call link
+// referenced from DEFAULT_SYSTEM_PROMPT).
+function scanForCalendarOffer(text: string): boolean {
+  return /\[BOOKING:[^\]]*\]/.test(text) || /calendly\.com/i.test(text)
+}
+
 async function extractNameWithHaiku(
   recentMessages: { role: 'user' | 'assistant'; content: string }[],
 ): Promise<string | null> {
@@ -124,6 +133,28 @@ async function persistVisitorName(sessionId: string, name: string): Promise<void
     console.log('[sage/route] visitor_name written:', { session_id: sessionId, name })
   } catch (err) {
     console.error('[sage/route] persistVisitorName threw:', err instanceof Error ? err.message : err)
+  }
+}
+
+async function persistCalendarOffered(sessionId: string): Promise<void> {
+  try {
+    const supabase = getAdminClient()
+    const { error } = await supabase
+      .from('chat_sessions')
+      .update({ calendar_offered: true })
+      .eq('id', sessionId)
+
+    if (error) {
+      console.error('[sage/route] calendar_offered update failed:', error.message)
+      return
+    }
+
+    console.log('[sage/route] calendar_offered written:', { session_id: sessionId })
+  } catch (err) {
+    console.error(
+      '[sage/route] persistCalendarOffered threw:',
+      err instanceof Error ? err.message : err,
+    )
   }
 }
 
@@ -273,8 +304,43 @@ export async function POST(req: Request) {
       maxTokens: 1000,
       onFinish: async ({ text }) => {
         if (!sessionId) {
-          console.log('[sage/route] onFinish: no session_id, skipping name extraction')
+          console.log('[sage/route] onFinish: no session_id, skipping detection flows')
           return
+        }
+
+        // Calendar offer detection. Pre-check bounds cost: once true for a
+        // session, no further scans fire. Self-contained try/catch so a
+        // failure here does not abort the visitor_name flow below.
+        try {
+          const { data, error } = await getAdminClient()
+            .from('chat_sessions')
+            .select('calendar_offered')
+            .eq('id', sessionId)
+            .maybeSingle()
+
+          if (error) {
+            console.error(
+              '[sage/route] onFinish: calendar_offered pre-check failed:',
+              error.message,
+            )
+          } else if (!data) {
+            console.warn(
+              '[sage/route] onFinish: session not found for calendar pre-check:',
+              sessionId,
+            )
+          } else if (data.calendar_offered === true) {
+            console.log(
+              '[sage/route] onFinish: calendar_offered already set, skipping scan',
+            )
+          } else if (scanForCalendarOffer(text)) {
+            console.log('[sage/route] onFinish: calendar offer detected in assistant text')
+            await persistCalendarOffered(sessionId)
+          }
+        } catch (err) {
+          console.error(
+            '[sage/route] onFinish: calendar_offered detection threw:',
+            err instanceof Error ? err.message : err,
+          )
         }
 
         // Pre-check: skip the Haiku call entirely if visitor_name is already
