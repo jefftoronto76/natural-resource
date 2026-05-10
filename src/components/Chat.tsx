@@ -1,262 +1,18 @@
 'use client'
 
 import { useRef, useEffect, KeyboardEvent, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
 import { useSageStore } from '../lib/store'
 import { streamSageResponse } from '../lib/sage'
 import { useReveal } from '@/hooks/useReveal'
+import { parseBookingCards } from './sage/parseBookingCards'
+import { SageReply } from './sage/SageReply'
+import { useSageParameters } from './sage/useSageParameters'
 
-type OpenAs = 'new_tab' | 'popup'
-
-interface BookingCardData {
-  label: string
-  description: string
-  ctaLabel: string
-  url: string
-}
-
-interface SageParameterPublic {
-  key: string
-  label: string | null
-  description: string | null
-  cta_label: string | null
-  url: string | null
-  open_as: OpenAs
-  embed_code: string | null
-}
-
-interface BookingCardProps extends BookingCardData {
-  openAs: OpenAs
-  embedCode: string | null
-}
-
-// Matches a completed booking-card line: [BOOKING: label | description | cta | url]
-const BOOKING_REGEX = /\[BOOKING:\s*([^|\]]*)\|\s*([^|\]]*)\|\s*([^|\]]*)\|\s*([^\]]*)\]/g
-
-function detectModeFromLocation(): 'question' | null {
-  if (typeof window === 'undefined') return null
-  const hash = window.location.hash
-  const hashQueryStart = hash.indexOf('?')
-  const hashParams =
-    hashQueryStart >= 0 ? new URLSearchParams(hash.slice(hashQueryStart + 1)) : null
-  const searchParams = new URLSearchParams(window.location.search)
-  const value = hashParams?.get('mode') ?? searchParams.get('mode')
-  return value === 'question' ? 'question' : null
-}
-
-function parseBookingCards(content: string): { prose: string; cards: BookingCardData[] } {
-  const cards: BookingCardData[] = []
-  let prose = content.replace(
-    BOOKING_REGEX,
-    (_match, label: string, description: string, ctaLabel: string, url: string) => {
-      cards.push({
-        label: label.trim(),
-        description: description.trim(),
-        ctaLabel: ctaLabel.trim(),
-        url: url.trim(),
-      })
-      return ''
-    },
-  )
-  // Strip an incomplete [BOOKING:... fragment still streaming (no closing bracket yet)
-  prose = prose.replace(/\[BOOKING:[^\]]*$/, '')
-  // Collapse extra blank lines left behind by removed cards
-  prose = prose.replace(/\n{3,}/g, '\n\n').trim()
-  return { prose, cards }
-}
-
-// Injects an embed snippet into a target element, re-materializing <script>
-// tags so they execute (setting innerHTML alone does NOT execute scripts).
-// Handles both pure inline JS and HTML fragments containing <script src="...">.
-function injectInlineEmbed(target: HTMLElement, embedCode: string): void {
-  const trimmed = embedCode.trim()
-  if (!trimmed) return
-
-  const hasScriptTag = /<script[\s>]/i.test(trimmed)
-  if (!hasScriptTag) {
-    const script = document.createElement('script')
-    script.text = trimmed
-    target.appendChild(script)
-    return
-  }
-
-  const temp = document.createElement('div')
-  temp.innerHTML = trimmed
-  Array.from(temp.childNodes).forEach(node => {
-    if (node.nodeType !== 1) {
-      target.appendChild(node.cloneNode(true))
-      return
-    }
-    if (node.nodeName === 'SCRIPT') {
-      const original = node as HTMLScriptElement
-      const script = document.createElement('script')
-      if (original.src) {
-        script.src = original.src
-        script.async = original.async
-        script.defer = original.defer
-      } else {
-        script.text = original.textContent ?? ''
-      }
-      for (const attr of Array.from(original.attributes)) {
-        if (attr.name !== 'src' && attr.name !== 'async' && attr.name !== 'defer') {
-          script.setAttribute(attr.name, attr.value)
-        }
-      }
-      target.appendChild(script)
-    } else if (node.nodeName === 'LINK') {
-      document.head.appendChild(node.cloneNode(true))
-    } else {
-      target.appendChild(node.cloneNode(true))
-    }
-  })
-}
-
-function BookingCard({ label, description, ctaLabel, url, openAs, embedCode }: BookingCardProps) {
-  const inlineRef = useRef<HTMLDivElement>(null)
-  const [inlineOpen, setInlineOpen] = useState(false)
-
-  const effectiveOpenAs: OpenAs =
-    openAs === 'popup' && (!embedCode || embedCode.trim().length === 0) ? 'new_tab' : openAs
-
-  const handleInlineClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    if (!embedCode) {
-      console.warn('[BookingCard] inline selected but embed_code missing — falling back to new tab')
-      if (url) window.open(url, '_blank', 'noopener,noreferrer')
-      return
-    }
-    if (inlineOpen) return
-    const target = inlineRef.current
-    if (!target) return
-    console.log('[BookingCard] injecting inline embed for', label || url)
-    setInlineOpen(true)
-    try {
-      injectInlineEmbed(target, embedCode)
-    } catch (err) {
-      console.error('[BookingCard] inline embed injection failed — falling back to new tab:', err)
-      setInlineOpen(false)
-      if (url) window.open(url, '_blank', 'noopener,noreferrer')
-    }
-  }
-
-  if (openAs === 'popup' && (!embedCode || embedCode.trim().length === 0)) {
-    console.warn('[BookingCard] inline requested without embed_code for', label || url)
-  }
-
-  const buttonClass =
-    'mt-3 inline-block rounded-md bg-[#2d6a4f] px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-white no-underline hover:opacity-90'
-
-  return (
-    <div className="w-full">
-      <div className="w-full rounded-lg border border-black/10 bg-white p-4 shadow-sm">
-        <p className="m-0 font-body text-base font-semibold text-[#1a1917]">{label}</p>
-        {description && (
-          <p className="mt-1 mb-0 font-body text-sm text-[#1a1917]/60">{description}</p>
-        )}
-        {effectiveOpenAs === 'popup' ? (
-          <button
-            type="button"
-            onClick={handleInlineClick}
-            disabled={inlineOpen}
-            className={`${buttonClass} cursor-pointer border-0 disabled:opacity-50`}
-          >
-            {ctaLabel || 'Book'}
-          </button>
-        ) : url ? (
-          <a href={url} target="_blank" rel="noopener noreferrer" className={buttonClass}>
-            {ctaLabel || 'Book'}
-          </a>
-        ) : null}
-      </div>
-      {effectiveOpenAs === 'new_tab' && (
-        <p className="mt-2 m-0 font-body text-xs text-[#1a1917]/55">
-          Heads up — clicking the button will open in a new tab to complete your booking.
-        </p>
-      )}
-      <div
-        ref={inlineRef}
-        aria-hidden={!inlineOpen}
-        className={`mt-2 w-full min-h-[700px] ${inlineOpen ? 'block' : 'hidden'}`}
-      />
-    </div>
-  )
-}
-
-const markdownComponents = {
-  p: ({ children }: any) => (
-    <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px', color: '#1a1917', margin: '0 0 12px 0' }}>
-      {children}
-    </p>
-  ),
-  strong: ({ children }: any) => (
-    <strong style={{ fontWeight: 600, color: '#1a1917' }}>{children}</strong>
-  ),
-  ul: ({ children }: any) => (
-    <ul style={{ paddingLeft: '16px', marginBottom: '12px', listStyleType: 'disc' }}>{children}</ul>
-  ),
-  ol: ({ children }: any) => (
-    <ol style={{ paddingLeft: '16px', marginBottom: '12px' }}>{children}</ol>
-  ),
-  li: ({ children }: any) => <li>{children}</li>,
-  pre: ({ children }: any) => <>{children}</>,
-  code: ({ children, className }: any) => {
-    const isBlock = Boolean(className?.startsWith('language-'))
-    return (
-      <code style={{
-        fontFamily: 'DM Mono, monospace',
-        fontSize: '13px',
-        background: 'rgba(26,25,23,0.06)',
-        padding: isBlock ? '8px' : '2px 4px',
-        borderRadius: isBlock ? '6px' : '3px',
-        display: isBlock ? 'block' : 'inline',
-        marginBottom: isBlock ? '12px' : '0',
-      }}>
-        {children}
-      </code>
-    )
-  },
-}
-
-function SageReply({
-  prose,
-  cards,
-  sageParameters,
-}: {
-  prose: string
-  cards: BookingCardData[]
-  sageParameters: SageParameterPublic[]
-}) {
-  if (!prose && cards.length === 0) return null
-
-  return (
-    <div
-      data-sage-role="assistant"
-      className="sage-animate max-w-[680px] border-l-2 border-accent/35 pl-4 [animation:sage-slide-up_0.28s_ease-out_both]"
-    >
-      {prose && (
-        <div className="font-display text-[18px] font-normal leading-[1.55] tracking-[-0.005em] text-[color:var(--color-text-primary)] [text-wrap:pretty]">
-          <ReactMarkdown components={markdownComponents}>{prose}</ReactMarkdown>
-        </div>
-      )}
-
-      {cards.length > 0 && (
-        <div className="mt-3 flex w-full flex-col gap-2">
-          {cards.map((card, i) => {
-            const match = sageParameters.find((p) => (p.url ?? '') === card.url)
-            return (
-              <BookingCard
-                key={`${card.url}-${i}`}
-                {...card}
-                openAs={match?.open_as ?? 'new_tab'}
-                embedCode={match?.embed_code ?? null}
-              />
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
+// NOTE: After the chat-first hero migration, the in-page hero owns the
+// composer and conversation list. The full-viewport overlay rendered
+// below is dormant — `isExpanded` is never flipped to true by the store
+// (expand() now scrolls-and-focuses the hero composer), so the overlay
+// JSX is unreachable and retained for follow-up cleanup.
 
 export function Chat() {
   const ref = useReveal()
@@ -277,45 +33,13 @@ export function Chat() {
   const [input, setInput] = useState('')
   const [isError, setIsError] = useState(false)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
-  const [sageParameters, setSageParameters] = useState<SageParameterPublic[]>([])
+  const sageParameters = useSageParameters()
 
-  // On fresh page load, auto-open the overlay in question mode when the URL
-  // carries ?mode=question. In-page nav (Work's "Click here") routes through
-  // expand('question') directly, so the URL is not the source of truth at
-  // runtime — it only seeds the initial mount.
-  // TODO: migrate to conditional block in Composer when activation_condition feature ships
-  useEffect(() => {
-    if (detectModeFromLocation() === 'question') {
-      expand('question')
-    }
-  }, [expand])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const retryMsgsRef = useRef<typeof messages>([])
   const retrySessionIdRef = useRef<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    console.log('[Chat] fetching sage parameters')
-    fetch('/api/sage/parameters')
-      .then(async r => {
-        if (!r.ok) {
-          console.error('[Chat] sage parameters fetch failed:', r.status)
-          return
-        }
-        const data: SageParameterPublic[] = await r.json()
-        if (cancelled) return
-        console.log('[Chat] sage parameters fetched:', data.length)
-        setSageParameters(data)
-      })
-      .catch(err => {
-        console.error('[Chat] sage parameters fetch threw:', err)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
 
   useEffect(() => {
     if (isExpanded) {
@@ -328,14 +52,11 @@ export function Chat() {
     }
   }, [isExpanded])
 
-  const messageListRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     if (!isExpanded) return
     messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
   }, [messages, isExpanded])
 
-  // On mobile keyboard open, resize overlay to match the actual visible area
   useEffect(() => {
     if (!isExpanded) return
     const vv = window.visualViewport
@@ -370,16 +91,12 @@ export function Chat() {
 
     setIsError(false)
     const userMsg = { role: 'user' as const, content: text }
-    // Capture messages before the state update — addMessage is async/batched
-    // and the closure `messages` won't include the just-added message.
-    // Build the full conversation to send explicitly, with a full SageMessage shape.
     const msgsToSend = [...messages, { ...userMsg, id: `${Date.now()}`, timestamp: Date.now() }]
     addMessage(userMsg)
     setInput('')
     setStreaming(true)
     addMessage({ role: 'assistant', content: '' })
 
-    // Create session row on the first user message
     let activeSessionId = sessionId
     if (!activeSessionId) {
       try {
@@ -410,7 +127,6 @@ export function Chat() {
     }
     setStreaming(false)
 
-    // Persist the completed conversation after each reply
     if (activeSessionId) {
       const { messages: finalMessages, visitorName } = useSageStore.getState()
       fetch(`/api/sessions/${activeSessionId}`, {
@@ -463,7 +179,8 @@ export function Chat() {
 
   return (
     <>
-      {/* Section always stays in the DOM — keeps #chat anchor and reveal working */}
+      {/* #chat anchor section — the green CTA now scrolls to #hero and focuses
+          the composer via the repurposed expand() in the store. */}
       <section
         id="chat"
         style={{
@@ -511,7 +228,7 @@ export function Chat() {
             fontWeight: 400,
             marginBottom: '40px',
           }}>
-            This AI knows Jeff's background. It'll give you a straight answer about whether it's a fit.
+            This AI knows Jeff&apos;s background. It&apos;ll give you a straight answer about whether it&apos;s a fit.
           </p>
 
           <button
@@ -558,7 +275,9 @@ export function Chat() {
         </div>
       </section>
 
-      {/* Full-viewport overlay — rendered on top, never replaces the section */}
+      {/* DORMANT — never renders after the chat-first migration because
+          isExpanded is never flipped to true by the store. Retained for
+          follow-up cleanup. */}
       {isExpanded && (
         <div ref={overlayRef} style={{
           position: 'fixed',
@@ -615,9 +334,9 @@ export function Chat() {
                 <div className="sage-animate max-w-[680px] border-l-2 border-accent/35 pl-4 [animation:sage-slide-up_0.28s_ease-out_both]">
                   <p className="mb-3 font-display font-normal leading-[1.15] tracking-[-0.01em] text-[color:var(--color-text-primary)] text-[clamp(26px,4vw,36px)]">
                     {mode === 'question' ? (
-                      <>Ask me anything about <em className="italic">Jeff's work</em>.</>
+                      <>Ask me anything about <em className="italic">Jeff&apos;s work</em>.</>
                     ) : (
-                      <>Hi, I'm Sage. <em className="italic">What brings you here?</em></>
+                      <>Hi, I&apos;m Sage. <em className="italic">What brings you here?</em></>
                     )}
                   </p>
                 </div>
@@ -698,7 +417,7 @@ export function Chat() {
               className="mt-2 text-center font-body text-[11px] text-[color:var(--color-text-muted)] transition-opacity duration-300"
               style={{ opacity: keyboardOpen ? 0 : 1 }}
             >
-              Sage knows Jeff's background and will give you a straight answer.
+              Sage knows Jeff&apos;s background and will give you a straight answer.
             </p>
           </div>
         </div>
