@@ -21,6 +21,8 @@ interface SessionRow {
   status: string | null
   updated_at: string | null
   created_at: string
+  input_tokens: number | null
+  output_tokens: number | null
 }
 
 export default async function AdminPage() {
@@ -34,7 +36,7 @@ export default async function AdminPage() {
       await Promise.all([
         supabase
           .from('chat_sessions')
-          .select('id, visitor_name, messages, status, updated_at, created_at')
+          .select('id, visitor_name, messages, status, updated_at, created_at, input_tokens, output_tokens')
           .eq('tenant_id', tenant_id)
           .eq('session_type', 'prospect')
           .order('updated_at', { ascending: false }),
