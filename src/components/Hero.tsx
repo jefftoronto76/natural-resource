@@ -68,6 +68,13 @@ export function Hero() {
     })
   }, [messages.length])
 
+  useEffect(() => {
+    const ta = textareaRef.current
+    if (!ta) return
+    ta.style.height = 'auto'
+    ta.style.height = Math.min(ta.scrollHeight, 140) + 'px'
+  }, [input])
+
   const send = async (override?: string) => {
     const text = (override ?? input).trim()
     if (!text || isStreaming) return
