@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Table, Badge, Box, Center, Group, Paper, Stack } from '@mantine/core'
 import { Text } from '@/components/admin/primitives/Text'
+import type { SessionStatus } from '@/lib/deriveSessionStatus'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-US', {
@@ -15,10 +16,27 @@ function formatDate(iso: string) {
   })
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  active: 'green',
-  completed: 'gray',
-  flagged: 'yellow',
+// Anthropic pricing (claude-sonnet-4-6) used for the Inbound Chats list cost
+// estimate: $3 / 1M input tokens, $15 / 1M output tokens. Approximate — does
+// not reflect cache discounts or fallback model usage.
+const INPUT_COST_PER_MILLION = 3
+const OUTPUT_COST_PER_MILLION = 15
+
+function formatTokens(input: number | null, output: number | null): string {
+  const total = (input ?? 0) + (output ?? 0)
+  return total.toLocaleString('en-US')
+}
+
+function formatCost(input: number | null, output: number | null): string {
+  const dollars =
+    ((input ?? 0) * INPUT_COST_PER_MILLION + (output ?? 0) * OUTPUT_COST_PER_MILLION) / 1_000_000
+  return `$${dollars.toFixed(4)}`
+}
+
+const STATUS_COLORS: Record<SessionStatus, string> = {
+  in_progress: 'green',
+  active: 'yellow',
+  abandoned: 'gray',
 }
 
 export interface ChatSession {
@@ -28,6 +46,9 @@ export interface ChatSession {
   status: string | null
   updated_at: string | null
   created_at: string
+  derived_status: SessionStatus
+  input_tokens: number | null
+  output_tokens: number | null
 }
 
 export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
@@ -50,6 +71,8 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
             <Table.Tr>
               <Table.Th>Visitor</Table.Th>
               <Table.Th>Messages</Table.Th>
+              <Table.Th>Tokens</Table.Th>
+              <Table.Th>Cost</Table.Th>
               <Table.Th>Status</Table.Th>
               <Table.Th>Last Active</Table.Th>
             </Table.Tr>
@@ -57,7 +80,7 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
           <Table.Tbody>
             {rows.map((session) => {
               const messageCount = Array.isArray(session.messages) ? session.messages.length : 0
-              const status = session.status ?? 'active'
+              const status = session.derived_status
               return (
                 <Table.Tr
                   key={session.id}
@@ -75,9 +98,19 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
                     </Text>
                   </Table.Td>
                   <Table.Td>
+                    <Text variant="muted" style={{ fontFamily: 'var(--mantine-font-family-monospace)' }}>
+                      {formatTokens(session.input_tokens, session.output_tokens)}
+                    </Text>
+                  </Table.Td>
+                  <Table.Td>
+                    <Text variant="muted" style={{ fontFamily: 'var(--mantine-font-family-monospace)' }}>
+                      {formatCost(session.input_tokens, session.output_tokens)}
+                    </Text>
+                  </Table.Td>
+                  <Table.Td>
                     <Badge
                       variant="light"
-                      color={STATUS_COLORS[status] ?? 'gray'}
+                      color={STATUS_COLORS[status]}
                       size="sm"
                       radius="sm"
                     >
@@ -100,7 +133,7 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
       <Stack gap="sm" hiddenFrom="md">
         {rows.map((session) => {
           const messageCount = Array.isArray(session.messages) ? session.messages.length : 0
-          const status = session.status ?? 'active'
+          const status = session.derived_status
           return (
             <Link
               key={session.id}
@@ -114,7 +147,7 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
                   </Text>
                   <Badge
                     variant="light"
-                    color={STATUS_COLORS[status] ?? 'gray'}
+                    color={STATUS_COLORS[status]}
                     size="sm"
                     radius="sm"
                   >
@@ -127,6 +160,14 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
                   </Text>
                   <Text variant="muted" style={{ fontFamily: 'var(--mantine-font-family-monospace)', fontSize: 'var(--mantine-font-size-xs)' }}>
                     {formatDate(session.updated_at ?? session.created_at)}
+                  </Text>
+                </Group>
+                <Group justify="space-between" mt={4}>
+                  <Text variant="muted" style={{ fontFamily: 'var(--mantine-font-family-monospace)', fontSize: 'var(--mantine-font-size-xs)' }}>
+                    {formatTokens(session.input_tokens, session.output_tokens)} tokens
+                  </Text>
+                  <Text variant="muted" style={{ fontFamily: 'var(--mantine-font-family-monospace)', fontSize: 'var(--mantine-font-size-xs)' }}>
+                    {formatCost(session.input_tokens, session.output_tokens)}
                   </Text>
                 </Group>
               </Paper>
