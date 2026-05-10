@@ -7,14 +7,6 @@ import { parseBookingCards } from './sage/parseBookingCards'
 import { SageReply } from './sage/SageReply'
 import { useSageParameters } from './sage/useSageParameters'
 
-const PROMPT_CHIPS: string[] = [
-  // TODO(jeff): finalize prompt chip copy
-  'Prompt chip 1',
-  'Prompt chip 2',
-  'Prompt chip 3',
-  'Prompt chip 4',
-]
-
 function detectModeFromLocation(): 'question' | null {
   if (typeof window === 'undefined') return null
   const hash = window.location.hash
@@ -38,6 +30,7 @@ export function Hero() {
     setSessionId,
     setMode,
     setComposerRef,
+    reset,
   } = useSageStore()
 
   const [input, setInput] = useState('')
@@ -45,21 +38,17 @@ export function Hero() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const composerWrapperRef = useRef<HTMLDivElement>(null)
   const retryMsgsRef = useRef<typeof messages>([])
   const retrySessionIdRef = useRef<string | null>(null)
 
   const sageParameters = useSageParameters()
 
-  // Register the composer textarea so the store can focus it from anywhere
-  // (Nav, Work CTA, #chat final-CTA, ?mode=question URL detection).
   useEffect(() => {
     setComposerRef(textareaRef)
     return () => setComposerRef(null)
   }, [setComposerRef])
 
-  // Bootstrap question mode from the URL on first mount, then focus the
-  // composer. Replaces the overlay-era expand('question') effect that lived
-  // in Chat.tsx.
   useEffect(() => {
     if (detectModeFromLocation() === 'question') {
       setMode('question')
@@ -69,10 +58,8 @@ export function Hero() {
     }
   }, [setMode])
 
-  const engaged = messages.length > 0
+  const isEngaged = messages.length > 0
 
-  // Scroll the latest message into view on append. Length-only deps so
-  // streaming token updates don't fight the user reading prior messages.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (messages.length === 0) return
@@ -81,15 +68,15 @@ export function Hero() {
     })
   }, [messages.length])
 
-  const send = async () => {
-    const text = input.trim()
+  const send = async (override?: string) => {
+    const text = (override ?? input).trim()
     if (!text || isStreaming) return
 
     setIsError(false)
     const userMsg = { role: 'user' as const, content: text }
     const msgsToSend = [...messages, { ...userMsg, id: `${Date.now()}`, timestamp: Date.now() }]
     addMessage(userMsg)
-    setInput('')
+    if (override === undefined) setInput('')
     setStreaming(true)
     addMessage({ role: 'assistant', content: '' })
 
@@ -166,136 +153,142 @@ export function Hero() {
     }
   }
 
-  const handleKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       send()
     }
   }
 
-  const handleChip = (chip: string) => {
-    setInput(chip)
-    textareaRef.current?.focus({ preventScroll: false })
-  }
-
   return (
     <section
       id="hero"
       data-screen-label="Hero"
-      className="stage"
-      data-engaged={engaged ? 'true' : 'false'}
+      className={isEngaged ? 'stage engaged' : 'stage'}
     >
-      <div className="stage-frame">
-        <p className="hero-eyebrow">
+      <div className="hero">
+        <button
+          type="button"
+          className="close-x"
+          aria-label="Close conversation"
+          onClick={() => reset()}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </button>
+
+        <p className="eyebrow">
           Performance-Driven, <span className="hilite">Heart-Led</span>
         </p>
 
-        <h1 className="hero-headline">
+        <h1>
           Better close rates.<br />
           Deeper relationships.<br />
-          <em style={{ fontStyle: 'italic', color: 'rgb(var(--color-accent))' }}>Revenue growth, made easier.</em>
+          <em>Revenue growth, made easier.</em>
         </h1>
 
-        <p className="hero-lede">
+        <p className="lede">
           Hi, I&apos;m Jeff.<br />
           I work hands-on with vertical market software companies — and the people running them — as an executive coach and fractional operator.
         </p>
+      </div>
 
-        <div className="hero-conversation" role="log" aria-live="polite">
-          {messages.length === 0 && (
-            <div className="sage-animate max-w-[680px] border-l-2 border-accent/35 pl-4 [animation:sage-slide-up_0.28s_ease-out_both]">
-              <p className="mb-3 font-display font-normal leading-[1.15] tracking-[-0.01em] text-[color:var(--color-text-primary)] text-[clamp(22px,3vw,30px)]">
-                {mode === 'question' ? (
-                  <>Ask me anything about <em className="italic">Jeff&apos;s work</em>.</>
-                ) : (
-                  <>Hi, I&apos;m Sage. <em className="italic">What brings you here?</em></>
-                )}
-              </p>
-            </div>
-          )}
-
-          {messages.map((msg) => {
-            if (msg.role === 'assistant' && !msg.content) return null
-            if (msg.role === 'user') {
-              return (
-                <div key={msg.id} className="flex justify-end">
-                  <p className="sage-visitor-msg sage-animate max-w-[560px] whitespace-pre-wrap text-right font-display text-[18px] italic leading-[1.5] text-[color:var(--color-text-muted)] [animation:sage-slide-up_0.24s_ease-out_both] [text-wrap:pretty]">
-                    {msg.content}
-                  </p>
-                </div>
-              )
-            }
-            const { prose, cards } = parseBookingCards(msg.content)
-            if (!prose && cards.length === 0) return null
+      <div className="flex flex-col gap-6 mt-4" role="log" aria-live="polite">
+        {messages.map((msg) => {
+          if (msg.role === 'assistant' && !msg.content) return null
+          if (msg.role === 'user') {
             return (
-              <SageReply
-                key={msg.id}
-                prose={prose}
-                cards={cards}
-                sageParameters={sageParameters}
-              />
+              <div key={msg.id} className="flex justify-end">
+                <p className="sage-visitor-msg sage-animate max-w-[560px] whitespace-pre-wrap text-right font-display text-[18px] italic leading-[1.5] text-[color:var(--color-text-muted)] [animation:sage-slide-up_0.24s_ease-out_both] [text-wrap:pretty]">
+                  {msg.content}
+                </p>
+              </div>
             )
-          })}
+          }
+          const { prose, cards } = parseBookingCards(msg.content)
+          if (!prose && cards.length === 0) return null
+          return (
+            <SageReply
+              key={msg.id}
+              prose={prose}
+              cards={cards}
+              sageParameters={sageParameters}
+            />
+          )
+        })}
 
-          {isError && !isStreaming && (
-            <div className="flex justify-start">
-              <div className="max-w-[70%] rounded-lg border border-black/[0.08] bg-surface p-4 font-body text-base leading-[1.7] text-[color:var(--color-text-primary)]">
-                Something went wrong. Please try again.
-                <button
-                  onClick={retryLastSend}
-                  className="mt-3 block rounded-md border border-black/[0.15] bg-transparent px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]"
-                >
-                  Retry
-                </button>
-              </div>
-            </div>
-          )}
-
-          {isStreaming && messages[messages.length - 1]?.content === '' && (
-            <div data-sage-streaming className="flex justify-start">
-              <div className="flex gap-1.5 rounded-lg border border-black/[0.08] bg-surface p-4">
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="h-1.5 w-1.5 rounded-full bg-accent"
-                    style={{ animation: `sage-pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        <div className="hero-composer">
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder={engaged ? 'Reply…' : 'Ask Sage anything about Jeff…'}
-            rows={1}
-            aria-label="Message Sage"
-          />
-          <button
-            type="button"
-            onClick={send}
-            disabled={isStreaming || !input.trim()}
-            aria-label="Send message"
-            className="hero-composer-send"
-          >
-            →
-          </button>
-        </div>
-
-        {!engaged && (
-          <div className="hero-prompt-chips">
-            {PROMPT_CHIPS.map((chip) => (
-              <button key={chip} type="button" onClick={() => handleChip(chip)}>
-                {chip}
+        {isError && !isStreaming && (
+          <div className="flex justify-start">
+            <div className="max-w-[70%] rounded-lg border border-black/[0.08] bg-surface p-4 font-body text-base leading-[1.7] text-[color:var(--color-text-primary)]">
+              Something went wrong. Please try again.
+              <button
+                onClick={retryLastSend}
+                className="mt-3 block rounded-md border border-black/[0.15] bg-transparent px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]"
+              >
+                Retry
               </button>
-            ))}
+            </div>
+          </div>
+        )}
+
+        {isStreaming && messages[messages.length - 1]?.content === '' && (
+          <div data-sage-streaming className="flex justify-start">
+            <div className="flex gap-1.5 rounded-lg border border-black/[0.08] bg-surface p-4">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: `sage-pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="composer-wrap" ref={composerWrapperRef}>
+        <div className="composer">
+          <div className="row">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={onKey}
+              placeholder={isEngaged ? "Keep going…" : "What's the situation you're trying to figure out?"}
+              rows={1}
+            />
+            <button
+              className="send"
+              onClick={() => send()}
+              disabled={!input.trim() || isStreaming}
+              aria-label="Send"
+            >
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 10L17 10M11 4L17 10L11 16"/>
+              </svg>
+            </button>
+          </div>
+          <div className="meta">
+            <span className="left">
+              <span className="ai-badge">
+                <span className="dot"></span>
+                SAGE·AI
+              </span>
+              <span>{isStreaming ? 'Thinking…' : isEngaged ? 'Live conversation' : "Trained on Jeff's playbooks · Replies in ~5s"}</span>
+            </span>
+            <span>{isEngaged ? '↵ to send' : '↵ to send · Shift+↵ for newline'}</span>
+          </div>
+        </div>
+
+        {!isEngaged && (
+          <div className="chips">
+            <button className="chip" onClick={() => send("Pipeline that won't convert")} disabled={isStreaming}>Pipeline that won&apos;t convert<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send("A deal I can't lose")} disabled={isStreaming}>A deal I can&apos;t lose<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send("How is coaching different from consulting?")} disabled={isStreaming}>How is coaching different from consulting?<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send("Is this a fit for early-stage?")} disabled={isStreaming}>Is this a fit for early-stage?<span className="arr">→</span></button>
           </div>
         )}
       </div>
