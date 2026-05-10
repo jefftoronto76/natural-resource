@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Design tokens ─────────────────────────────────────────────────────── */
+/* ─── Design tokens ──────────────────────────────────────────────── */
 :root {
   --color-bg: 249 248 245;
   --color-surface: 255 255 255;
@@ -19,7 +19,7 @@
   --font-mono: 'DM Mono', 'Courier New', monospace;
 }
 
-/* ─── Reset ─────────────────────────────────────────────────────────────── */
+/* ─── Reset ──────────────────────────────────────────────────────────── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; font-size: 16px; }
@@ -34,7 +34,7 @@ body {
 
 ::selection { background: rgba(45,106,79,0.15); }
 
-/* ─── Scroll-reveal animation ───────────────────────────────────────────── */
+/* ─── Scroll-reveal animation ────────────────────────────────────────── */
 .reveal {
   opacity: 0;
   transform: translateY(28px);
@@ -46,19 +46,19 @@ body {
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
 
-/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
+/* ─── Scrollbar ────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: rgb(var(--color-bg)); }
 ::-webkit-scrollbar-thumb { background: rgba(26,25,23,0.15); border-radius: 2px; }
 
-/* ─── Utility ───────────────────────────────────────────────────────────── */
+/* ─── Utility ────────────────────────────────────────────────────────────── */
 .highlight-marker {
   background: #E8E1CF;
   padding: 2px 8px;
   display: inline-block;
 }
 
-/* ─── Calendly widget overrides ─────────────────────────────────────────── */
+/* ─── Calendly widget overrides ─────────────────────────────────────── */
 .calendly-inline-widget {
   width: 100% !important;
   max-width: 100% !important;
@@ -151,9 +151,9 @@ body {
   100% { border-bottom-color: rgb(var(--color-accent)); border-left-color: rgb(var(--color-accent)); }
 }
 
-/* ───────────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────── */
 /* Sage chat overlay — appended for visitor chat redesign   */
-/* ───────────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────── */
 
 /* Curly quotes on visitor messages. Applied via .sage-visitor-msg
    on the user-reply <p> in Chat.tsx. */
@@ -189,4 +189,213 @@ body {
     animation: none !important;
     transition: none !important;
   }
+  #hero.stage,
+  #hero.stage .hero-eyebrow,
+  #hero.stage .hero-headline,
+  #hero.stage .hero-lede,
+  #hero.stage .hero-composer {
+    transition: none !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────── */
+/* Chat-first hero stage                                     */
+/* ──────────────────────────────────────────────────────────── */
+
+#hero.stage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px clamp(24px, 5vw, 48px);
+  border-bottom: 1px solid rgba(26,25,23,0.08);
+  background: rgb(var(--color-bg));
+  transition: min-height 0.4s ease, padding 0.4s ease;
+}
+
+#hero.stage[data-engaged="true"] {
+  min-height: auto;
+  padding-top: 24px;
+  padding-bottom: 0;
+  justify-content: flex-start;
+}
+
+#hero .stage-frame {
+  max-width: 920px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+#hero .hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 13.2px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(26,25,23,0.34);
+  margin-bottom: 40px;
+  transition: margin 0.4s ease, font-size 0.4s ease;
+}
+
+#hero[data-engaged="true"] .hero-eyebrow {
+  margin-bottom: 16px;
+  font-size: 11px;
+}
+
+#hero .hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 72px);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin-bottom: 32px;
+  transition: font-size 0.4s ease, margin 0.4s ease, line-height 0.4s ease;
+}
+
+#hero[data-engaged="true"] .hero-headline {
+  font-size: clamp(20px, 2.5vw, 28px);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+#hero .hero-lede {
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 1.7;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  margin-bottom: 48px;
+  transition: opacity 0.3s ease, max-height 0.4s ease, margin 0.4s ease;
+  max-height: 400px;
+  overflow: hidden;
+}
+
+#hero[data-engaged="true"] .hero-lede {
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
+  pointer-events: none;
+}
+
+/* Brush-stroke highlight, promoted from inline style */
+.hilite {
+  position: relative;
+  display: inline-block;
+  padding: 0 4px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cpath d='M2,14 C20,8 80,6 98,12 C99,16 95,20 80,21 C50,23 15,22 2,18 Z' fill='%232d6a4f' fill-opacity='0.2'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* Inline conversation list inside the hero */
+#hero .hero-conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 0;
+}
+
+#hero[data-engaged="true"] .hero-conversation {
+  margin-top: 8px;
+  padding-bottom: 24px;
+}
+
+/* Composer */
+#hero .hero-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 12px;
+  border: 1px solid rgba(26,25,23,0.12);
+  border-radius: 14px;
+  background: rgb(var(--color-surface));
+  transition: box-shadow 0.2s ease;
+}
+
+#hero .hero-composer:focus-within {
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.12);
+}
+
+#hero[data-engaged="true"] .hero-composer {
+  position: sticky;
+  bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: rgb(var(--color-bg));
+  z-index: 5;
+}
+
+#hero .hero-composer textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 160px;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 16px; /* >=16px to suppress iOS auto-zoom */
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  scroll-margin-bottom: 120px;
+}
+
+#hero .hero-composer textarea::placeholder {
+  color: var(--color-text-dim);
+}
+
+#hero .hero-composer-send {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 0;
+  background: rgb(var(--color-accent));
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+#hero .hero-composer-send:hover:not(:disabled) {
+  background: rgb(var(--color-accent-hover));
+}
+
+#hero .hero-composer-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Prompt chips (only shown pre-engagement) */
+#hero .hero-prompt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+#hero .hero-prompt-chips button {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  padding: 8px 14px;
+  border: 1px solid rgba(26,25,23,0.15);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+#hero .hero-prompt-chips button:hover {
+  background: rgba(26,25,23,0.04);
+  border-color: rgba(26,25,23,0.28);
+}
+
+#hero .hero-prompt-chips button:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 3px;
 }
