@@ -28,6 +28,7 @@ export async function PATCH(
   const baseUpdate = {
     messages,
     updated_at: new Date().toISOString(),
+    status: 'in_progress' as const,
   }
   const update = trimmedName.length > 0
     ? { ...baseUpdate, visitor_name: trimmedName }

@@ -1,9 +1,18 @@
 import { getAdminClient } from '@/lib/supabase-admin'
 import { getAuthContext } from '@/lib/get-auth-context'
+import {
+  deriveSessionStatus,
+  type SessionStatusThresholds,
+} from '@/lib/deriveSessionStatus'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
+
+const DEFAULT_THRESHOLDS: SessionStatusThresholds = {
+  chat_in_progress_idle_seconds: 300,
+  chat_active_idle_seconds: 86400,
+}
 
 interface Message {
   id: string
@@ -40,16 +49,43 @@ export default async function SessionPage({
 
   const supabase = getAdminClient()
 
-  const { data: session, error } = await supabase
-    .from('chat_sessions')
-    .select('*')
-    .eq('id', id)
-    .eq('tenant_id', tenantId)
-    .single()
+  const [{ data: session, error }, { data: tenant, error: tenantError }] = await Promise.all([
+    supabase
+      .from('chat_sessions')
+      .select('*')
+      .eq('id', id)
+      .eq('tenant_id', tenantId)
+      .single(),
+    supabase
+      .from('tenants')
+      .select('chat_in_progress_idle_seconds, chat_active_idle_seconds')
+      .eq('id', tenantId)
+      .maybeSingle(),
+  ])
 
   if (error || !session) {
     notFound()
   }
+
+  if (tenantError) {
+    console.error('[admin/sessions/[id]] tenant fetch error:', tenantError)
+  }
+
+  const thresholds: SessionStatusThresholds =
+    tenant &&
+    typeof tenant.chat_in_progress_idle_seconds === 'number' &&
+    typeof tenant.chat_active_idle_seconds === 'number'
+      ? {
+          chat_in_progress_idle_seconds: tenant.chat_in_progress_idle_seconds,
+          chat_active_idle_seconds: tenant.chat_active_idle_seconds,
+        }
+      : DEFAULT_THRESHOLDS
+
+  const derivedStatus = deriveSessionStatus({
+    updatedAt: session.updated_at ?? session.created_at,
+    thresholds,
+    now: new Date(),
+  })
 
   const messages: Message[] = Array.isArray(session.messages) ? session.messages : []
 
@@ -98,9 +134,9 @@ export default async function SessionPage({
             fontSize: '11px',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            color: session.status === 'active' ? '#2d6a4f' : 'var(--color-text-muted)',
+            color: derivedStatus === 'in_progress' ? '#2d6a4f' : 'var(--color-text-muted)',
           }}>
-            {session.status ?? 'active'}
+            {derivedStatus}
           </span>
           <span style={{
             fontFamily: 'var(--font-mono)',

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Table, Badge, Box, Center, Group, Paper, Stack } from '@mantine/core'
 import { Text } from '@/components/admin/primitives/Text'
+import type { SessionStatus } from '@/lib/deriveSessionStatus'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-US', {
@@ -15,10 +16,10 @@ function formatDate(iso: string) {
   })
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  active: 'green',
-  completed: 'gray',
-  flagged: 'yellow',
+const STATUS_COLORS: Record<SessionStatus, string> = {
+  in_progress: 'green',
+  active: 'yellow',
+  abandoned: 'gray',
 }
 
 export interface ChatSession {
@@ -28,6 +29,7 @@ export interface ChatSession {
   status: string | null
   updated_at: string | null
   created_at: string
+  derived_status: SessionStatus
 }
 
 export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
@@ -57,7 +59,7 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
           <Table.Tbody>
             {rows.map((session) => {
               const messageCount = Array.isArray(session.messages) ? session.messages.length : 0
-              const status = session.status ?? 'active'
+              const status = session.derived_status
               return (
                 <Table.Tr
                   key={session.id}
@@ -77,7 +79,7 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
                   <Table.Td>
                     <Badge
                       variant="light"
-                      color={STATUS_COLORS[status] ?? 'gray'}
+                      color={STATUS_COLORS[status]}
                       size="sm"
                       radius="sm"
                     >
@@ -100,7 +102,7 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
       <Stack gap="sm" hiddenFrom="md">
         {rows.map((session) => {
           const messageCount = Array.isArray(session.messages) ? session.messages.length : 0
-          const status = session.status ?? 'active'
+          const status = session.derived_status
           return (
             <Link
               key={session.id}
@@ -114,7 +116,7 @@ export function InboundChatsTable({ rows }: { rows: ChatSession[] }) {
                   </Text>
                   <Badge
                     variant="light"
-                    color={STATUS_COLORS[status] ?? 'gray'}
+                    color={STATUS_COLORS[status]}
                     size="sm"
                     radius="sm"
                   >
