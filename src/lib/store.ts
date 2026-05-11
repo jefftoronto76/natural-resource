@@ -38,8 +38,6 @@ interface SageStore {
   visitorName: string | null
   hasGreeted: boolean
   isStreaming: boolean
-  // Retained on the store but never flipped to true after the chat-first
-  // hero migration. The dormant overlay block in Chat.tsx still gates on it.
   isExpanded: boolean
   mode: 'question' | null
   sessionId: string | null
@@ -56,18 +54,6 @@ interface SageStore {
   expand: (mode?: 'question') => void
   collapse: () => void
   reset: () => void
-}
-
-function scrollAndFocusHero(): void {
-  if (typeof window === 'undefined') return
-  const hero = document.getElementById('hero')
-  hero?.scrollIntoView({ behavior: 'smooth' })
-  // Focus after the scroll has had a chance to commit. A single rAF is
-  // enough on modern browsers; iOS occasionally needs a small timeout for
-  // the keyboard to come up cleanly.
-  requestAnimationFrame(() => {
-    setTimeout(() => useSageStore.getState().focusComposer(), 60)
-  })
 }
 
 export const useSageStore = create<SageStore>((set, get) => ({
@@ -103,16 +89,13 @@ export const useSageStore = create<SageStore>((set, get) => ({
     const ref = get().composerRef
     ref?.current?.focus({ preventScroll: false })
   },
-  // Repurposed: instead of opening the overlay, scroll to the in-page hero
-  // composer and focus it. Optionally sets question mode. Callers (Nav, Work,
-  // the #chat final-CTA, ?mode=question URL detection) keep working unchanged.
-  expand: (mode) => {
-    if (mode) set({ mode })
-    scrollAndFocusHero()
-  },
-  // No-op after the chat-first migration. Retained so any caller (Escape
-  // handler, close button on the dormant overlay) doesn't crash.
-  collapse: () => {},
+  // Opens the full-viewport overlay (Chat.tsx). Called from Nav "CHAT" link,
+  // the in-page #chat section CTA, and Work's "Click here" (with 'question').
+  // Hero's inline composer does NOT use expand() — it owns its own UI and
+  // writes to the shared session state (messages, sessionId, streaming, mode)
+  // directly.
+  expand: (mode) => set({ isExpanded: true, mode: mode ?? null }),
+  collapse: () => set({ isExpanded: false }),
   reset: () => set({
     messages: [],
     visitorName: null,
