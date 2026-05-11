@@ -299,6 +299,10 @@ export function Hero() {
             <button className="chip" onClick={() => send('How does this work?')} disabled={isStreaming}>How does this work?<span className="arr">→</span></button>
           </div>
         )}
+
+        <div className="scroll-hint">
+          <span>Scroll for background, principles, work ↓</span>
+        </div>
       </div>
     </section>
   )
