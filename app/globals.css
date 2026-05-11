@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Design tokens ─────────────────────────────────────────────────────────── */
+/* ─── Design tokens ──────────────────────────────────────────────────────────── */
 :root {
   --color-bg: 249 248 245;
   --color-surface: 255 255 255;
@@ -34,7 +34,7 @@ body {
 
 ::selection { background: rgba(45,106,79,0.15); }
 
-/* ─── Scroll-reveal animation ───────────────────────────────────────────────────────────────── */
+/* ─── Scroll-reveal animation ─────────────────────────────────────────────────────────────────── */
 .reveal {
   opacity: 0;
   transform: translateY(28px);
@@ -151,9 +151,9 @@ body {
   100% { border-bottom-color: rgb(var(--color-accent)); border-left-color: rgb(var(--color-accent)); }
 }
 
-/* ────────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────── */
 /* Sage chat overlay — appended for visitor chat redesign   */
-/* ────────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────── */
 
 /* Curly quotes on visitor messages. Applied via .sage-visitor-msg
    on the user-reply <p> in Chat.tsx. */
@@ -194,9 +194,9 @@ body {
   }
 }
 
-/* ────────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────── */
 /* Chat-first hero stage                                     */
-/* ────────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────── */
 
 .stage{
   min-height:100vh;display:flex;flex-direction:column;
@@ -208,7 +208,7 @@ body {
 .hero{
   position:relative;
   transition:padding .55s cubic-bezier(.2,.7,.2,1), opacity .35s ease, background-color .35s ease, box-shadow .35s ease;
-  padding-top:48px;
+  padding-top:36px;
 }
 .hero .close-x{
   position:absolute;top:0;right:0;
@@ -236,7 +236,7 @@ body {
 .hero h1 em{font-style:italic;color:rgb(var(--color-accent));font-weight:400}
 .hero .lede{
   font-size:17px;line-height:1.6;color:rgba(26,25,23,0.70);
-  margin-bottom:32px;
+  margin-bottom:16px;
   transition:font-size .45s ease, max-height .45s ease, opacity .35s ease, margin-bottom .45s ease;
   overflow:hidden;
 }
@@ -302,7 +302,7 @@ body {
   100%{box-shadow:0 0 0 0 rgb(var(--color-accent) / 0)}
 }
 .chips{
-  display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;
   transition:opacity .35s ease, max-height .45s ease, margin-top .35s ease;
   overflow:hidden;
 }
@@ -317,7 +317,7 @@ body {
 .chip .arr{margin-left:6px;color:rgb(var(--color-accent))}
 
 .scroll-hint {
-  margin-top: 8px;
+  margin-top: 16px;
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: .18em;
