@@ -289,7 +289,7 @@ export function Hero() {
               </span>
               <span>{isStreaming ? 'Thinking…' : isEngaged ? 'Live conversation' : "Trained on Jeff's playbooks · Replies in ~5s"}</span>
             </span>
-            <span>{isEngaged ? '↵ to send' : '↵ to send · Shift+↵ for newline'}</span>
+            <span>↵ to send</span>
           </div>
         </div>
 
