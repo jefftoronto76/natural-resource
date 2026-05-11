@@ -51,7 +51,7 @@ export default function BoardseatPage() {
 
         <nav className="nav">
           <span className="nav-wordmark">Jeff Lougheed</span>
-          <span className="nav-badge">15+ Year Resident · Noble Lofts</span>
+          <span className="nav-badge">10+ Year Resident · Noble Lofts</span>
         </nav>
 
         <section className="hero">
