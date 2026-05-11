@@ -8,11 +8,13 @@ import { parseBookingCards } from './sage/parseBookingCards'
 import { SageReply } from './sage/SageReply'
 import { useSageParameters } from './sage/useSageParameters'
 
-// NOTE: After the chat-first hero migration, the in-page hero owns the
-// composer and conversation list. The full-viewport overlay rendered
-// below is dormant — `isExpanded` is never flipped to true by the store
-// (expand() now scrolls-and-focuses the hero composer), so the overlay
-// JSX is unreachable and retained for follow-up cleanup.
+// NOTE: This file owns two surfaces — the in-page `#chat` anchor section
+// and the full-viewport overlay. The overlay opens from the Nav "CHAT"
+// link, the in-page `#chat` CTA, and Work's "Click here" — each calls
+// `expand()` which flips `isExpanded` to true. Hero (src/components/Hero.tsx)
+// is a separate, independent inline chat that does NOT use expand() and does
+// NOT render this overlay. Hero and the overlay share session state
+// (messages, sessionId, isStreaming, mode) via useSageStore.
 
 export function Chat() {
   const ref = useReveal()
@@ -179,8 +181,7 @@ export function Chat() {
 
   return (
     <>
-      {/* #chat anchor section — the green CTA now scrolls to #hero and focuses
-          the composer via the repurposed expand() in the store. */}
+      {/* #chat anchor section — the green CTA opens the overlay via expand(). */}
       <section
         id="chat"
         style={{
@@ -275,9 +276,6 @@ export function Chat() {
         </div>
       </section>
 
-      {/* DORMANT — never renders after the chat-first migration because
-          isExpanded is never flipped to true by the store. Retained for
-          follow-up cleanup. */}
       {isExpanded && (
         <div ref={overlayRef} style={{
           position: 'fixed',
