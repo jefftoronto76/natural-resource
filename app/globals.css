@@ -19,7 +19,7 @@
   --font-mono: 'DM Mono', 'Courier New', monospace;
 }
 
-/* ─── Reset ─────────────────────────────────────────────────────────────── */
+/* ─── Reset ──────────────────────────────────────────────────────────── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; font-size: 16px; }
@@ -34,7 +34,7 @@ body {
 
 ::selection { background: rgba(45,106,79,0.15); }
 
-/* ─── Scroll-reveal animation ───────────────────────────────────────────── */
+/* ─── Scroll-reveal animation ──────────────────────────────────────────────── */
 .reveal {
   opacity: 0;
   transform: translateY(28px);
@@ -46,19 +46,19 @@ body {
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
 
-/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
+/* ─── Scrollbar ───────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: rgb(var(--color-bg)); }
 ::-webkit-scrollbar-thumb { background: rgba(26,25,23,0.15); border-radius: 2px; }
 
-/* ─── Utility ───────────────────────────────────────────────────────────── */
+/* ─── Utility ───────────────────────────────────────────────────────────────────── */
 .highlight-marker {
   background: #E8E1CF;
   padding: 2px 8px;
   display: inline-block;
 }
 
-/* ─── Calendly widget overrides ─────────────────────────────────────────── */
+/* ─── Calendly widget overrides ─────────────────────────────────────── */
 .calendly-inline-widget {
   width: 100% !important;
   max-width: 100% !important;
@@ -151,14 +151,16 @@ body {
   100% { border-bottom-color: rgb(var(--color-accent)); border-left-color: rgb(var(--color-accent)); }
 }
 
-/* ───────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────── */
 /* Sage chat overlay — appended for visitor chat redesign   */
-/* ───────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────── */
 
 /* Curly quotes on visitor messages. Applied via .sage-visitor-msg
    on the user-reply <p> in Chat.tsx. */
 .sage-visitor-msg {
   quotes: "\201C" "\201D" "\2018" "\2019";
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .sage-visitor-msg::before { content: open-quote; }
 .sage-visitor-msg::after  { content: close-quote; }
@@ -189,4 +191,156 @@ body {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* Chat-first hero stage                                     */
+/* ─────────────────────────────────────────────────────────────── */
+
+.stage{
+  min-height:100vh;display:flex;flex-direction:column;
+  padding:80px clamp(20px,5vw,48px) 0;
+  max-width:920px;
+  margin:0 auto;
+  width:100%;
+}
+.hero{
+  position:relative;
+  transition:padding .55s cubic-bezier(.2,.7,.2,1), opacity .35s ease, background-color .35s ease, box-shadow .35s ease;
+  padding-top:48px;
+}
+.hero .close-x{
+  position:absolute;top:0;right:0;
+  width:36px;height:36px;border-radius:50%;
+  background:transparent;border:1px solid rgba(26,25,23,0.12);
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(26,25,23,0.55);
+  opacity:0;pointer-events:none;transform:scale(.85);
+  transition:opacity .35s ease, transform .35s ease, color .15s, border-color .15s, background .15s;
+}
+.hero .close-x:hover{color:#1a1917;border-color:#1a1917;background:#fff}
+.stage.engaged .hero .close-x{opacity:1;pointer-events:auto;transform:scale(1)}
+.hero .eyebrow{
+  font-family:var(--font-mono);font-size:12px;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(26,25,23,0.42);margin-bottom:24px;
+  transition:font-size .45s ease, margin-bottom .45s ease;
+}
+.hero h1{
+  font-family:var(--font-display);font-weight:400;
+  font-size:clamp(36px, 4vw, 56px);line-height:1.06;letter-spacing:-.015em;
+  margin-bottom:18px;
+  transition:font-size .55s cubic-bezier(.2,.7,.2,1), margin-bottom .45s ease;
+  text-wrap:pretty;
+}
+.hero h1 em{font-style:italic;color:rgb(var(--color-accent));font-weight:400}
+.hero .lede{
+  font-size:17px;line-height:1.6;color:rgba(26,25,23,0.70);
+  margin-bottom:32px;
+  transition:font-size .45s ease, max-height .45s ease, opacity .35s ease, margin-bottom .45s ease;
+  overflow:hidden;
+}
+.stage.engaged .hero{
+  position:sticky;top:60px;z-index:20;
+  padding:14px 0 14px;
+  margin:0 -8px;padding-left:8px;padding-right:8px;
+  background:rgb(var(--color-bg) / .92);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 16px -12px rgba(26,25,23,0.18), 0 1px 0 0 rgba(26,25,23,0.08);
+}
+.stage.engaged .hero .eyebrow{font-size:10px;margin-bottom:6px}
+.stage.engaged .hero h1{font-size:20px;margin-bottom:0;line-height:1.2;padding-right:48px}
+.stage.engaged .hero .lede{font-size:0;max-height:0;opacity:0;margin-bottom:0;}
+
+.composer-wrap{margin-top:16px;position:relative}
+.composer{
+  background:#fff;border:1px solid rgba(26,25,23,0.12);border-radius:18px;
+  padding:14px 14px 10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.05);
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.composer:focus-within{
+  border-color:rgb(var(--color-accent));
+  box-shadow:0 8px 32px rgb(var(--color-accent) / .14);
+}
+.composer .row{display:flex;align-items:flex-end;gap:10px}
+.composer textarea{
+  flex:1;border:none;outline:none;resize:none;background:transparent;
+  font-family:var(--font-body);font-size:16px;line-height:1.5;color:#1a1917;
+  min-height:28px;max-height:140px;padding:6px 6px;
+}
+.composer textarea::placeholder{color:rgba(26,25,23,0.42)}
+.composer .send{
+  width:38px;height:38px;border-radius:50%;border:none;
+  background:rgb(var(--color-accent));color:#fff;
+  display:flex;align-items:center;justify-content:center;flex:none;
+  cursor:pointer;
+  transition:background .15s ease,transform .15s ease,opacity .15s ease;
+}
+.composer .send:hover:not(:disabled){background:rgb(var(--color-accent-hover))}
+.composer .send:disabled{opacity:.4;cursor:not-allowed}
+.composer .meta{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:8px;padding-top:8px;border-top:1px solid rgba(26,25,23,0.08);
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:rgba(26,25,23,0.42);
+}
+.composer .meta .left{display:flex;align-items:center;gap:8px}
+.ai-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 8px;background:rgb(var(--color-accent) / .08);border-radius:999px;
+  color:rgb(var(--color-accent));font-weight:500;letter-spacing:.08em;
+}
+.ai-badge .dot{
+  width:6px;height:6px;border-radius:50%;background:rgb(var(--color-accent));
+  box-shadow:0 0 0 0 rgb(var(--color-accent) / .45);
+  animation:pulse 2s ease-out infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgb(var(--color-accent) / .45)}
+  70%{box-shadow:0 0 0 8px rgb(var(--color-accent) / 0)}
+  100%{box-shadow:0 0 0 0 rgb(var(--color-accent) / 0)}
+}
+.chips{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;
+  transition:opacity .35s ease, max-height .45s ease, margin-top .35s ease;
+  overflow:hidden;
+}
+.stage.engaged .chips{opacity:0;max-height:0;margin-top:0;pointer-events:none}
+.chip{
+  background:#fff;border:1px solid rgba(26,25,23,0.12);
+  padding:8px 13px;border-radius:999px;
+  font-family:var(--font-body);font-size:13px;color:rgba(26,25,23,0.70);
+  cursor:pointer;transition:all .15s ease;
+}
+.chip:hover{border-color:#1a1917;color:#1a1917}
+.chip .arr{margin-left:6px;color:rgb(var(--color-accent))}
+
+.scroll-hint {
+  margin-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(26,25,23,0.35);
+  text-align: center;
+}
+
+.stage.engaged .scroll-hint {
+  display: none;
+}
+
+.msg.user .bubble {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Brush-stroke highlight on the eyebrow "Heart-Led" */
+.hilite {
+  position: relative;
+  display: inline-block;
+  padding: 0 4px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cpath d='M2,14 C20,8 80,6 98,12 C99,16 95,20 80,21 C50,23 15,22 2,18 Z' fill='%232d6a4f' fill-opacity='0.2'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
