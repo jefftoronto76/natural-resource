@@ -294,7 +294,7 @@ export default function BoardseatPage() {
               </div>
             ) : (
               <iframe
-                src=https://youtube.com/shorts/7EfZ_R-dPLU?si=ny7WrOExptSCIucA
+                src={VIDEO_URL}
                 title="Jeff Lougheed — Noble Lofts Board Candidate"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
