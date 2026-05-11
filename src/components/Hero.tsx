@@ -204,7 +204,7 @@ export function Hero() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-6 mt-4" role="log" aria-live="polite">
+      <div className="hero-conversation flex flex-col gap-6 mt-4" role="log" aria-live="polite">
         {messages.map((msg) => {
           if (msg.role === 'assistant' && !msg.content) return null
           if (msg.role === 'user') {
@@ -256,7 +256,7 @@ export function Hero() {
           </div>
         )}
 
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="messages-end" />
       </div>
 
       <div className="composer-wrap" ref={composerWrapperRef}>

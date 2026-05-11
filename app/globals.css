@@ -336,6 +336,21 @@ body {
   max-width: 100%;
 }
 
+.hero-conversation {
+  overflow-y: auto;
+  max-height: 60vh;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26,25,23,0.15) transparent;
+}
+
+.hero-conversation::-webkit-scrollbar { width: 4px; }
+.hero-conversation::-webkit-scrollbar-track { background: transparent; }
+.hero-conversation::-webkit-scrollbar-thumb { background: rgba(26,25,23,0.15); border-radius: 2px; }
+
+.messages-end {
+  scroll-margin-bottom: 80px;
+}
+
 /* Brush-stroke highlight on the eyebrow "Heart-Led" */
 .hilite {
   position: relative;
