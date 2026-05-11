@@ -197,7 +197,8 @@ export function Hero() {
 
         <p className="lede">
           Hi, I&apos;m Jeff.<br />
-          I work hands-on with vertical market software companies — and the people running them — as an executive coach and fractional operator.
+          I help technology companies do better. It&apos;s a broad statement, and I&apos;ve worked hard to earn it.<br /><br />
+          I built the chat below to make it easy to figure out if I&apos;m the right fit for what you&apos;re dealing with.
         </p>
       </div>
 
