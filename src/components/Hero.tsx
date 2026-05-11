@@ -200,13 +200,11 @@ export function Hero() {
         </h1>
 
         <p className="lede">
-          Hi, I&apos;m Jeff.<br />
-          I help technology companies do better. It&apos;s a broad statement, and I&apos;ve worked hard to earn it.<br /><br />
-          I built the chat below to make it easy to figure out if I&apos;m the right fit for what you&apos;re dealing with.
+          Hi, I&apos;m Jeff. I help technology companies do better. It&apos;s a broad statement, and one I&apos;ve spent years earning across revenue, operations, product, and leadership.
         </p>
       </div>
 
-      <div className="flex flex-col gap-6 mt-4" role="log" aria-live="polite">
+      <div className="hero-conversation flex flex-col gap-6" role="log" aria-live="polite">
         {messages.map((msg) => {
           if (msg.role === 'assistant' && !msg.content) return null
           if (msg.role === 'user') {
@@ -258,7 +256,7 @@ export function Hero() {
           </div>
         )}
 
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="messages-end" />
       </div>
 
       <div className="composer-wrap" ref={composerWrapperRef}>
@@ -291,16 +289,17 @@ export function Hero() {
               </span>
               <span>{isStreaming ? 'Thinking…' : isEngaged ? 'Live conversation' : "Trained on Jeff's playbooks · Replies in ~5s"}</span>
             </span>
-            <span>{isEngaged ? '↵ to send' : '↵ to send · Shift+↵ for newline'}</span>
+            <span>↵ to send</span>
           </div>
         </div>
 
         {!isEngaged && (
           <div className="chips">
+            <button className="chip" onClick={() => send("Pipeline that won't convert")} disabled={isStreaming}>Pipeline that won&apos;t convert<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send('Is this a fit for me?')} disabled={isStreaming}>Is this a fit for me?<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send("A deal I can't lose")} disabled={isStreaming}>A deal I can&apos;t lose<span className="arr">→</span></button>
             <button className="chip" onClick={() => send('What does "do better" mean?')} disabled={isStreaming}>What does &quot;do better&quot; mean?<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send('Tell me about Jeff')} disabled={isStreaming}>Tell me about Jeff<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send('How is coaching different from consulting?')} disabled={isStreaming}>How is coaching different from consulting?<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send('How does this work?')} disabled={isStreaming}>How does this work?<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send('What are companies getting wrong about AI?')} disabled={isStreaming}>What are companies getting wrong about AI?<span className="arr">→</span></button>
           </div>
         )}
 
