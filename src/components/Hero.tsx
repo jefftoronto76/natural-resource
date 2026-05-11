@@ -293,10 +293,10 @@ export function Hero() {
 
         {!isEngaged && (
           <div className="chips">
-            <button className="chip" onClick={() => send("Pipeline that won't convert")} disabled={isStreaming}>Pipeline that won&apos;t convert<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send("A deal I can't lose")} disabled={isStreaming}>A deal I can&apos;t lose<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send("How is coaching different from consulting?")} disabled={isStreaming}>How is coaching different from consulting?<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send("Is this a fit for early-stage?")} disabled={isStreaming}>Is this a fit for early-stage?<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send('What does "do better" mean?')} disabled={isStreaming}>What does &quot;do better&quot; mean?<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send('Tell me about Jeff')} disabled={isStreaming}>Tell me about Jeff<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send('How is coaching different from consulting?')} disabled={isStreaming}>How is coaching different from consulting?<span className="arr">→</span></button>
+            <button className="chip" onClick={() => send('How does this work?')} disabled={isStreaming}>How does this work?<span className="arr">→</span></button>
           </div>
         )}
       </div>
