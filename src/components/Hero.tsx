@@ -200,9 +200,7 @@ export function Hero() {
         </h1>
 
         <p className="lede">
-          Hi, I&apos;m Jeff.<br />
-          I help technology companies do better. It&apos;s a broad statement, and I&apos;ve worked hard to earn it.<br /><br />
-          I built the chat below to make it easy to figure out if I&apos;m the right fit for what you&apos;re dealing with.
+          Hi, I&apos;m Jeff. I help technology companies do better. It&apos;s a broad statement, and one I&apos;ve worked hard to earn. I built the chat below to make it easier to figure out whether I&apos;m the right fit for what you&apos;re dealing with.
         </p>
       </div>
 
