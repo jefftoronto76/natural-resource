@@ -30,11 +30,14 @@ export function Hero() {
     setSessionId,
     setMode,
     setComposerRef,
-    reset,
   } = useSageStore()
 
   const [input, setInput] = useState('')
   const [isError, setIsError] = useState(false)
+  // Hero-local: close-x collapses the inline engaged view without touching
+  // shared session state (messages, sessionId, mode, isExpanded). Reset to
+  // false whenever the visitor sends a new message from the hero composer.
+  const [dismissed, setDismissed] = useState(false)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -58,7 +61,7 @@ export function Hero() {
     }
   }, [setMode])
 
-  const isEngaged = messages.length > 0
+  const isEngaged = messages.length > 0 && !dismissed
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -80,6 +83,7 @@ export function Hero() {
     if (!text || isStreaming) return
 
     setIsError(false)
+    setDismissed(false)
     const userMsg = { role: 'user' as const, content: text }
     const msgsToSend = [...messages, { ...userMsg, id: `${Date.now()}`, timestamp: Date.now() }]
     addMessage(userMsg)
@@ -177,8 +181,8 @@ export function Hero() {
         <button
           type="button"
           className="close-x"
-          aria-label="Close conversation"
-          onClick={() => reset()}
+          aria-label="Collapse hero conversation"
+          onClick={() => setDismissed(true)}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
             <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
