@@ -6,14 +6,13 @@ export default function BoardseatPage() {
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #f9f8f5; color: #1a1917; font-family: 'DM Sans', sans-serif; font-size: 16px; -webkit-font-smoothing: antialiased; }
         .page { min-height: 100vh; display: flex; flex-direction: column; }
-        .nav { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(26,25,23,0.08); gap: 16px; }
-        .nav-right { display: flex; align-items: center; gap: 20px; }
+        .nav { position: relative; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(26,25,23,0.08); gap: 16px; }
         .nav-links { display: flex; align-items: center; gap: 14px; }
         .nav-link { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(26,25,23,0.65); text-decoration: none; transition: color 0.15s ease; }
         .nav-link:hover { color: #2d6a4f; }
         .nav-link img { width: 16px; height: 16px; display: block; }
         .nav-wordmark { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 400; color: #1a1917; letter-spacing: 0.01em; }
-        .nav-badge { font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(26,25,23,0.55); letter-spacing: 0.04em; text-transform: uppercase; }
+        .nav-badge { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(26,25,23,0.55); letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; pointer-events: none; }
         .hero { padding: 48px 24px 40px; text-align: center; max-width: 680px; margin: 0 auto; width: 100%; }
         .hero-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(26,25,23,0.45); margin-bottom: 16px; }
         .hero-headline { font-family: 'Playfair Display', serif; font-size: clamp(28px, 6vw, 42px); font-weight: 500; line-height: 1.2; color: #1a1917; margin-bottom: 12px; }
@@ -59,18 +58,16 @@ export default function BoardseatPage() {
 
         <nav className="nav">
           <span className="nav-wordmark">Jeff Lougheed</span>
-          <div className="nav-right">
-            <span className="nav-badge">10+ Year Resident · Noble Lofts</span>
-            <div className="nav-links">
-              <a href="https://jefflougheed.ca" target="_blank" rel="noopener noreferrer" className="nav-link" aria-label="Jeff Lougheed website">
-                <img src="/world-wide-web.svg" alt="" />
-                <span>jefflougheed.ca</span>
-              </a>
-              <a href="https://www.linkedin.com/in/lougheedjeff/" target="_blank" rel="noopener noreferrer" className="nav-link" aria-label="Jeff Lougheed on LinkedIn">
-                <img src="/linkedin.svg" alt="" />
-                <span>LinkedIn</span>
-              </a>
-            </div>
+          <span className="nav-badge">10+ Year Resident · Noble Lofts</span>
+          <div className="nav-links">
+            <a href="https://jefflougheed.ca" target="_blank" rel="noopener noreferrer" className="nav-link" aria-label="Jeff Lougheed website">
+              <img src="/world-wide-web.svg" alt="" />
+              <span>jefflougheed.ca</span>
+            </a>
+            <a href="https://www.linkedin.com/in/lougheedjeff/" target="_blank" rel="noopener noreferrer" className="nav-link" aria-label="Jeff Lougheed on LinkedIn">
+              <img src="/linkedin.svg" alt="" />
+              <span>LinkedIn</span>
+            </a>
           </div>
         </nav>
 
