@@ -7,7 +7,7 @@ export default function BoardseatPage() {
         body { background: #f9f8f5; color: #1a1917; font-family: 'DM Sans', sans-serif; font-size: 16px; -webkit-font-smoothing: antialiased; }
         .page { min-height: 100vh; display: flex; flex-direction: column; }
         .nav { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(26,25,23,0.08); gap: 16px; }
-        .nav-left { display: flex; align-items: center; gap: 20px; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
         .nav-links { display: flex; align-items: center; gap: 14px; }
         .nav-link { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(26,25,23,0.65); text-decoration: none; transition: color 0.15s ease; }
         .nav-link:hover { color: #2d6a4f; }
@@ -58,7 +58,9 @@ export default function BoardseatPage() {
       <div className="page">
 
         <nav className="nav">
-          <div className="nav-left">
+          <span className="nav-wordmark">Jeff Lougheed</span>
+          <div className="nav-right">
+            <span className="nav-badge">10+ Year Resident · Noble Lofts</span>
             <div className="nav-links">
               <a href="https://jefflougheed.ca" target="_blank" rel="noopener noreferrer" className="nav-link" aria-label="Jeff Lougheed website">
                 <img src="/world-wide-web.svg" alt="" />
@@ -69,9 +71,7 @@ export default function BoardseatPage() {
                 <span>LinkedIn</span>
               </a>
             </div>
-            <span className="nav-wordmark">Jeff Lougheed</span>
           </div>
-          <span className="nav-badge">10+ Year Resident · Noble Lofts</span>
         </nav>
 
         <section className="hero">
