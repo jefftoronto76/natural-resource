@@ -6,7 +6,12 @@ export default function BoardseatPage() {
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #f9f8f5; color: #1a1917; font-family: 'DM Sans', sans-serif; font-size: 16px; -webkit-font-smoothing: antialiased; }
         .page { min-height: 100vh; display: flex; flex-direction: column; }
-        .nav { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(26,25,23,0.08); }
+        .nav { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(26,25,23,0.08); gap: 16px; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+        .nav-links { display: flex; align-items: center; gap: 14px; }
+        .nav-link { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(26,25,23,0.65); text-decoration: none; transition: color 0.15s ease; }
+        .nav-link:hover { color: #2d6a4f; }
+        .nav-link img { width: 16px; height: 16px; display: block; }
         .nav-wordmark { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 400; color: #1a1917; letter-spacing: 0.01em; }
         .nav-badge { font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(26,25,23,0.55); letter-spacing: 0.04em; text-transform: uppercase; }
         .hero { padding: 48px 24px 40px; text-align: center; max-width: 680px; margin: 0 auto; width: 100%; }
@@ -39,6 +44,9 @@ export default function BoardseatPage() {
         @media (max-width: 480px) {
           .nav { padding: 16px 20px; }
           .nav-badge { display: none; }
+          .nav-wordmark { display: none; }
+          .nav-link span { display: none; }
+          .nav-links { gap: 16px; }
           .hero { padding: 36px 20px 32px; }
           .video-section, .photo-section, .cta-section { padding-left: 20px; padding-right: 20px; }
           .why-section { padding: 40px 20px 48px; }
@@ -51,7 +59,19 @@ export default function BoardseatPage() {
 
         <nav className="nav">
           <span className="nav-wordmark">Jeff Lougheed</span>
-          <span className="nav-badge">10+ Year Resident · Noble Lofts</span>
+          <div className="nav-right">
+            <span className="nav-badge">10+ Year Resident · Noble Lofts</span>
+            <div className="nav-links">
+              <a href="https://jefflougheed.ca" target="_blank" rel="noopener noreferrer" className="nav-link" aria-label="Jeff Lougheed website">
+                <img src="/world-wide-web.svg" alt="" />
+                <span>jefflougheed.ca</span>
+              </a>
+              <a href="https://www.linkedin.com/in/lougheedjeff/" target="_blank" rel="noopener noreferrer" className="nav-link" aria-label="Jeff Lougheed on LinkedIn">
+                <img src="/linkedin.svg" alt="" />
+                <span>LinkedIn</span>
+              </a>
+            </div>
+          </div>
         </nav>
 
         <section className="hero">
