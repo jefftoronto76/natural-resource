@@ -303,8 +303,10 @@ export function Hero() {
           </div>
         )}
 
-        <div className="scroll-hint">
-          <span>Scroll for background, principles, work ↓</span>
+        <div className="scroll-hint-wrap">
+          <div className="scroll-hint">
+            <span>Scroll for background, principles, work ↓</span>
+          </div>
         </div>
       </div>
     </section>

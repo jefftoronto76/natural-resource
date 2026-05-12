@@ -315,8 +315,11 @@ body {
 .chip:hover{border-color:#1a1917;color:#1a1917}
 .chip .arr{margin-left:6px;color:rgb(var(--color-accent))}
 
-.scroll-hint {
+.scroll-hint-wrap {
   margin-top: 52px;
+}
+
+.scroll-hint {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: .18em;
@@ -340,6 +343,10 @@ body {
 
 .stage.engaged .hero-conversation {
   flex: 1;
+}
+
+.stage.engaged .hero-conversation > :first-child {
+  margin-top: auto;
 }
 
 .hero-conversation::-webkit-scrollbar { width: 4px; }
