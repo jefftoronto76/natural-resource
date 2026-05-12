@@ -302,11 +302,11 @@ export function Hero() {
             <button className="chip" onClick={() => send('What are companies getting wrong about AI?')} disabled={isStreaming}>What are companies getting wrong about AI?<span className="arr">→</span></button>
           </div>
         )}
+      </div>
 
-        <div className="scroll-hint-wrap">
-          <div className="scroll-hint">
-            <span>Scroll for background, principles, work ↓</span>
-          </div>
+      <div className="scroll-hint-wrap">
+        <div className="scroll-hint">
+          <span>Scroll for background, principles, work ↓</span>
         </div>
       </div>
     </section>
