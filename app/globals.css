@@ -316,7 +316,11 @@ body {
 .chip .arr{margin-left:6px;color:rgb(var(--color-accent))}
 
 .scroll-hint-wrap {
-  margin-top: 52px;
+  height: 52px;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .scroll-hint {
