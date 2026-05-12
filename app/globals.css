@@ -46,7 +46,7 @@ body {
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
 
-/* ─── Scrollbar ────────────────────────────────────────────────────────────── */
+/* ─── Scrollbar ────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: rgb(var(--color-bg)); }
 ::-webkit-scrollbar-thumb { background: rgba(26,25,23,0.15); border-radius: 2px; }
@@ -245,9 +245,7 @@ body {
   position:sticky;top:60px;z-index:20;
   padding:14px 0 14px;
   margin:0 -8px;padding-left:8px;padding-right:8px;
-  background:rgb(var(--color-bg) / .92);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
+  background:transparent;
   box-shadow:0 8px 16px -12px rgba(26,25,23,0.18), 0 1px 0 0 rgba(26,25,23,0.08);
 }
 .stage.engaged .hero .eyebrow{font-size:10px;margin-bottom:6px}
