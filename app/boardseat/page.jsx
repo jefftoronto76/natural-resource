@@ -72,7 +72,6 @@ export default function BoardseatPage() {
         </nav>
 
         <section className="hero">
-          <p className="hero-label">Noble Lofts · 24 Noble St · Board Election</p>
           <h1 className="hero-headline">
             Better communication<br />
             for <span className="accent">our building.</span>
