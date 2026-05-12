@@ -316,7 +316,17 @@ body {
 .chip .arr{margin-left:6px;color:rgb(var(--color-accent))}
 
 .scroll-hint-wrap {
-  margin-top: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage:not(.engaged) .scroll-hint-wrap {
+  flex: 1;
+}
+
+.stage.engaged .scroll-hint-wrap {
+  height: 52px;
 }
 
 .scroll-hint {
