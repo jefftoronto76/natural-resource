@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Design tokens ──────────────────────────────────────────────────────── */
+/* ─── Design tokens ─────────────────────────────────────────────────────── */
 :root {
   --color-bg: 249 248 245;
   --color-surface: 255 255 255;
@@ -19,7 +19,7 @@
   --font-mono: 'DM Mono', 'Courier New', monospace;
 }
 
-/* ─── Reset ─────────────────────────────────────────────────────── */
+/* ─── Reset ──────────────────────────────────────────────────────── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; font-size: 16px; }
@@ -34,7 +34,7 @@ body {
 
 ::selection { background: rgba(45,106,79,0.15); }
 
-/* ─── Scroll-reveal animation ────────────────────────────────────────────────── */
+/* ─── Scroll-reveal animation ─────────────────────────────────────────────────── */
 .reveal {
   opacity: 0;
   transform: translateY(28px);
@@ -46,12 +46,12 @@ body {
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
 
-/* ─── Scrollbar ────────────────────────────────────────────────────── */
+/* ─── Scrollbar ─────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: rgb(var(--color-bg)); }
 ::-webkit-scrollbar-thumb { background: rgba(26,25,23,0.15); border-radius: 2px; }
 
-/* ─── Utility ───────────────────────────────────────────────────────────────── */
+/* ─── Utility ───────────────────────────────────────────────────────────── */
 .highlight-marker {
   background: #E8E1CF;
   padding: 2px 8px;
@@ -151,9 +151,9 @@ body {
   100% { border-bottom-color: rgb(var(--color-accent)); border-left-color: rgb(var(--color-accent)); }
 }
 
-/* ───────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────── */
 /* Sage chat overlay — appended for visitor chat redesign   */
-/* ─────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────── */
 
 /* Curly quotes on visitor messages. Applied via .sage-visitor-msg
    on the user-reply <p> in Chat.tsx. */
@@ -194,9 +194,9 @@ body {
   }
 }
 
-/* ───────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────────────────── */
 /* Chat-first hero stage                                     */
-/* ───────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────── */
 
 .stage{
   height:100dvh;display:flex;flex-direction:column;
@@ -317,8 +317,11 @@ body {
 .chip:hover{border-color:#1a1917;color:#1a1917}
 .chip .arr{margin-left:6px;color:rgb(var(--color-accent))}
 
-.scroll-hint {
+.scroll-hint-wrap {
   margin-top: 52px;
+}
+
+.scroll-hint {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: .18em;
