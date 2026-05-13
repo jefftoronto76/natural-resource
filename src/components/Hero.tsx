@@ -42,6 +42,7 @@ export function Hero() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const composerWrapperRef = useRef<HTMLDivElement>(null)
+  const stageRef = useRef<HTMLElement>(null)
   const retryMsgsRef = useRef<typeof messages>([])
   const retrySessionIdRef = useRef<string | null>(null)
 
@@ -77,6 +78,33 @@ export function Hero() {
     ta.style.height = 'auto'
     ta.style.height = Math.min(ta.scrollHeight, 140) + 'px'
   }, [input])
+
+  // iOS keyboard handling: when the soft keyboard opens, the layout viewport
+  // (100dvh) does not shrink, so the composer is pushed off-screen. Pin the
+  // .stage element to the visual viewport's height/top while the keyboard
+  // is open; reset when it closes.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const vv = window.visualViewport
+    if (!vv) return
+
+    const onViewportChange = () => {
+      const stage = stageRef.current
+      if (!stage) return
+      if (vv.height === window.innerHeight) {
+        stage.style.height = ''
+        stage.style.top = ''
+        return
+      }
+      stage.style.height = `${vv.height}px`
+      stage.style.top = `${vv.offsetTop}px`
+    }
+
+    vv.addEventListener('resize', onViewportChange)
+    return () => {
+      vv.removeEventListener('resize', onViewportChange)
+    }
+  }, [])
 
   const send = async (override?: string) => {
     const text = (override ?? input).trim()
@@ -173,6 +201,7 @@ export function Hero() {
 
   return (
     <section
+      ref={stageRef}
       id="hero"
       data-screen-label="Hero"
       className={isEngaged ? 'stage engaged' : 'stage'}
