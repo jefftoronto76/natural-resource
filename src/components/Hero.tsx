@@ -34,10 +34,10 @@ export function Hero() {
 
   const [input, setInput] = useState('')
   const [isError, setIsError] = useState(false)
-  // Hero-local: close-x collapses the inline engaged view without touching
-  // shared session state (messages, sessionId, mode, isExpanded). Reset to
-  // false whenever the visitor sends a new message from the hero composer.
-  const [dismissed, setDismissed] = useState(false)
+  // Hero-local: when true the conversation canvas renders; toggled off by
+  // the close-x and back on by textarea focus or a chip click. Independent
+  // of isEngaged so the compact hero stays compact after dismissing.
+  const [conversationVisible, setConversationVisible] = useState(true)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -61,15 +61,16 @@ export function Hero() {
     }
   }, [setMode])
 
-  const isEngaged = messages.length > 0 && !dismissed
+  const isEngaged = messages.length > 0
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    if (!conversationVisible) return
     if (messages.length === 0) return
     requestAnimationFrame(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'instant' as ScrollBehavior, block: 'end' })
     })
-  }, [messages.length])
+  }, [messages.length, conversationVisible])
 
   useEffect(() => {
     const ta = textareaRef.current
@@ -103,9 +104,15 @@ export function Hero() {
   }, [])
 
   const handleComposerFocus = () => {
+    setConversationVisible(true)
     document.body.style.position = 'fixed'
     document.body.style.width = '100%'
     document.body.style.top = `-${window.scrollY}px`
+  }
+
+  const handleChipClick = (text: string) => {
+    setConversationVisible(true)
+    send(text)
   }
 
   const handleComposerBlur = () => {
@@ -121,7 +128,6 @@ export function Hero() {
     if (!text || isStreaming) return
 
     setIsError(false)
-    setDismissed(false)
     const userMsg = { role: 'user' as const, content: text }
     const msgsToSend = [...messages, { ...userMsg, id: `${Date.now()}`, timestamp: Date.now() }]
     addMessage(userMsg)
@@ -220,7 +226,7 @@ export function Hero() {
           type="button"
           className="close-x"
           aria-label="Collapse hero conversation"
-          onClick={() => setDismissed(true)}
+          onClick={() => setConversationVisible(false)}
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
             <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -242,60 +248,62 @@ export function Hero() {
         </p>
       </div>
 
-      <div className="hero-conversation flex flex-col gap-6" role="log" aria-live="polite">
-        {messages.map((msg) => {
-          if (msg.role === 'assistant' && !msg.content) return null
-          if (msg.role === 'user') {
+      {conversationVisible && (
+        <div className="hero-conversation flex flex-col gap-6" role="log" aria-live="polite">
+          {messages.map((msg) => {
+            if (msg.role === 'assistant' && !msg.content) return null
+            if (msg.role === 'user') {
+              return (
+                <div key={msg.id} className="flex justify-end">
+                  <p className="sage-visitor-msg sage-animate max-w-[560px] whitespace-pre-wrap text-right font-display text-[18px] italic leading-[1.5] text-[color:var(--color-text-muted)] [animation:sage-slide-up_0.24s_ease-out_both] [text-wrap:pretty]">
+                    {msg.content}
+                  </p>
+                </div>
+              )
+            }
+            const { prose, cards } = parseBookingCards(msg.content)
+            if (!prose && cards.length === 0) return null
             return (
-              <div key={msg.id} className="flex justify-end">
-                <p className="sage-visitor-msg sage-animate max-w-[560px] whitespace-pre-wrap text-right font-display text-[18px] italic leading-[1.5] text-[color:var(--color-text-muted)] [animation:sage-slide-up_0.24s_ease-out_both] [text-wrap:pretty]">
-                  {msg.content}
-                </p>
-              </div>
+              <SageReply
+                key={msg.id}
+                prose={prose}
+                cards={cards}
+                sageParameters={sageParameters}
+              />
             )
-          }
-          const { prose, cards } = parseBookingCards(msg.content)
-          if (!prose && cards.length === 0) return null
-          return (
-            <SageReply
-              key={msg.id}
-              prose={prose}
-              cards={cards}
-              sageParameters={sageParameters}
-            />
-          )
-        })}
+          })}
 
-        {isError && !isStreaming && (
-          <div className="flex justify-start">
-            <div className="max-w-[70%] rounded-lg border border-black/[0.08] bg-surface p-4 font-body text-base leading-[1.7] text-[color:var(--color-text-primary)]">
-              Something went wrong. Please try again.
-              <button
-                onClick={retryLastSend}
-                className="mt-3 block rounded-md border border-black/[0.15] bg-transparent px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]"
-              >
-                Retry
-              </button>
+          {isError && !isStreaming && (
+            <div className="flex justify-start">
+              <div className="max-w-[70%] rounded-lg border border-black/[0.08] bg-surface p-4 font-body text-base leading-[1.7] text-[color:var(--color-text-primary)]">
+                Something went wrong. Please try again.
+                <button
+                  onClick={retryLastSend}
+                  className="mt-3 block rounded-md border border-black/[0.15] bg-transparent px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[color:var(--color-text-muted)]"
+                >
+                  Retry
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {isStreaming && messages[messages.length - 1]?.content === '' && (
-          <div data-sage-streaming className="flex justify-start">
-            <div className="flex gap-1.5 rounded-lg border border-black/[0.08] bg-surface p-4">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="h-1.5 w-1.5 rounded-full bg-accent"
-                  style={{ animation: `sage-pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
-                />
-              ))}
+          {isStreaming && messages[messages.length - 1]?.content === '' && (
+            <div data-sage-streaming className="flex justify-start">
+              <div className="flex gap-1.5 rounded-lg border border-black/[0.08] bg-surface p-4">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="h-1.5 w-1.5 rounded-full bg-accent"
+                    style={{ animation: `sage-pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div ref={messagesEndRef} className="messages-end" />
-      </div>
+          <div ref={messagesEndRef} className="messages-end" />
+        </div>
+      )}
 
       <div className="composer-wrap" ref={composerWrapperRef}>
         <div className="composer">
@@ -335,11 +343,11 @@ export function Hero() {
 
         {!isEngaged && (
           <div className="chips">
-            <button className="chip" onClick={() => send("Pipeline that won't convert")} disabled={isStreaming}>Pipeline that won&apos;t convert<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send('Is this a fit for me?')} disabled={isStreaming}>Is this a fit for me?<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send("A deal I can't lose")} disabled={isStreaming}>A deal I can&apos;t lose<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send('What does "do better" mean?')} disabled={isStreaming}>What does &quot;do better&quot; mean?<span className="arr">→</span></button>
-            <button className="chip" onClick={() => send('What are companies getting wrong about AI?')} disabled={isStreaming}>What are companies getting wrong about AI?<span className="arr">→</span></button>
+            <button className="chip" onClick={() => handleChipClick("Pipeline that won't convert")} disabled={isStreaming}>Pipeline that won&apos;t convert<span className="arr">→</span></button>
+            <button className="chip" onClick={() => handleChipClick('Is this a fit for me?')} disabled={isStreaming}>Is this a fit for me?<span className="arr">→</span></button>
+            <button className="chip" onClick={() => handleChipClick("A deal I can't lose")} disabled={isStreaming}>A deal I can&apos;t lose<span className="arr">→</span></button>
+            <button className="chip" onClick={() => handleChipClick('What does "do better" mean?')} disabled={isStreaming}>What does &quot;do better&quot; mean?<span className="arr">→</span></button>
+            <button className="chip" onClick={() => handleChipClick('What are companies getting wrong about AI?')} disabled={isStreaming}>What are companies getting wrong about AI?<span className="arr">→</span></button>
           </div>
         )}
       </div>
