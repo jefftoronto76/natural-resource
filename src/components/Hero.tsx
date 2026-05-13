@@ -80,29 +80,54 @@ export function Hero() {
   }, [input])
 
   // iOS keyboard handling: when the soft keyboard opens, the layout viewport
-  // (100dvh) does not shrink, so the composer is pushed off-screen. Pin the
-  // .stage element to the visual viewport's height/top while the keyboard
-  // is open; reset when it closes.
+  // (100dvh) does not shrink. Mutating .stage height/top while it is still
+  // position:relative leaves the document scroll position pointing into the
+  // next section (Problem), so the composer appears to disappear. While the
+  // keyboard is open, lift .stage to position:fixed sized to the visual
+  // viewport and lock body scroll — same pattern as the Chat.tsx overlay.
+  // Restore everything when the keyboard closes.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const vv = window.visualViewport
     if (!vv) return
 
+    let keyboardOpen = false
+
+    const lock = (stage: HTMLElement) => {
+      keyboardOpen = true
+      document.body.style.overflow = 'hidden'
+      stage.style.position = 'fixed'
+      stage.style.top = '0'
+      stage.style.left = '0'
+      stage.style.right = '0'
+    }
+
+    const release = (stage: HTMLElement) => {
+      keyboardOpen = false
+      document.body.style.overflow = ''
+      stage.style.position = ''
+      stage.style.top = ''
+      stage.style.left = ''
+      stage.style.right = ''
+      stage.style.height = ''
+    }
+
     const onViewportChange = () => {
       const stage = stageRef.current
       if (!stage) return
-      if (vv.height === window.innerHeight) {
-        stage.style.height = ''
-        stage.style.top = ''
-        return
+      const isOpen = vv.height < window.innerHeight
+      if (isOpen) {
+        if (!keyboardOpen) lock(stage)
+        stage.style.height = `${vv.height}px`
+      } else if (keyboardOpen) {
+        release(stage)
       }
-      stage.style.height = `${vv.height}px`
-      stage.style.top = `${vv.offsetTop}px`
     }
 
     vv.addEventListener('resize', onViewportChange)
     return () => {
       vv.removeEventListener('resize', onViewportChange)
+      if (keyboardOpen && stageRef.current) release(stageRef.current)
     }
   }, [])
 
