@@ -327,9 +327,9 @@ export function Hero() {
                 <span className="dot"></span>
                 SAGE·AI
               </span>
-              <span>{isStreaming ? 'Thinking…' : isEngaged ? 'Live conversation' : "Trained on Jeff's playbooks · Replies in ~5s"}</span>
+              <span>{isStreaming ? 'Thinking…' : isEngaged ? 'Live conversation' : <>Trained on Jeff&apos;s playbooks<span className="reply-time"> · Replies in ~5s</span></>}</span>
             </span>
-            <span>↵ to send</span>
+            <span className="send-hint">↵ to send</span>
           </div>
         </div>
 
