@@ -91,6 +91,8 @@ export function Hero() {
     const vv = window.visualViewport
     if (!vv) return
 
+    console.log('[Hero.vv] effect mounted')
+
     let keyboardOpen = false
 
     const lock = (stage: HTMLElement) => {
@@ -113,6 +115,13 @@ export function Hero() {
     }
 
     const onViewportChange = () => {
+      console.log('[Hero.vv]', {
+        vvHeight: vv.height,
+        innerHeight: window.innerHeight,
+        screenHeight: window.screen.height,
+        scrollY: window.scrollY,
+        vvOffsetTop: vv.offsetTop,
+      })
       const stage = stageRef.current
       if (!stage) return
       const isOpen = vv.height < window.innerHeight
