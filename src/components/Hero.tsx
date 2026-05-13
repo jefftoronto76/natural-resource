@@ -80,12 +80,11 @@ export function Hero() {
   }, [input])
 
   // iOS keyboard handling: when the soft keyboard opens, the layout viewport
-  // (100dvh) does not shrink. Mutating .stage height/top while it is still
-  // position:relative leaves the document scroll position pointing into the
-  // next section (Problem), so the composer appears to disappear. While the
-  // keyboard is open, lift .stage to position:fixed sized to the visual
-  // viewport and lock body scroll — same pattern as the Chat.tsx overlay.
-  // Restore everything when the keyboard closes.
+  // does not shrink and iOS slides the visual viewport DOWN inside the layout
+  // viewport (vv.offsetTop becomes nonzero). position:fixed elements anchor
+  // to the layout viewport on iOS, so we have to translate by vv.offsetTop
+  // ourselves and re-apply on every scroll/resize event while the keyboard
+  // is open. Same pattern as the Chat.tsx overlay.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const vv = window.visualViewport
@@ -94,15 +93,6 @@ export function Hero() {
     console.log('[Hero.vv] effect mounted')
 
     let keyboardOpen = false
-
-    const lock = (stage: HTMLElement) => {
-      keyboardOpen = true
-      document.body.style.overflow = 'hidden'
-      stage.style.position = 'fixed'
-      stage.style.top = '0'
-      stage.style.left = '0'
-      stage.style.right = '0'
-    }
 
     const release = (stage: HTMLElement) => {
       keyboardOpen = false
@@ -126,7 +116,14 @@ export function Hero() {
       if (!stage) return
       const isOpen = vv.height < window.innerHeight
       if (isOpen) {
-        if (!keyboardOpen) lock(stage)
+        if (!keyboardOpen) {
+          keyboardOpen = true
+          document.body.style.overflow = 'hidden'
+          stage.style.position = 'fixed'
+          stage.style.left = '0'
+          stage.style.right = '0'
+        }
+        stage.style.top = `${vv.offsetTop}px`
         stage.style.height = `${vv.height}px`
       } else if (keyboardOpen) {
         release(stage)
@@ -134,8 +131,10 @@ export function Hero() {
     }
 
     vv.addEventListener('resize', onViewportChange)
+    vv.addEventListener('scroll', onViewportChange)
     return () => {
       vv.removeEventListener('resize', onViewportChange)
+      vv.removeEventListener('scroll', onViewportChange)
       if (keyboardOpen && stageRef.current) release(stageRef.current)
     }
   }, [])
