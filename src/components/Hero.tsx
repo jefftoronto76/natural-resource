@@ -42,7 +42,6 @@ export function Hero() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const composerWrapperRef = useRef<HTMLDivElement>(null)
-  const stageRef = useRef<HTMLElement>(null)
   const retryMsgsRef = useRef<typeof messages>([])
   const retrySessionIdRef = useRef<string | null>(null)
 
@@ -79,27 +78,50 @@ export function Hero() {
     ta.style.height = Math.min(ta.scrollHeight, 140) + 'px'
   }, [input])
 
-  // iOS keyboard handling — placeholder retained for commit 2.
+  // iOS keyboard handling — Option 2: pin only the composer-wrap to the
+  // bottom of the visual viewport while the keyboard is open. Leaves .stage
+  // and body untouched. Avoids the iOS position:fixed-on-flex-container
+  // quirks that broke Option 1 on real devices.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const vv = window.visualViewport
     if (!vv) return
 
+    let keyboardOpen = false
+
+    const release = (composer: HTMLDivElement) => {
+      keyboardOpen = false
+      composer.style.position = ''
+      composer.style.bottom = ''
+      composer.style.left = ''
+      composer.style.right = ''
+      composer.style.background = ''
+    }
+
     const onViewportChange = () => {
-      const stage = stageRef.current
-      if (!stage) return
-      if (vv.height === window.innerHeight) {
-        stage.style.height = ''
-        stage.style.top = ''
-        return
+      const composer = composerWrapperRef.current
+      if (!composer) return
+      const isOpen = vv.height < window.innerHeight
+      if (isOpen) {
+        if (!keyboardOpen) {
+          keyboardOpen = true
+          composer.style.position = 'fixed'
+          composer.style.bottom = '0'
+          composer.style.left = '0'
+          composer.style.right = '0'
+          composer.style.background = '#f9f8f5'
+        }
+      } else if (keyboardOpen) {
+        release(composer)
       }
-      stage.style.height = `${vv.height}px`
-      stage.style.top = `${vv.offsetTop}px`
     }
 
     vv.addEventListener('resize', onViewportChange)
+    vv.addEventListener('scroll', onViewportChange)
     return () => {
       vv.removeEventListener('resize', onViewportChange)
+      vv.removeEventListener('scroll', onViewportChange)
+      if (keyboardOpen && composerWrapperRef.current) release(composerWrapperRef.current)
     }
   }, [])
 
@@ -198,7 +220,6 @@ export function Hero() {
 
   return (
     <section
-      ref={stageRef}
       id="hero"
       data-screen-label="Hero"
       className={isEngaged ? 'stage engaged' : 'stage'}
