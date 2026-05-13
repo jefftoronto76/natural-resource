@@ -61,7 +61,7 @@ export function Hero() {
     }
   }, [setMode])
 
-  const isEngaged = messages.length > 0
+  const isEngaged = messages.length > 0 && conversationVisible
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
