@@ -79,63 +79,27 @@ export function Hero() {
     ta.style.height = Math.min(ta.scrollHeight, 140) + 'px'
   }, [input])
 
-  // iOS keyboard handling: when the soft keyboard opens, the layout viewport
-  // does not shrink and iOS slides the visual viewport DOWN inside the layout
-  // viewport (vv.offsetTop becomes nonzero). position:fixed elements anchor
-  // to the layout viewport on iOS, so we have to translate by vv.offsetTop
-  // ourselves and re-apply on every scroll/resize event while the keyboard
-  // is open. Same pattern as the Chat.tsx overlay.
+  // iOS keyboard handling — placeholder retained for commit 2.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const vv = window.visualViewport
     if (!vv) return
 
-    console.log('[Hero.vv] effect mounted')
-
-    let keyboardOpen = false
-
-    const release = (stage: HTMLElement) => {
-      keyboardOpen = false
-      document.body.style.overflow = ''
-      stage.style.position = ''
-      stage.style.top = ''
-      stage.style.left = ''
-      stage.style.right = ''
-      stage.style.height = ''
-    }
-
     const onViewportChange = () => {
-      console.log('[Hero.vv]', {
-        vvHeight: vv.height,
-        innerHeight: window.innerHeight,
-        screenHeight: window.screen.height,
-        scrollY: window.scrollY,
-        vvOffsetTop: vv.offsetTop,
-      })
       const stage = stageRef.current
       if (!stage) return
-      const isOpen = vv.height < window.innerHeight
-      if (isOpen) {
-        if (!keyboardOpen) {
-          keyboardOpen = true
-          document.body.style.overflow = 'hidden'
-          stage.style.position = 'fixed'
-          stage.style.left = '0'
-          stage.style.right = '0'
-        }
-        stage.style.top = `${vv.offsetTop}px`
-        stage.style.height = `${vv.height}px`
-      } else if (keyboardOpen) {
-        release(stage)
+      if (vv.height === window.innerHeight) {
+        stage.style.height = ''
+        stage.style.top = ''
+        return
       }
+      stage.style.height = `${vv.height}px`
+      stage.style.top = `${vv.offsetTop}px`
     }
 
     vv.addEventListener('resize', onViewportChange)
-    vv.addEventListener('scroll', onViewportChange)
     return () => {
       vv.removeEventListener('resize', onViewportChange)
-      vv.removeEventListener('scroll', onViewportChange)
-      if (keyboardOpen && stageRef.current) release(stageRef.current)
     }
   }, [])
 
