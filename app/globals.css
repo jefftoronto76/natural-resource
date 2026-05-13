@@ -396,4 +396,25 @@ body {
   .chips {
     display: none;
   }
+  .scroll-hint-wrap {
+    display: none;
+  }
+  .hero .close-x {
+    position: fixed;
+    top: auto;
+    right: 16px;
+    bottom: calc(120px + env(safe-area-inset-bottom) + 12px);
+    background: #1a1917;
+    border: none;
+    color: #ffffff;
+    z-index: 31;
+  }
+  .hero .close-x:hover {
+    background: #1a1917;
+    border: none;
+    color: #ffffff;
+  }
+  .stage.engaged .hero {
+    background: #f9f8f5;
+  }
 }
