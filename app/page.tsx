@@ -2,6 +2,7 @@ import { Nav } from '@/components/Nav'
 import { Hero } from '@/components/Hero'
 import { Problem } from '@/components/Problem'
 import { Problems } from '@/components/Problems'
+import { About } from '@/components/About'
 import { WhyMe } from '@/components/WhyMe'
 import { Work } from '@/components/Work'
 import { Session } from '@/components/Session'
@@ -16,6 +17,7 @@ export default function Page() {
         <Hero />
         <Problem />
         <Problems />
+        <About />
         <WhyMe />
         <Work />
         {/* <Session /> */}
