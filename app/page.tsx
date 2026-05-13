@@ -1,6 +1,7 @@
 import { Nav } from '@/components/Nav'
 import { Hero } from '@/components/Hero'
 import { Problem } from '@/components/Problem'
+import { Problems } from '@/components/Problems'
 import { WhyMe } from '@/components/WhyMe'
 import { Work } from '@/components/Work'
 import { Session } from '@/components/Session'
@@ -14,6 +15,7 @@ export default function Page() {
       <main>
         <Hero />
         <Problem />
+        <Problems />
         <WhyMe />
         <Work />
         {/* <Session /> */}
