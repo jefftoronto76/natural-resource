@@ -376,3 +376,24 @@ body {
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
+
+/* ──────────────────────────────────────────────────────────── */
+/* Mobile: pin Hero composer to viewport bottom (iOS keyboard) */
+/* ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .composer-wrap {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #f9f8f5;
+    z-index: 30;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .stage {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
+  .chips {
+    display: none;
+  }
+}

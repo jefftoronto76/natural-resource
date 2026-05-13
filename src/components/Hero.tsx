@@ -78,24 +78,37 @@ export function Hero() {
     ta.style.height = Math.min(ta.scrollHeight, 140) + 'px'
   }, [input])
 
-  // iOS keyboard handling — Option 2: pin only the composer-wrap to the
-  // bottom of the visual viewport while the keyboard is open. Leaves .stage
-  // and body untouched. Avoids the iOS position:fixed-on-flex-container
-  // quirks that broke Option 1 on real devices.
+  // iOS keyboard handling — always-fixed composer + vv-driven body lock.
+  // .composer-wrap is position:fixed on mobile via CSS at all times; this
+  // effect only mutates `bottom` to push the composer above the keyboard
+  // and locks the body so iOS can't auto-scroll the page underneath.
+  // Trigger is purely visualViewport detection — never focus/blur — so an
+  // auto-focus at mount doesn't lock the body unless the keyboard actually
+  // opens. On desktop the condition never fires.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const vv = window.visualViewport
     if (!vv) return
 
     let keyboardOpen = false
+    let savedY = 0
 
-    const release = (composer: HTMLDivElement) => {
+    const lock = () => {
+      keyboardOpen = true
+      savedY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+      document.body.style.top = `-${savedY}px`
+    }
+
+    const release = () => {
       keyboardOpen = false
-      composer.style.position = ''
-      composer.style.bottom = ''
-      composer.style.left = ''
-      composer.style.right = ''
-      composer.style.background = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+      document.body.style.top = ''
+      window.scrollTo({ top: savedY, behavior: 'instant' as ScrollBehavior })
+      const composer = composerWrapperRef.current
+      if (composer) composer.style.bottom = '0px'
     }
 
     const onViewportChange = () => {
@@ -103,17 +116,11 @@ export function Hero() {
       if (!composer) return
       const isOpen = vv.height < window.innerHeight
       if (isOpen) {
-        if (!keyboardOpen) {
-          keyboardOpen = true
-          window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
-          composer.style.position = 'fixed'
-          composer.style.bottom = '0'
-          composer.style.left = '0'
-          composer.style.right = '0'
-          composer.style.background = '#f9f8f5'
-        }
+        if (!keyboardOpen) lock()
+        const offset = window.innerHeight - vv.height - vv.offsetTop
+        composer.style.bottom = `${Math.max(0, offset)}px`
       } else if (keyboardOpen) {
-        release(composer)
+        release()
       }
     }
 
@@ -122,7 +129,7 @@ export function Hero() {
     return () => {
       vv.removeEventListener('resize', onViewportChange)
       vv.removeEventListener('scroll', onViewportChange)
-      if (keyboardOpen && composerWrapperRef.current) release(composerWrapperRef.current)
+      if (keyboardOpen) release()
     }
   }, [])
 
