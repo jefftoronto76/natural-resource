@@ -37,6 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://assets.calendly.com/assets/external/widget.css"
           rel="stylesheet"
         />
+        {/* Eruda mobile console — temporary, debugging only */}
+        <Script id="eruda-debug" strategy="afterInteractive">
+          {`(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/eruda';s.onload=function(){if(window.eruda)window.eruda.init();};document.head.appendChild(s);})();`}
+        </Script>
       </head>
       <body>
         {children}
