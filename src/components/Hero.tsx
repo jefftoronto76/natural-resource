@@ -229,7 +229,7 @@ export function Hero() {
         </h1>
 
         <p className="lede">
-          Hi, I&apos;m Jeff. I help technology companies do better. It&apos;s a broad statement, and one I&apos;ve spent years earning across revenue, operations, product, and leadership.
+          I help technology companies do better.
         </p>
       </div>
 
