@@ -105,6 +105,7 @@ export function Hero() {
       if (isOpen) {
         if (!keyboardOpen) {
           keyboardOpen = true
+          window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
           composer.style.position = 'fixed'
           composer.style.bottom = '0'
           composer.style.left = '0'
