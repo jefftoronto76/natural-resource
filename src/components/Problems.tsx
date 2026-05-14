@@ -30,7 +30,7 @@ export function Problems() {
           The problems I&apos;m built to solve.
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-8">
           {CARDS.map(({ Icon, label }) => (
             <div
               key={label}
