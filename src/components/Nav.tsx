@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { useSageStore } from '../lib/store'
 
 const LINKS = [
-  { label: 'Schedule', href: '#work' },
-  { label: 'Chat', href: '#chat' },
+  { label: 'Book', href: '#work' },
+  { label: 'Labs', href: '#' },
+  { label: 'Share', href: '#' },
 ]
 
 export function Nav() {
