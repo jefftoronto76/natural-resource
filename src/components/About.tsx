@@ -64,11 +64,11 @@ export function About() {
               key={label}
               className="bg-surface rounded-xl border border-[color:var(--color-border)] p-7"
             >
-              <Icon className="text-accent mb-5" size={36} strokeWidth={1.75} />
-              <p className="font-body text-base font-semibold leading-snug text-[color:var(--color-text-primary)] mb-3">
+              <Icon className="text-accent mb-5" size={64} strokeWidth={1.75} />
+              <p className="font-body text-xl font-semibold leading-snug text-[color:var(--color-text-primary)] mb-3">
                 {label}
               </p>
-              <p className="font-body text-[15px] leading-relaxed text-[color:var(--color-text-muted)]">
+              <p className="font-body text-base leading-relaxed text-[color:var(--color-text-muted)]">
                 {body}
               </p>
             </div>
