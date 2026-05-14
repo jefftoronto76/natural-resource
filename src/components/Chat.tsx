@@ -187,7 +187,6 @@ export function Chat() {
         style={{
           padding: '64px clamp(24px, 5vw, 48px)',
           borderBottom: '1px solid rgba(26,25,23,0.08)',
-          background: '#f9f8f5',
         }}
       >
         <div ref={ref} className="reveal" style={{ maxWidth: '640px' }}>
