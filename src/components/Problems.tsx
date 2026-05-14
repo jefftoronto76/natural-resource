@@ -36,7 +36,7 @@ export function Problems() {
               key={label}
               className="bg-surface rounded-xl border border-[color:var(--color-border)] p-7"
             >
-              <Icon className="text-accent mb-5" size={36} strokeWidth={1.75} />
+              <Icon className="text-[color:var(--color-text-primary)] mb-5" size={36} strokeWidth={1.75} />
               <p className="font-body text-base font-semibold leading-snug text-[color:var(--color-text-primary)]">
                 {label}
               </p>
