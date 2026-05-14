@@ -285,7 +285,7 @@ export function Chat() {
           zIndex: 100,
           display: 'flex',
           flexDirection: 'column',
-          background: '#f9f8f5',
+          background: 'rgb(var(--color-bg))',
           animation: 'expandChat 0.3s ease-out',
           transition: 'height 0.3s ease, top 0.3s ease',
         }}>
