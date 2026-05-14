@@ -214,17 +214,17 @@ body {
 .hero .close-x{
   position:absolute;top:0;right:0;
   width:36px;height:36px;border-radius:50%;
-  background:transparent;border:1px solid rgba(26,25,23,0.12);
+  background:transparent;border:1px solid var(--color-border);
   display:flex;align-items:center;justify-content:center;
-  color:rgba(26,25,23,0.55);
+  color:var(--color-text-muted);
   opacity:0;pointer-events:none;transform:scale(.85);
   transition:opacity .35s ease, transform .35s ease, color .15s, border-color .15s, background .15s;
 }
-.hero .close-x:hover{color:#1a1917;border-color:#1a1917;background:#fff}
+.hero .close-x:hover{color:var(--color-text-primary);border-color:var(--color-border-hover);background:rgb(var(--color-surface))}
 .stage.engaged .hero .close-x{opacity:1;pointer-events:auto;transform:scale(1)}
 .hero .eyebrow{
   font-family:var(--font-mono);font-size:12px;letter-spacing:.22em;
-  text-transform:uppercase;color:rgba(26,25,23,0.42);margin-bottom:36px;
+  text-transform:uppercase;color:var(--color-text-dim);margin-bottom:36px;
   transition:font-size .45s ease, margin-bottom .45s ease;
 }
 .hero h1{
@@ -236,7 +236,7 @@ body {
 }
 .hero h1 em{font-style:italic;color:rgb(var(--color-accent));font-weight:400}
 .hero .lede{
-  font-size:17px;line-height:1.6;color:rgba(26,25,23,0.70);
+  font-size:17px;line-height:1.6;color:var(--color-text-muted);
   margin-bottom:32px;
   transition:font-size .45s ease, max-height .45s ease, opacity .35s ease, margin-bottom .45s ease;
   overflow:hidden;
@@ -246,7 +246,7 @@ body {
   padding:14px 0 14px;
   margin:0 -8px;padding-left:8px;padding-right:8px;
   background:transparent;
-  box-shadow:0 8px 16px -12px rgba(26,25,23,0.18), 0 1px 0 0 rgba(26,25,23,0.08);
+  box-shadow:0 8px 16px -12px rgb(var(--ink-rgb, 26 25 23) / 0.18), 0 1px 0 0 var(--color-border);
 }
 .stage.engaged .hero .eyebrow{font-size:10px;margin-bottom:6px}
 .stage.engaged .hero h1{font-size:20px;margin-bottom:0;line-height:1.2;padding-right:48px}
@@ -254,7 +254,7 @@ body {
 
 .composer-wrap{margin-top:8px;position:relative}
 .composer{
-  background:#fff;border:1px solid rgba(26,25,23,0.12);border-radius:18px;
+  background:rgb(var(--color-surface));border:1px solid var(--color-border);border-radius:18px;
   padding:14px 14px 10px;
   box-shadow:0 8px 32px rgba(0,0,0,.05);
   transition:border-color .15s ease, box-shadow .15s ease;
@@ -266,13 +266,13 @@ body {
 .composer .row{display:flex;align-items:flex-end;gap:10px}
 .composer textarea{
   flex:1;border:none;outline:none;resize:none;background:transparent;
-  font-family:var(--font-body);font-size:16px;line-height:1.5;color:#1a1917;
+  font-family:var(--font-body);font-size:16px;line-height:1.5;color:var(--color-text-primary);
   min-height:28px;max-height:140px;padding:6px 6px;
 }
-.composer textarea::placeholder{color:rgba(26,25,23,0.42)}
+.composer textarea::placeholder{color:var(--color-text-dim)}
 .composer .send{
   width:38px;height:38px;border-radius:50%;border:none;
-  background:rgb(var(--color-accent));color:#fff;
+  background:rgb(var(--color-accent));color:rgb(var(--color-surface));
   display:flex;align-items:center;justify-content:center;flex:none;
   cursor:pointer;
   transition:background .15s ease,transform .15s ease,opacity .15s ease;
@@ -281,8 +281,8 @@ body {
 .composer .send:disabled{opacity:.4;cursor:not-allowed}
 .composer .meta{
   display:flex;justify-content:space-between;align-items:center;
-  margin-top:8px;padding-top:8px;border-top:1px solid rgba(26,25,23,0.08);
-  font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:rgba(26,25,23,0.42);
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--color-border);
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--color-text-dim);
 }
 .composer .meta .left{display:flex;align-items:center;gap:8px}
 .ai-badge{
@@ -307,12 +307,12 @@ body {
 }
 .stage.engaged .chips{opacity:0;max-height:0;margin-top:0;pointer-events:none}
 .chip{
-  background:#fff;border:1px solid rgba(26,25,23,0.12);
+  background:rgb(var(--color-surface));border:1px solid var(--color-border);
   padding:8px 13px;border-radius:999px;
-  font-family:var(--font-body);font-size:13px;color:rgba(26,25,23,0.70);
+  font-family:var(--font-body);font-size:13px;color:var(--color-text-muted);
   cursor:pointer;transition:all .15s ease;
 }
-.chip:hover{border-color:#1a1917;color:#1a1917}
+.chip:hover{border-color:var(--color-border-hover);color:var(--color-text-primary)}
 .chip .arr{margin-left:6px;color:rgb(var(--color-accent))}
 
 .scroll-hint-wrap {
@@ -334,7 +334,7 @@ body {
   font-size: 11px;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: rgba(26,25,23,0.35);
+  color: var(--color-text-dim);
   text-align: center;
 }
 
@@ -386,7 +386,7 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: #f9f8f5;
+    background: rgb(var(--color-bg));
     z-index: 30;
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -404,18 +404,18 @@ body {
     top: auto;
     right: 16px;
     bottom: calc(120px + env(safe-area-inset-bottom) + 12px);
-    background: #1a1917;
+    background: var(--color-text-primary);
     border: none;
-    color: #ffffff;
+    color: rgb(var(--color-bg));
     z-index: 31;
   }
   .hero .close-x:hover {
-    background: #1a1917;
+    background: var(--color-text-primary);
     border: none;
-    color: #ffffff;
+    color: rgb(var(--color-bg));
   }
   .stage.engaged .hero {
-    background: #f9f8f5;
+    background: rgb(var(--color-bg));
   }
   .send-hint {
     display: none;
