@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { ChevronDown, ChevronUp, X } from 'lucide-react'
 
 type FilterId = 'all' | 'roles' | 'education'
 
@@ -231,7 +232,8 @@ const EDU_COUNT = CARDS.filter((c) => c.kind === 'education').length
 
 export function SectionCareer() {
   const [filter, setFilter] = useState<FilterId>('all')
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [modalRoleId, setModalRoleId] = useState<string | null>(null)
+  const [modalVisible, setModalVisible] = useState(false)
   const [mobileShowAll, setMobileShowAll] = useState(false)
 
   const visible = CARDS.filter((c) => {
@@ -240,20 +242,40 @@ export function SectionCareer() {
     return true
   })
 
-  const toggleExpand = (id: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
+  const openModal = (id: string) => {
+    setModalRoleId(id)
+    requestAnimationFrame(() => setModalVisible(true))
   }
+
+  const closeModal = () => {
+    setModalVisible(false)
+    setTimeout(() => setModalRoleId(null), 200)
+  }
+
+  useEffect(() => {
+    if (modalRoleId !== null) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [modalRoleId])
 
   const setFilterAndReset = (id: FilterId) => {
     setFilter(id)
     setMobileShowAll(false)
-    setExpanded(new Set())
+    setModalVisible(false)
+    setModalRoleId(null)
   }
+
+  const modalCard =
+    modalRoleId !== null
+      ? (CARDS.find((c) => c.kind === 'role' && c.id === modalRoleId) as
+          | RoleCard
+          | undefined)
+      : null
 
   const filters: { id: FilterId; label: string; count: number }[] = [
     { id: 'all', label: 'All', count: ROLE_COUNT + EDU_COUNT },
@@ -338,8 +360,7 @@ export function SectionCareer() {
                 {card.kind === 'role' ? (
                   <RoleCardView
                     card={card}
-                    expanded={expanded.has(card.id)}
-                    onToggle={() => toggleExpand(card.id)}
+                    onOpen={() => openModal(card.id)}
                   />
                 ) : (
                   <EducationCardView card={card} />
@@ -376,6 +397,17 @@ export function SectionCareer() {
           </button>
         )}
       </div>
+
+      {modalCard &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <RoleModal
+            card={modalCard}
+            visible={modalVisible}
+            onClose={closeModal}
+          />,
+          document.body,
+        )}
     </section>
   )
 }
@@ -386,12 +418,10 @@ export function SectionCareer() {
 
 function RoleCardView({
   card,
-  expanded,
-  onToggle,
+  onOpen,
 }: {
   card: RoleCard
-  expanded: boolean
-  onToggle: () => void
+  onOpen: () => void
 }) {
   const longMetric = card.metric.length > 8
   return (
@@ -432,8 +462,81 @@ function RoleCardView({
         {card.outcome}
       </p>
 
-      {expanded && (
-        <div className="mt-2 pt-5 border-t border-[color:var(--color-border)] flex flex-col gap-5">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="mt-auto pt-4 flex items-center gap-2 font-body text-[13px] font-semibold text-accent hover:opacity-80 transition-opacity self-start"
+      >
+        See more
+        <ChevronDown size={14} strokeWidth={2} />
+      </button>
+    </article>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/*  Role modal                                                 */
+/* ─────────────────────────────────────────────────────────── */
+
+function RoleModal({
+  card,
+  visible,
+  onClose,
+}: {
+  card: RoleCard
+  visible: boolean
+  onClose: () => void
+}) {
+  return (
+    <div
+      onClick={onClose}
+      role="presentation"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0,0,0,0.4)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.2s ease',
+        padding: '20px',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${card.tagline} — career detail`}
+        style={{
+          background: '#fff',
+          borderRadius: '16px',
+          maxWidth: '640px',
+          width: '100%',
+          maxHeight: '80vh',
+          overflow: 'auto',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
+          padding: 'clamp(24px, 4vw, 40px)',
+          position: 'relative',
+        }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <img src={card.logo} alt="" className="h-10 w-auto" />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close modal"
+            className="bg-transparent border-0 cursor-pointer p-1 text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text-primary)] transition-colors"
+          >
+            <X size={24} strokeWidth={2} />
+          </button>
+        </div>
+
+        <div className="border-t border-[color:var(--color-border)] pt-6 flex flex-col gap-5">
           <ExpandBlock label="What got me there" body={card.story} />
           <ExpandBlock label="Business context" body={card.context} />
 
@@ -477,22 +580,8 @@ function RoleCardView({
             </div>
           )}
         </div>
-      )}
-
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        className="mt-auto pt-4 flex items-center gap-2 font-body text-[13px] font-semibold text-accent hover:opacity-80 transition-opacity self-start"
-      >
-        {expanded ? 'See less' : 'See more'}
-        {expanded ? (
-          <ChevronUp size={14} strokeWidth={2} />
-        ) : (
-          <ChevronDown size={14} strokeWidth={2} />
-        )}
-      </button>
-    </article>
+      </div>
+    </div>
   )
 }
 
