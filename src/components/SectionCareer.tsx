@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
 
@@ -512,17 +513,23 @@ function RoleModal({
         role="dialog"
         aria-modal="true"
         aria-label={`${card.tagline} — career detail`}
-        style={{
-          background: '#fff',
-          borderRadius: '16px',
-          maxWidth: '640px',
-          width: '100%',
-          maxHeight: '80vh',
-          overflow: 'auto',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
-          padding: 'clamp(24px, 4vw, 40px)',
-          position: 'relative',
-        }}
+        className="overflow-y-auto"
+        style={
+          {
+            background: '#fff',
+            borderRadius: '16px',
+            maxWidth: '640px',
+            width: '100%',
+            maxHeight: '80vh',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
+            padding: 'clamp(24px, 4vw, 40px)',
+            position: 'relative',
+            '--color-text-primary': 'rgb(24 32 41)',
+            '--color-text-muted': 'rgb(24 32 41 / 0.70)',
+            '--color-text-dim': 'rgb(24 32 41 / 0.46)',
+            '--color-border': 'rgb(24 32 41 / 0.10)',
+          } as CSSProperties
+        }
       >
         <div className="flex items-center justify-between mb-6">
           <img src={card.logo} alt="" className="h-10 w-auto" />
