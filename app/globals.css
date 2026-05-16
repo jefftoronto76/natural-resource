@@ -442,7 +442,8 @@ html[data-palette="inkwell"] {
 html[data-palette="inkwell"] #problems,
 html[data-palette="inkwell"] #process,
 html[data-palette="inkwell"] #why,
-html[data-palette="inkwell"] #career {
+html[data-palette="inkwell"] #career,
+html[data-palette="inkwell"] #testimonials {
   --color-bg: 245 244 240;
   --color-surface: 255 255 255;
   --ink-rgb: 24 32 41;
