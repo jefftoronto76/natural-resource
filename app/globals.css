@@ -440,7 +440,8 @@ html[data-palette="inkwell"] {
 }
 
 html[data-palette="inkwell"] #problems,
-html[data-palette="inkwell"] #process {
+html[data-palette="inkwell"] #process,
+html[data-palette="inkwell"] #why {
   --color-bg: 245 244 240;
   --color-surface: 255 255 255;
   --ink-rgb: 24 32 41;
@@ -463,7 +464,6 @@ html[data-palette="inkwell"] body {
     rgb(var(--color-bg));
 }
 
-html[data-palette="inkwell"] #why,
 html[data-palette="inkwell"] #chat {
   position: relative;
   background:
