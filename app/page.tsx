@@ -1,9 +1,6 @@
 import { Nav } from '@/components/Nav'
 import { Hero } from '@/components/Hero'
 import { Problem } from '@/components/Problem'
-import { Problems } from '@/components/Problems'
-import { About } from '@/components/About'
-import { Process } from '@/components/Process'
 import { SectionOutcomes } from '@/components/SectionOutcomes'
 import { SectionWhy } from '@/components/SectionWhy'
 import { Work } from '@/components/Work'
@@ -18,9 +15,6 @@ export default function Page() {
       <main>
         <Hero />
         <Problem />
-        <Problems />
-        <About />
-        <Process />
         <SectionOutcomes />
         <SectionWhy />
         <Work />
