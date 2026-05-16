@@ -50,11 +50,11 @@ export function Nav() {
         borderBottom: scrolled || open ? '1px solid var(--color-border)' : 'none',
         transition: 'all 0.3s ease',
       }}>
-        <a href="#hero" style={{
-          fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 400,
+        <a href="#hero" className="nr-brand" style={{
+          fontFamily: 'var(--font-display)', fontWeight: 400,
           letterSpacing: '0.02em', color: 'var(--color-text-primary)', textDecoration: 'none',
         }}>
-          Natural Resource
+          Performance-Driven, Heart-Led
         </a>
 
         {/* Desktop links */}
@@ -139,9 +139,11 @@ export function Nav() {
       )}
 
       <style>{`
+        .nr-brand { font-size: 17px; }
         @media (max-width: 768px) {
           .nr-desktop-links { display: none !important; }
           .nr-mobile-menu-btn { display: flex !important; }
+          .nr-brand { font-size: 14px; }
         }
       `}</style>
     </>

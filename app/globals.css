@@ -222,24 +222,35 @@ body {
 }
 .hero .close-x:hover{color:var(--color-text-primary);border-color:var(--color-border-hover);background:rgb(var(--color-surface))}
 .stage.engaged .hero .close-x{opacity:1;pointer-events:auto;transform:scale(1)}
-.hero .eyebrow{
-  font-family:var(--font-mono);font-size:12px;letter-spacing:.22em;
-  text-transform:uppercase;color:var(--color-text-dim);margin-bottom:36px;
-  transition:font-size .45s ease, margin-bottom .45s ease;
-}
 .hero h1{
   font-family:var(--font-display);font-weight:400;
-  font-size:clamp(36px, 4vw, 56px);line-height:1.06;letter-spacing:-.015em;
+  font-size:clamp(48px, 8vw, 96px);line-height:1.06;letter-spacing:-.015em;
   margin-bottom:16px;
   transition:font-size .55s cubic-bezier(.2,.7,.2,1), margin-bottom .45s ease;
   text-wrap:pretty;
 }
 .hero h1 em{font-style:italic;color:rgb(var(--color-accent));font-weight:400}
 .hero .lede{
-  font-size:17px;line-height:1.6;color:var(--color-text-muted);
+  font-family:var(--font-display);
+  font-size:clamp(20px, 2.4vw, 28px);line-height:1.5;color:var(--color-text-muted);
+  margin-bottom:48px;
+  transition:font-size .45s ease, max-height .45s ease, opacity .35s ease, margin-bottom .45s ease;
+  overflow:hidden;
+}
+.hero .lede em{font-style:italic}
+.hero .sage-line{
+  font-family:var(--font-body);
+  font-size:14px;line-height:1.5;color:var(--color-text-muted);
   margin-bottom:32px;
   transition:font-size .45s ease, max-height .45s ease, opacity .35s ease, margin-bottom .45s ease;
   overflow:hidden;
+}
+.hero .sage-line .hilite{
+  background-image:none;
+  background-color:rgb(var(--color-surface));
+  border-radius:4px;
+  padding:2px 8px;
+  color:var(--color-text-primary);
 }
 .stage.engaged .hero{
   position:sticky;top:60px;z-index:20;
@@ -248,9 +259,9 @@ body {
   background:transparent;
   box-shadow:0 8px 16px -12px rgb(var(--ink-rgb, 26 25 23) / 0.18), 0 1px 0 0 var(--color-border);
 }
-.stage.engaged .hero .eyebrow{font-size:10px;margin-bottom:6px}
 .stage.engaged .hero h1{font-size:20px;margin-bottom:0;line-height:1.2;padding-right:48px}
 .stage.engaged .hero .lede{font-size:0;max-height:0;opacity:0;margin-bottom:0;}
+.stage.engaged .hero .sage-line{font-size:0;max-height:0;opacity:0;margin-bottom:0;}
 
 .composer-wrap{margin-top:8px;position:relative}
 .composer{
