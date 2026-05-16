@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import {
   Globe,
   Handshake,
@@ -64,7 +65,19 @@ const PRACTICE_AREAS = ['Revenue', 'Operations', 'Product', 'Leadership']
 
 export function SectionWhy() {
   return (
-    <section id="why" className="py-16 px-6 md:px-12">
+    <section
+      id="why"
+      className="bg-white py-16 px-6 md:px-12"
+      style={
+        {
+          '--color-text-primary': 'rgb(24 32 41)',
+          '--color-text-muted': 'rgb(24 32 41 / 0.70)',
+          '--color-text-dim': 'rgb(24 32 41 / 0.46)',
+          '--color-border': 'rgb(24 32 41 / 0.10)',
+          '--color-surface': 'rgb(245 244 240)',
+        } as CSSProperties
+      }
+    >
       <div className="max-w-[1100px] mx-auto">
         <p className="font-mono text-[13.2px] tracking-[0.22em] uppercase text-[color:var(--color-text-dim)] mb-6 flex items-center gap-4">
           <span>Why work with me</span>
