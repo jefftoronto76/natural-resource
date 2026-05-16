@@ -4,7 +4,8 @@ import { Problem } from '@/components/Problem'
 import { Problems } from '@/components/Problems'
 import { About } from '@/components/About'
 import { Process } from '@/components/Process'
-import { WhyMe } from '@/components/WhyMe'
+import { SectionOutcomes } from '@/components/SectionOutcomes'
+import { SectionWhy } from '@/components/SectionWhy'
 import { Work } from '@/components/Work'
 import { Session } from '@/components/Session'
 import { Chat } from '@/components/Chat'
@@ -20,7 +21,8 @@ export default function Page() {
         <Problems />
         <About />
         <Process />
-        <WhyMe />
+        <SectionOutcomes />
+        <SectionWhy />
         <Work />
         {/* <Session /> */}
         <Chat />
