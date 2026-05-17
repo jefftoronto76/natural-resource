@@ -58,6 +58,35 @@ body {
   display: inline-block;
 }
 
+.mark-highlight {
+  background-image: linear-gradient(
+    180deg,
+    transparent 58%,
+    rgba(198, 217, 196, 0.32) 58%,
+    rgba(198, 217, 196, 0.32) 92%,
+    transparent 92%
+  );
+  padding: 0 2px;
+  color: var(--color-text-primary);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.mark-highlight--display {
+  background-image: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(198, 217, 196, 0.32) 60%,
+    rgba(198, 217, 196, 0.32) 92%,
+    transparent 92%
+  );
+  padding: 0 2px;
+  font-style: normal;
+  color: var(--color-text-primary);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 /* ─── Calendly widget overrides ────────────────────────────────────── */
 .calendly-inline-widget {
   width: 100% !important;
