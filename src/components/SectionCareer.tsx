@@ -533,7 +533,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -580,7 +581,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -617,7 +619,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -705,7 +708,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -730,7 +734,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -756,7 +761,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -842,7 +848,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -867,7 +874,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -893,7 +901,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -981,7 +990,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -1006,7 +1016,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
@@ -1032,7 +1043,8 @@ export function SectionCareer() {
                     <div
                       style={{
                         fontFamily: 'DM Mono, monospace',
-                        fontSize: '11px',
+                        fontSize: '16px',
+                        fontWeight: 700,
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
                         color: 'rgb(24 32 41 / 0.70)',
