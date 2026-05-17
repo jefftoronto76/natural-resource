@@ -3,6 +3,8 @@ import {
   Handshake,
   Users,
   Layers,
+  Unlock,
+  Telescope,
 } from 'lucide-react'
 
 type Outcome = {
@@ -23,7 +25,7 @@ const OUTCOMES: Outcome[] = [
   },
   {
     Icon: Handshake,
-    title: 'Vendor → Trusted Partner',
+    title: 'Resilient client relationships',
     bodyLead: 'Strong customer relationships drive ',
     bodyMark: 'retention, expansion, and advocacy',
     bodyTrail: '.',
@@ -41,6 +43,20 @@ const OUTCOMES: Outcome[] = [
     bodyLead: 'People grow. Systems improve. ',
     bodyMark: 'Profits compound',
     bodyTrail: '.',
+  },
+  {
+    Icon: Unlock,
+    title: 'Unstuck',
+    bodyLead: 'Find the ',
+    bodyMark: 'real constraint',
+    bodyTrail: ' behind stalled growth, teams, or execution.',
+  },
+  {
+    Icon: Telescope,
+    title: 'Diagnose before prescribing',
+    bodyLead: 'Teams that ',
+    bodyMark: 'ask better questions',
+    bodyTrail: ' before reaching for answers.',
   },
 ]
 
@@ -67,17 +83,17 @@ export function SectionOutcomes() {
           {OUTCOMES.map(({ Icon, title, bodyLead, bodyMark, bodyTrail }) => (
             <article key={title} className="grid grid-rows-[auto_auto_auto] gap-4 pt-1">
               <Icon
-                size={32}
-                strokeWidth={1.6}
+                size={64}
+                strokeWidth={1.4}
                 aria-hidden
-                className="text-[color:var(--color-text-primary)] mb-1"
+                className="text-[color:var(--color-text-primary)] mb-2"
               />
-              <h3 className="font-body text-lg font-semibold leading-snug tracking-[-0.01em] text-[color:var(--color-text-primary)] m-0">
+              <h3 className="font-body text-2xl font-semibold leading-snug tracking-[-0.01em] text-[color:var(--color-text-primary)] m-0">
                 {title}
               </h3>
-              <p className="font-body text-[15px] leading-relaxed text-[color:var(--color-text-muted)] m-0 text-pretty max-w-[32ch]">
+              <p className="font-body text-[18px] leading-[1.55] text-[color:var(--color-text-muted)] m-0 text-pretty max-w-[32ch]">
                 {bodyLead}
-                <span className="bg-[#E8E1CF] text-[color:var(--color-text-primary)] px-1.5 py-px">
+                <span className="mark-highlight">
                   {bodyMark}
                 </span>
                 {bodyTrail}
@@ -89,7 +105,7 @@ export function SectionOutcomes() {
         <div className="mt-[72px] pt-8 border-t border-[color:var(--color-border)] grid grid-cols-1 lg:grid-cols-[1fr_auto] items-end gap-7 lg:gap-12">
           <p className="font-display italic font-normal text-[clamp(18px,1.8vw,22px)] leading-[1.55] text-[color:var(--color-text-muted)] m-0 max-w-[64ch] text-pretty">
             Underneath all of it: relationships always win.{' '}
-            <span className="bg-[#E8E1CF] not-italic font-display text-[color:var(--color-text-primary)] px-2 py-px">
+            <span className="mark-highlight--display font-display">
               Know your customer, understand their pains, help them win.
             </span>{' '}
             That&apos;s the cornerstone of a durable business.
