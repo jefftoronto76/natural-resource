@@ -422,7 +422,7 @@ export function SectionCareer() {
             <div
               onClick={(e) => e.stopPropagation()}
               style={{
-                background: '#fff',
+                background: 'rgb(245 244 240)',
                 borderRadius: '16px',
                 maxWidth: '640px',
                 width: '100%',
@@ -454,7 +454,7 @@ export function SectionCareer() {
                     border: 'none',
                     cursor: 'pointer',
                     padding: '4px',
-                    color: 'rgba(26,25,23,0.5)',
+                    color: 'rgb(24 32 41 / 0.70)',
                   }}
                   aria-label="Close modal"
                 >
@@ -476,7 +476,7 @@ export function SectionCareer() {
               {/* Modal content */}
               <div
                 style={{
-                  borderTop: '1px solid rgba(26,25,23,0.08)',
+                  borderTop: '1px solid rgb(24 32 41 / 0.10)',
                   paddingTop: '24px',
                 }}
               >
@@ -497,7 +497,7 @@ export function SectionCareer() {
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: '16px',
                           lineHeight: 1.7,
-                          color: 'var(--color-text-primary)',
+                          color: 'rgb(24 32 41)',
                           fontStyle: 'italic',
                           margin: 0,
                         }}
@@ -508,7 +508,7 @@ export function SectionCareer() {
                         style={{
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: '14px',
-                          color: 'var(--color-text-muted)',
+                          color: 'rgb(24 32 41 / 0.70)',
                           margin: '8px 0 0 0',
                         }}
                       >
@@ -522,7 +522,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '24px',
                       }}
                     >
@@ -536,7 +536,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginBottom: '12px',
                       }}
                     >
@@ -547,7 +547,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '16px',
                       }}
                     >
@@ -558,7 +558,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '16px',
                       }}
                     >
@@ -569,7 +569,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '0',
                       }}
                     >
@@ -583,7 +583,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
                       }}
@@ -595,7 +595,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '16px',
                       }}
                     >
@@ -606,7 +606,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '0',
                       }}
                     >
@@ -620,7 +620,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
                       }}
@@ -656,11 +656,11 @@ export function SectionCareer() {
                           >
                             ·
                           </span>
-                          <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                          <span style={{ fontWeight: 700, color: 'rgb(24 32 41)' }}>
                             {item.bold}
                           </span>
                           <br />
-                          <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                          <span style={{ color: 'rgb(24 32 41 / 0.70)' }}>{item.text}</span>
                         </li>
                       ))}
                     </ul>
@@ -682,7 +682,7 @@ export function SectionCareer() {
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: '16px',
                           lineHeight: 1.7,
-                          color: 'var(--color-text-primary)',
+                          color: 'rgb(24 32 41)',
                           fontStyle: 'italic',
                           margin: 0,
                         }}
@@ -693,7 +693,7 @@ export function SectionCareer() {
                         style={{
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: '14px',
-                          color: 'var(--color-text-muted)',
+                          color: 'rgb(24 32 41 / 0.70)',
                           margin: '8px 0 0 0',
                         }}
                       >
@@ -708,7 +708,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginBottom: '12px',
                       }}
                     >
@@ -719,7 +719,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '0',
                       }}
                     >
@@ -733,7 +733,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
                       }}
@@ -745,7 +745,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '0',
                       }}
                     >
@@ -759,7 +759,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
                       }}
@@ -793,11 +793,11 @@ export function SectionCareer() {
                           >
                             ·
                           </span>
-                          <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                          <span style={{ fontWeight: 700, color: 'rgb(24 32 41)' }}>
                             {item.bold}
                           </span>
                           <br />
-                          <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                          <span style={{ color: 'rgb(24 32 41 / 0.70)' }}>{item.text}</span>
                         </li>
                       ))}
                     </ul>
@@ -819,7 +819,7 @@ export function SectionCareer() {
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: '16px',
                           lineHeight: 1.7,
-                          color: 'var(--color-text-primary)',
+                          color: 'rgb(24 32 41)',
                           fontStyle: 'italic',
                           margin: 0,
                         }}
@@ -830,7 +830,7 @@ export function SectionCareer() {
                         style={{
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: '14px',
-                          color: 'var(--color-text-muted)',
+                          color: 'rgb(24 32 41 / 0.70)',
                           margin: '8px 0 0 0',
                         }}
                       >
@@ -845,7 +845,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginBottom: '12px',
                       }}
                     >
@@ -856,7 +856,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '0',
                       }}
                     >
@@ -870,7 +870,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
                       }}
@@ -882,7 +882,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '0',
                       }}
                     >
@@ -896,7 +896,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
                       }}
@@ -932,11 +932,11 @@ export function SectionCareer() {
                           >
                             ·
                           </span>
-                          <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                          <span style={{ fontWeight: 700, color: 'rgb(24 32 41)' }}>
                             {item.bold}
                           </span>
                           <br />
-                          <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                          <span style={{ color: 'rgb(24 32 41 / 0.70)' }}>{item.text}</span>
                         </li>
                       ))}
                     </ul>
@@ -958,7 +958,7 @@ export function SectionCareer() {
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: '16px',
                           lineHeight: 1.7,
-                          color: 'var(--color-text-primary)',
+                          color: 'rgb(24 32 41)',
                           fontStyle: 'italic',
                           margin: 0,
                         }}
@@ -969,7 +969,7 @@ export function SectionCareer() {
                         style={{
                           fontFamily: 'DM Sans, sans-serif',
                           fontSize: '14px',
-                          color: 'var(--color-text-muted)',
+                          color: 'rgb(24 32 41 / 0.70)',
                           margin: '8px 0 0 0',
                         }}
                       >
@@ -984,7 +984,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginBottom: '12px',
                       }}
                     >
@@ -995,7 +995,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '0',
                       }}
                     >
@@ -1009,7 +1009,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
                       }}
@@ -1021,7 +1021,7 @@ export function SectionCareer() {
                         fontFamily: 'DM Sans, sans-serif',
                         fontSize: '14px',
                         lineHeight: 1.7,
-                        color: 'var(--color-text-primary)',
+                        color: 'rgb(24 32 41)',
                         marginBottom: '0',
                       }}
                     >
@@ -1035,7 +1035,7 @@ export function SectionCareer() {
                         fontSize: '11px',
                         letterSpacing: '0.15em',
                         textTransform: 'uppercase',
-                        color: 'var(--color-text-muted)',
+                        color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
                       }}
@@ -1072,11 +1072,11 @@ export function SectionCareer() {
                           >
                             ·
                           </span>
-                          <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                          <span style={{ fontWeight: 700, color: 'rgb(24 32 41)' }}>
                             {item.bold}
                           </span>
                           <br />
-                          <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                          <span style={{ color: 'rgb(24 32 41 / 0.70)' }}>{item.text}</span>
                         </li>
                       ))}
                     </ul>
