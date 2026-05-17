@@ -534,9 +534,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginBottom: '12px',
                       }}
@@ -582,9 +580,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
@@ -620,9 +616,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
@@ -709,9 +703,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginBottom: '12px',
                       }}
@@ -735,9 +727,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
@@ -762,9 +752,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
@@ -849,9 +837,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginBottom: '12px',
                       }}
@@ -875,9 +861,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
@@ -902,9 +886,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
@@ -991,9 +973,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginBottom: '12px',
                       }}
@@ -1017,9 +997,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
@@ -1044,9 +1022,7 @@ export function SectionCareer() {
                       style={{
                         fontFamily: 'DM Mono, monospace',
                         fontSize: '16px',
-                        fontWeight: 700,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
+                        fontWeight: 500,
                         color: 'rgb(24 32 41 / 0.70)',
                         marginTop: '24px',
                         marginBottom: '12px',
