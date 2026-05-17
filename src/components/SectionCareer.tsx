@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDown, ChevronUp, X } from 'lucide-react'
+import { ChevronUp } from 'lucide-react'
 
 type FilterId = 'all' | 'roles' | 'education'
 
@@ -402,11 +401,690 @@ export function SectionCareer() {
       {modalCard &&
         typeof document !== 'undefined' &&
         createPortal(
-          <RoleModal
-            card={modalCard}
-            visible={modalVisible}
-            onClose={closeModal}
-          />,
+          <div
+            onClick={closeModal}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              opacity: modalVisible ? 1 : 0,
+              transition: 'opacity 0.2s ease',
+              padding: '20px',
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: '#fff',
+                borderRadius: '16px',
+                maxWidth: '640px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflow: 'auto',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
+                padding: 'clamp(24px, 4vw, 40px)',
+                position: 'relative',
+              }}
+            >
+              {/* Modal header */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '24px',
+                }}
+              >
+                <img
+                  src={modalCard.logo}
+                  alt="Company logo"
+                  style={{ height: '40px', width: 'auto' }}
+                />
+                <button
+                  onClick={closeModal}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    color: 'rgba(26,25,23,0.5)',
+                  }}
+                  aria-label="Close modal"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Modal content */}
+              <div
+                style={{
+                  borderTop: '1px solid rgba(26,25,23,0.08)',
+                  paddingTop: '24px',
+                }}
+              >
+                {modalCard.id === 'trapeze' ? (
+                  <>
+                    {/* Trapeze custom expanded content */}
+
+                    {/* Quote block */}
+                    <div
+                      style={{
+                        borderLeft: '2px solid #2d6a4f',
+                        paddingLeft: '16px',
+                        marginBottom: '24px',
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontSize: '16px',
+                          lineHeight: 1.7,
+                          color: 'var(--color-text-primary)',
+                          fontStyle: 'italic',
+                          margin: 0,
+                        }}
+                      >
+                        &ldquo;He has proven repeatedly that he can perform in the most trying situations.&rdquo;
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontSize: '14px',
+                          color: 'var(--color-text-muted)',
+                          margin: '8px 0 0 0',
+                        }}
+                      >
+                        — Rick Bacchus, President, Trapeze Group North America
+                      </p>
+                    </div>
+
+                    {/* Progression summary */}
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '24px',
+                      }}
+                    >
+                      Progressed from Special Projects to Director of Sales & Relationship Management, ultimately responsible for more than 50% of annual bookings in North America.
+                    </p>
+
+                    {/* Where It Started */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      Where It Started
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '16px',
+                      }}
+                    >
+                      Started part-time in Special Projects, supporting the executive team, reporting to the VP of Business Development (co-founder).
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '16px',
+                      }}
+                    >
+                      Built early CRM and pipeline discipline, supported executive decisions, and saw firsthand how Constellation operators run software businesses.
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '0',
+                      }}
+                    >
+                      This is where I learned that great companies are built on discipline, focus, and consistent execution over time.
+                    </p>
+
+                    {/* The Business */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginTop: '24px',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      The Business
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '16px',
+                      }}
+                    >
+                      Mission-critical system-of-record technology supporting public transportation agencies across North America, spanning onboard systems, wireless infrastructure, hardware, and software.
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '0',
+                      }}
+                    >
+                      Long sales cycles, complex stakeholders, and high switching costs, where costs, trust, execution, and consistency determine who wins.
+                    </p>
+
+                    {/* Impact */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginTop: '24px',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      Impact
+                    </div>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {[
+                        { bold: 'Scaled multiple revenue segments.', text: 'Led growth across small sector, SMB, enterprise, and partner channels.' },
+                        { bold: 'Led commercial integration through acquisition and leadership transitions.', text: 'Protecting the pipeline, revenue continuity, and customer relationships.' },
+                        { bold: 'Built repeatable commercial systems.', text: 'Implemented sales playbooks, onboarding programs, forecasting discipline, and win/loss processes.' },
+                        { bold: 'Operator and performer.', text: 'Consistently delivered as top individual contributor, top territory leader, top team leader, largest deals, and strongest quarters across roles.' },
+                        { bold: 'Built trusted enterprise relationships.', text: 'Developed executive-level customer relationships that positioned Trapeze as a long-term strategic partner for more than 70 of the top 200 key accounts.' },
+                      ].map((item, idx, arr) => (
+                        <li
+                          key={idx}
+                          style={{
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: '14px',
+                            lineHeight: 1.7,
+                            paddingLeft: '20px',
+                            position: 'relative',
+                            marginBottom: idx < arr.length - 1 ? '16px' : '0',
+                          }}
+                        >
+                          <span
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              color: '#2d6a4f',
+                              fontWeight: 600,
+                            }}
+                          >
+                            ·
+                          </span>
+                          <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                            {item.bold}
+                          </span>
+                          <br />
+                          <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : modalCard.id === 'infor' ? (
+                  <>
+                    {/* Infor custom expanded content */}
+
+                    {/* Quote block */}
+                    <div
+                      style={{
+                        borderLeft: '2px solid #2d6a4f',
+                        paddingLeft: '16px',
+                        marginBottom: '24px',
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontSize: '16px',
+                          lineHeight: 1.7,
+                          color: 'var(--color-text-primary)',
+                          fontStyle: 'italic',
+                          margin: 0,
+                        }}
+                      >
+                        &ldquo;Despite early doubts, Jeff stayed with the opportunity, expanded the scope, and ultimately won a $1.75M CloudSuite deal in a highly competitive process. Real conviction and persistence.&rdquo;
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontSize: '14px',
+                          color: 'var(--color-text-muted)',
+                          margin: '8px 0 0 0',
+                        }}
+                      >
+                        — John Parsons, RVP Sales, Infor
+                      </p>
+                    </div>
+
+                    {/* Why Infor */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      Why Infor
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '0',
+                      }}
+                    >
+                      Joined during Infor&apos;s transition from legacy ERP provider to cloud platform. Expanded CloudSuite adoption into both enterprise and mid-market organizations while building credibility in a highly structured Tier-1 sales environment.
+                    </p>
+
+                    {/* The Business */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginTop: '24px',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      The Business
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '0',
+                      }}
+                    >
+                      Global vertical software provider transitioning to a cloud-first strategy. Led CloudSuite HCM growth in Canada. Introduced Talent Science as a strategic differentiator in complex enterprise sales.
+                    </p>
+
+                    {/* Impact */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginTop: '24px',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      Impact
+                    </div>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {[
+                        { bold: 'Built a $2.5M+ qualified pipeline in under 18 months.', text: 'Established and developed relationships with key enterprise accounts across Canada, engaging in multiple competitive RFP processes.' },
+                        { bold: 'Expanded cloud adoption into new customer segments.', text: 'Drove CloudSuite adoption in the 1,000–5,000 employee segment while also competing successfully in large enterprise opportunities.' },
+                        { bold: 'Closed the largest CloudSuite HCM deal in company history.', text: 'Transformed a narrow payroll evaluation into a full platform transformation — ~10,000 employees across HCM, Payroll, WFM, Talent Science, and Learning. Beat Dayforce in a head-to-head evaluation through persistence, preparation, and differentiated positioning.' },
+                      ].map((item, idx, arr) => (
+                        <li
+                          key={idx}
+                          style={{
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: '14px',
+                            lineHeight: 1.7,
+                            paddingLeft: '20px',
+                            position: 'relative',
+                            marginBottom: idx < arr.length - 1 ? '16px' : '0',
+                          }}
+                        >
+                          <span
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              color: '#2d6a4f',
+                              fontWeight: 600,
+                            }}
+                          >
+                            ·
+                          </span>
+                          <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                            {item.bold}
+                          </span>
+                          <br />
+                          <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : modalCard.id === 'keyhole' ? (
+                  <>
+                    {/* Keyhole custom expanded content */}
+
+                    {/* Quote block */}
+                    <div
+                      style={{
+                        borderLeft: '2px solid #2d6a4f',
+                        paddingLeft: '16px',
+                        marginBottom: '24px',
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontSize: '16px',
+                          lineHeight: 1.7,
+                          color: 'var(--color-text-primary)',
+                          fontStyle: 'italic',
+                          margin: 0,
+                        }}
+                      >
+                        &ldquo;Your question-based coaching had a huge impact on helping me think more creatively in the face of problems that seem unapproachable.&rdquo;
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontSize: '14px',
+                          color: 'var(--color-text-muted)',
+                          margin: '8px 0 0 0',
+                        }}
+                      >
+                        — Iara Rios, Manager, Content Marketing, Keyhole
+                      </p>
+                    </div>
+
+                    {/* The Mandate */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      The Mandate
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '0',
+                      }}
+                    >
+                      Recruited by the CEO to rebuild revenue, increase deal size, and expand growth channels. Owned hiring, revenue structure, and growth investment decisions.
+                    </p>
+
+                    {/* The Business */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginTop: '24px',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      The Business
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '0',
+                      }}
+                    >
+                      Product-led SaaS company providing social listening and analytics tools. Strong self-serve adoption but limited enterprise motion, fragmented demand generation, and no structured revenue architecture.
+                    </p>
+
+                    {/* Impact */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginTop: '24px',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      Impact
+                    </div>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {[
+                        { bold: 'Built a multi-motion revenue engine.', text: 'Added inbound, enterprise, and structured demand generation to complement PLG growth.' },
+                        { bold: 'Tripled average deal size.', text: 'Introduced qualification discipline, annual contracts, and enterprise sales structure.' },
+                        { bold: 'Expanded revenue ownership beyond sales.', text: 'Added customer success, demand generation, and pipeline development capabilities.' },
+                        { bold: 'Built commercial operating structure.', text: 'Introduced hiring plans, performance management, forecasting, and growth investment discipline.' },
+                        { bold: 'Connected customer insights directly to product and GTM decisions.', text: 'Partnered with the CEO to close the loop between customer feedback, product direction, and go-to-market execution.' },
+                      ].map((item, idx, arr) => (
+                        <li
+                          key={idx}
+                          style={{
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: '14px',
+                            lineHeight: 1.7,
+                            paddingLeft: '20px',
+                            position: 'relative',
+                            marginBottom: idx < arr.length - 1 ? '16px' : '0',
+                          }}
+                        >
+                          <span
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              color: '#2d6a4f',
+                              fontWeight: 600,
+                            }}
+                          >
+                            ·
+                          </span>
+                          <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                            {item.bold}
+                          </span>
+                          <br />
+                          <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : modalCard.id === 'mealgarden' ? (
+                  <>
+                    {/* Meal Garden custom expanded content */}
+
+                    {/* Quote block */}
+                    <div
+                      style={{
+                        borderLeft: '2px solid #2d6a4f',
+                        paddingLeft: '16px',
+                        marginBottom: '24px',
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontSize: '16px',
+                          lineHeight: 1.7,
+                          color: 'var(--color-text-primary)',
+                          fontStyle: 'italic',
+                          margin: 0,
+                        }}
+                      >
+                        &ldquo;Jeff gave me the confidence to get out there and make it happen — whether that meant making a phone call, trying an out-of-the-box idea, or asking for help.&rdquo;
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontSize: '14px',
+                          color: 'var(--color-text-muted)',
+                          margin: '8px 0 0 0',
+                        }}
+                      >
+                        — Kiki, Demand Generation Lead, Meal Garden
+                      </p>
+                    </div>
+
+                    {/* The Mandate */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      The Mandate
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '0',
+                      }}
+                    >
+                      Recruited by the Founder to operationalize the business, introduce P&L discipline, and build the leadership and commercial foundation required to turn early traction into a sustainable company.
+                    </p>
+
+                    {/* The Business */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginTop: '24px',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      The Business
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.7,
+                        color: 'var(--color-text-primary)',
+                        marginBottom: '0',
+                      }}
+                    >
+                      Consumer and B2B SaaS platform helping individuals, dietitians, and food businesses manage nutrition and meal planning. Early product-market fit but a small, high-churn user base, no operating infrastructure, commercial discipline, or path to sustainable unit economics.
+                    </p>
+
+                    {/* Impact */}
+                    <div
+                      style={{
+                        fontFamily: 'DM Mono, monospace',
+                        fontSize: '11px',
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-text-muted)',
+                        marginTop: '24px',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      Impact
+                    </div>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {[
+                        { bold: 'Introduced operating infrastructure from the ground up.', text: 'Introduced financial discipline, budget ownership, and performance cadence across revenue, product, and operations.' },
+                        { bold: 'Built enterprise and institutional partnerships.', text: 'Signed HEB (one of the largest grocery chains in the US), Nutrigenomix, and Metabolic Balance as white-label and teams channel partners.' },
+                        { bold: 'Created demand generation from scratch.', text: 'Hired and structured a team to drive awareness and trials, growing web traffic by triple digits.' },
+                        { bold: 'Expanded into new revenue channels.', text: 'Added teams, education, and platform partner motions — increasing deal size and shifting the base toward annual agreements.' },
+                        { bold: 'Spearheaded core product enhancements.', text: 'Drove delivery of payments, mobile, meal plan auto-generation, and enhanced food data — closing critical gaps for enterprise and practitioner use cases.' },
+                        { bold: 'Sustained strong conversion performance.', text: 'Maintained >18% trial-to-conversion through improved qualification, onboarding, and customer success.' },
+                      ].map((item, idx, arr) => (
+                        <li
+                          key={idx}
+                          style={{
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: '14px',
+                            lineHeight: 1.7,
+                            paddingLeft: '20px',
+                            position: 'relative',
+                            marginBottom: idx < arr.length - 1 ? '16px' : '0',
+                          }}
+                        >
+                          <span
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              color: '#2d6a4f',
+                              fontWeight: 600,
+                            }}
+                          >
+                            ·
+                          </span>
+                          <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                            {item.bold}
+                          </span>
+                          <br />
+                          <span style={{ color: 'var(--color-text-muted)' }}>{item.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </div>,
           document.body,
         )}
     </section>
@@ -464,144 +1142,45 @@ function RoleCardView({
       </p>
 
       <button
-        type="button"
         onClick={onOpen}
-        className="mt-auto pt-4 flex items-center gap-2 font-body text-[13px] font-semibold text-accent hover:opacity-80 transition-opacity self-start"
+        style={{
+          background: 'transparent',
+          border: 'none',
+          color: 'rgb(var(--color-accent))',
+          fontFamily: 'var(--font-sans)',
+          fontSize: '14px',
+          fontWeight: 600,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 0',
+          marginTop: 'auto',
+          transition: 'opacity 0.2s ease',
+          alignSelf: 'flex-start',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = '0.7'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = '1'
+        }}
       >
         See more
-        <ChevronDown size={14} strokeWidth={2} />
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M4 6L8 10L12 6" />
+        </svg>
       </button>
     </article>
-  )
-}
-
-/* ─────────────────────────────────────────────────────────── */
-/*  Role modal                                                 */
-/* ─────────────────────────────────────────────────────────── */
-
-function RoleModal({
-  card,
-  visible,
-  onClose,
-}: {
-  card: RoleCard
-  visible: boolean
-  onClose: () => void
-}) {
-  return (
-    <div
-      onClick={onClose}
-      role="presentation"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999,
-        opacity: visible ? 1 : 0,
-        transition: 'opacity 0.2s ease',
-        padding: '20px',
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label={`${card.tagline} — career detail`}
-        className="overflow-y-auto"
-        style={
-          {
-            background: '#fff',
-            borderRadius: '16px',
-            maxWidth: '640px',
-            width: '100%',
-            maxHeight: '80vh',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
-            padding: 'clamp(24px, 4vw, 40px)',
-            position: 'relative',
-            '--color-text-primary': 'rgb(24 32 41)',
-            '--color-text-muted': 'rgb(24 32 41 / 0.70)',
-            '--color-text-dim': 'rgb(24 32 41 / 0.46)',
-            '--color-border': 'rgb(24 32 41 / 0.10)',
-          } as CSSProperties
-        }
-      >
-        <div className="flex items-center justify-between mb-6">
-          <img src={card.logo} alt="" className="h-10 w-auto" />
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="bg-transparent border-0 cursor-pointer p-1 text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text-primary)] transition-colors"
-          >
-            <X size={24} strokeWidth={2} />
-          </button>
-        </div>
-
-        <div className="border-t border-[color:var(--color-border)] pt-6 flex flex-col gap-5">
-          <ExpandBlock label="What got me there" body={card.story} />
-          <ExpandBlock label="Business context" body={card.context} />
-
-          <div>
-            <div className="font-mono text-[10.5px] tracking-[0.15em] uppercase text-[color:var(--color-text-dim)] mb-2.5">
-              Impact
-            </div>
-            <ul className="flex flex-col gap-3 list-none p-0 m-0">
-              {card.impact.map((item, idx) => (
-                <li
-                  key={idx}
-                  className="relative pl-5 font-body text-[13.5px] leading-relaxed text-pretty"
-                >
-                  <span
-                    aria-hidden
-                    className="absolute left-0 top-0 text-accent font-semibold"
-                  >
-                    ·
-                  </span>
-                  <span className="font-semibold text-[color:var(--color-text-primary)]">
-                    {item.bold}
-                  </span>{' '}
-                  <span className="text-[color:var(--color-text-muted)]">
-                    {item.text}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {card.quote && (
-            <div className="border-l-2 border-accent pl-4">
-              <p className="font-display italic text-[15px] leading-relaxed text-[color:var(--color-text-primary)] m-0">
-                &ldquo;{card.quote}&rdquo;
-              </p>
-              {card.quoteAuthor && (
-                <p className="font-mono text-[10.5px] tracking-[0.08em] uppercase text-[color:var(--color-text-dim)] mt-2 m-0">
-                  — {card.quoteAuthor}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ExpandBlock({ label, body }: { label: string; body: string }) {
-  return (
-    <div>
-      <div className="font-mono text-[10.5px] tracking-[0.15em] uppercase text-[color:var(--color-text-dim)] mb-2.5">
-        {label}
-      </div>
-      <p className="font-body text-[13.5px] leading-relaxed text-[color:var(--color-text-muted)] text-pretty m-0">
-        {body}
-      </p>
-    </div>
   )
 }
 
