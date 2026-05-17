@@ -75,25 +75,24 @@ export function SectionWhy() {
         </p>
 
         <h2 className="font-display text-[clamp(30px,4vw,52px)] font-normal leading-[1.08] tracking-[-0.02em] text-[color:var(--color-text-primary)] mb-14 text-balance max-w-[22ch]">
-          The people I&apos;ve led go on to outperform me.{' '}
-          <em className="italic font-normal text-accent">That&apos;s the goal.</em>
+          I show up, I listen, and I make the work and the people doing it better.
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-14">
           {REASONS.map(({ Icon, title, bodyLead, bodyMark, bodyTrail }) => (
             <article key={title} className="grid grid-rows-[auto_auto_auto] gap-4 pt-1">
               <Icon
-                size={32}
-                strokeWidth={1.6}
+                size={64}
+                strokeWidth={1.4}
                 aria-hidden
-                className="text-[color:var(--color-text-primary)] mb-1"
+                className="text-[color:var(--color-text-primary)] mb-2"
               />
-              <h3 className="font-body text-lg font-semibold leading-snug tracking-[-0.01em] text-[color:var(--color-text-primary)] m-0">
+              <h3 className="font-body text-2xl font-semibold leading-snug tracking-[-0.01em] text-[color:var(--color-text-primary)] m-0">
                 {title}
               </h3>
-              <p className="font-body text-[15px] leading-relaxed text-[color:var(--color-text-muted)] m-0 text-pretty max-w-[32ch]">
+              <p className="font-body text-[18px] leading-[1.55] text-[color:var(--color-text-muted)] m-0 text-pretty max-w-[32ch]">
                 {bodyLead}
-                <span className="bg-[#E8E1CF] text-[color:var(--color-text-primary)] px-1.5 py-px">
+                <span className="mark-highlight">
                   {bodyMark}
                 </span>
                 {bodyTrail}
@@ -104,11 +103,11 @@ export function SectionWhy() {
 
         <div className="mt-[72px] pt-8 border-t border-[color:var(--color-border)] grid grid-cols-1 lg:grid-cols-[1fr_auto] items-end gap-7 lg:gap-12">
           <p className="font-display italic font-normal text-[clamp(18px,1.8vw,22px)] leading-[1.55] text-[color:var(--color-text-muted)] m-0 max-w-[64ch] text-pretty">
-            When most of your career is spent reporting to the people who built the business,{' '}
-            <span className="bg-[#E8E1CF] not-italic font-display text-[color:var(--color-text-primary)] px-2 py-px">
-              you see things the way they do
-            </span>{' '}
-            — and you build teams that think like that.
+            Most of my career has been spent{' '}
+            <span className="mark-highlight--display font-display">
+              close to ownership
+            </span>
+            . It shapes how I lead, build, and make decisions.
           </p>
           <div
             className="flex flex-wrap gap-2 lg:justify-end"
